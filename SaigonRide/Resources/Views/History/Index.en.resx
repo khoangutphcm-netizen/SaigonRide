@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="PageTitle" xml:space="preserve"><value>History</value></data>
+	<data name="PageSubtitle" xml:space="preserve"><value>View your past rides and transactions.</value></data>
+	<data name="TotalRides" xml:space="preserve"><value>Total Rides</value></data>
+	<data name="TotalDistance" xml:space="preserve"><value>Total Distance</value></data>
+	<data name="TotalSpent" xml:space="preserve"><value>Total Spent</value></data>
+	<data name="Co2Saved" xml:space="preserve"><value>CO2 Saved</value></data>
+	<data name="AllTime" xml:space="preserve"><value>All time</value></data>
+	<data name="TabAll" xml:space="preserve"><value>All</value></data>
+	<data name="TabBike" xml:space="preserve"><value>Bike</value></data>
+	<data name="TabScooter" xml:space="preserve"><value>E-Scooter</value></data>
+	<data name="FilterAllTime" xml:space="preserve"><value>All Time</value></data>
+	<data name="FilterMonth" xml:space="preserve"><value>This Month</value></data>
+	<data name="FilterYear" xml:space="preserve"><value>This Year</value></data>
+	<data name="BtnFilter" xml:space="preserve"><value>Filter</value></data>
+	<data name="Duration" xml:space="preserve"><value>Duration</value></data>
+	<data name="Distance" xml:space="preserve"><value>Distance</value></data>
+	<data name="NoRides" xml:space="preserve"><value>No rides found.</value></data>
+	<data name="NoMoreRides" xml:space="preserve"><value>No more rides to load</value></data>
+	<data name="Announcements" xml:space="preserve"><value>Announcements</value></data>
+	<data name="ViewAll" xml:space="preserve"><value>View All</value></data>
+	<data name="New" xml:space="preserve"><value>New</value></data>
+</root>

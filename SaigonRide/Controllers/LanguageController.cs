@@ -10,14 +10,32 @@ namespace SaigonRide.Controllers
         [HttpPost]
         public IActionResult SetLanguage(string culture, string returnUrl)
         {
+            var cookieOptions = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
+                Path = "/",
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Lax
+            };
+
             Response.Cookies.Append(
                 CookieRequestCultureProvider.DefaultCookieName,
                 CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1) }
+                cookieOptions
             );
 
-            // Xoay vòng lại trang cũ. Nếu không có trang cũ, bay về Home!
-            return LocalRedirect(string.IsNullOrEmpty(returnUrl) ? "/Home/Index" : returnUrl);
+            if (string.IsNullOrEmpty(returnUrl)) returnUrl = "/Home/Index";
+
+            // KIỂM TRA ĐẶC BIỆT: Bảo toàn dữ liệu POST cho luồng Checkout (Rent, Receipt)
+            if (Request.HasFormContentType && Request.Form.ContainsKey("vehicleId"))
+            {
+                // Dùng hàm chuyên dụng này để giữ nguyên method POST và tự động tạo Header chuyển hướng
+                return LocalRedirectPreserveMethod(returnUrl);
+            }
+
+            // Với các trang bình thường (Home, Success, History), dùng Redirect thông thường
+            return LocalRedirect(returnUrl);
         }
     }
 }

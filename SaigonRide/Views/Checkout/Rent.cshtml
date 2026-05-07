@@ -1,84 +1,77 @@
 ﻿@model SaigonRide.Models.entities.Vehicle
-@{ ViewData["Title"] = "Lên lịch trình"; }
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@{ ViewData["Title"] = Localizer["PageTitle"].Value; }
 
-<!-- Load Leaflet.js -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-    .dash-line { position: absolute; left: 11px; top: 35px; height: 35px; border-left: 2px dashed #ccc; }
-    .modern-input { background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; font-weight: bold; }
-    .modern-input:focus { background-color: #fff; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15); border-color: #198754; }
-    #returnMap { height: 250px; border-radius: 12px; z-index: 1; border: 2px solid #e9ecef; }
+    .modern-input { background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; font-weight: bold; color: var(--text-color) !important; }
+    .modern-input:focus { background-color: var(--card-bg); box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15); border-color: #198754; }
+    .modern-input[readonly] { background-color: var(--bg-color); opacity: 0.8; }
+    #returnMap { height: 550px; border-radius: 1rem; z-index: 1; border: 1px solid var(--border-color); }
 </style>
 
-<div class="row justify-content-center mt-4 mb-5">
-    <div class="col-md-8 col-lg-6">
-        <div class="d-flex align-items-center mb-4">
-            <!-- NÚT BACK THẦN THÁNH ĐÂY RỒI -->
-            <a href="javascript:history.back()" class="btn btn-light rounded-circle me-3 shadow-sm"><i class="bi bi-arrow-left"></i></a>
-            <h4 class="fw-bold mb-0">Lên lịch trình</h4>
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a href="javascript:history.back()" class="btn btn-white bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-arrow-left text-dark"></i></a>
+        <div>
+            <h3 class="fw-bold text-dark mb-0">@Localizer["PageTitle"]</h3>
+            <p class="text-muted mb-0">@Localizer["PageSubtitle"]</p>
         </div>
+    </div>
 
-        <div class="card border-0 shadow-sm rounded-4 p-4">
-            <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
-                <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3 shadow-sm">
-                    <i class="bi bi-bicycle text-success fs-3"></i>
-                </div>
-                <div>
-                    <h5 class="fw-bold mb-0 text-dark">@Model.Category</h5>
-                    <span class="badge bg-success mt-1">@Model.PricePerMinute.ToString("N0")đ / phút</span>
+    <div class="row g-4 mb-5">
+        <!-- Cột Trái: Bản đồ To đùng -->
+        <div class="col-lg-7 col-xl-8">
+            <div class="card border-0 shadow-sm rounded-4 p-2 bg-white h-100">
+                <div id="returnMap"></div>
+                <div class="d-flex justify-content-center gap-4 mt-3 pb-2">
+                    <small class="text-muted"><i class="bi bi-circle-fill text-secondary me-1"></i>@Localizer["StationFull"]</small>
+                    <small class="text-muted"><i class="bi bi-circle-fill text-success me-1"></i>@Localizer["StationAvailable"]</small>
+                    <small class="text-muted"><i class="bi bi-circle-fill text-warning me-1"></i>@Localizer["StationPromo"]</small>
                 </div>
             </div>
+        </div>
 
-            <form asp-controller="Checkout" asp-action="Receipt" method="post" id="rentForm">
-                <input type="hidden" name="vehicleId" value="@Model.Id" />
-                <input type="hidden" name="returnStationId" id="selectedReturnStationId" required />
-
-                <div class="position-relative mb-4">
-                    <div class="d-flex align-items-start mb-3">
-                        <i class="bi bi-circle-fill text-primary mt-2 me-3" style="font-size: 0.7rem; z-index: 2;"></i>
-                        <div class="flex-grow-1">
-                            <label class="text-muted small fw-bold mb-1">Điểm lấy xe</label>
-                            <input type="text" class="form-control modern-input text-muted" value="@Model.Station.LocationName" readonly />
-                        </div>
+        <!-- Cột Phải: Form Xác nhận -->
+        <div class="col-lg-5 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3 shadow-sm text-success">
+                        <i class="bi @(Model.Category.Contains("Scooter") ? "bi-scooter" : "bi-bicycle") fs-2"></i>
                     </div>
-                    
-                    <div class="dash-line"></div>
-
-                    <div class="d-flex align-items-start">
-                        <i class="bi bi-geo-alt-fill text-danger mt-2 me-3" style="font-size: 1.1rem; margin-left: -3px; z-index: 2;"></i>
-                        <div class="flex-grow-1">
-                            <label class="text-muted small fw-bold mb-1">Trả xe ở đâu? (Chọn trên bản đồ)</label>
-                            <!-- Input giả để hiện tên trạm, input thật bị ẩn ở trên -->
-                            <input type="text" id="displayReturnStation" class="form-control modern-input bg-white text-danger" placeholder="Vui lòng click vào trạm trên bản đồ..." readonly required />
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BẢN ĐỒ MINI CHỌN TRẠM TRẢ XE -->
-                <div class="mb-4">
-                    <div id="returnMap"></div>
-                    <small class="text-muted mt-2 d-block"><i class="bi bi-info-circle"></i> Trạm màu xám là đã hết chỗ đỗ xe. Trạm màu vàng là đang có khuyến mãi.</small>
-                </div>
-
-                <div class="d-flex align-items-start mb-4">
-                    <i class="bi bi-clock-fill text-warning mt-2 me-3" style="font-size: 1rem;"></i>
                     <div class="flex-grow-1">
-                        <label class="text-muted small fw-bold mb-1">Thời gian dự kiến (phút)</label>
-                        <input type="number" name="duration" class="form-control modern-input" placeholder="Ví dụ: 30" min="1" required />
+                        <h5 class="fw-bold mb-0 text-dark">@Model.Category</h5>
+                        <span class="badge bg-dark mt-1">@Model.PricePerMinute.ToString("N0")đ / min</span>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-dark w-100 rounded-pill py-3 fw-bold fs-5 shadow">Tiếp tục thanh toán</button>
-            </form>
+                <form asp-controller="Checkout" asp-action="StartTimer" method="post" id="rentForm" class="d-flex flex-column h-100">
+                    <input type="hidden" name="vehicleId" value="@Model.Id" />
+                    <input type="hidden" name="returnStationId" id="selectedReturnStationId" required />
+
+                    <div class="mb-4">
+                        <label class="text-muted small fw-bold mb-2"><i class="bi bi-geo-alt text-primary me-1"></i> @Localizer["PickupPoint"]</label>
+                        <input type="text" class="form-control modern-input shadow-none mb-3" value="@Model.Station.LocationName" readonly />
+
+                        <label class="text-muted small fw-bold mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> @Localizer["DropoffPoint"]</label>
+                        <input type="text" id="displayReturnStation" class="form-control modern-input text-danger shadow-none" placeholder="@Localizer["SelectOnMap"]" readonly required style="cursor: pointer;" />
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-3 fw-bold fs-5 shadow mt-auto rounded-pill">
+                        @Localizer["StartRental"] <i class="bi bi-play-circle ms-2"></i>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
     var map = L.map('returnMap').setView([10.785, 106.705], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
     var stations = @Html.Raw(ViewBag.StationsJson);
     var bounds = [];
@@ -90,39 +83,24 @@
 
         var availableSlots = st.capacity - st.inventory;
         var isFull = availableSlots <= 0;
-        
-        // Logic đổi màu Marker: Hết chỗ = Đen/Xám, Khuyến mãi (Ví dụ id = 3 là Bình Thạnh) = Vàng, Bình thường = Xanh lá
-        var markerColor = isFull ? 'filter: grayscale(100%);' : (st.id === 3 ? 'filter: hue-rotate(40deg);' : 'filter: hue-rotate(120deg);');
+        var markerColor = isFull ? 'filter: grayscale(100%); opacity: 0.7;' : (st.id === 3 ? 'filter: hue-rotate(40deg);' : 'filter: hue-rotate(120deg);');
         
         var customIcon = L.divIcon({
             className: 'custom-div-icon',
-            html: `<div style="text-align:center; ${markerColor}">
-                       <i class="bi bi-geo-alt-fill fs-2 ${isFull ? 'text-secondary' : (st.id === 3 ? 'text-warning' : 'text-success')}"></i>
-                   </div>`,
-            iconSize: [30, 42],
-            iconAnchor: [15, 42]
+            html: `<div style="text-align:center; ${markerColor}"><i class="bi bi-geo-alt-fill fs-1 ${isFull ? 'text-secondary' : (st.id === 3 ? 'text-warning' : 'text-success')}" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i></div>`,
+            iconSize: [40, 50],
+            iconAnchor: [20, 50]
         });
 
         var marker = L.marker([finalLat, finalLng], { icon: customIcon }).addTo(map);
-        
-        var tooltipText = `<b>${st.name}</b><br>Chỗ trống: ${availableSlots}`;
-        if(st.id === 3) tooltipText += `<br><span class="badge bg-warning text-dark mt-1">Giảm 15%</span>`;
-        if(isFull) tooltipText += `<br><span class="badge bg-danger mt-1">Đã đầy</span>`;
-        
-        marker.bindTooltip(tooltipText, { permanent: false, direction: 'top' });
+        marker.bindTooltip(`<b>${st.name}</b><br>Slots: ${availableSlots}`, { direction: 'top', offset: [0, -35] });
 
         marker.on('click', function () {
-            if (isFull) {
-                alert("Trạm này đã hết chỗ đỗ xe. Vui lòng chọn trạm khác!");
-                return;
-            }
-            // Điền dữ liệu vào form
+            if (isFull) { alert("Station is full!"); return; }
             document.getElementById('selectedReturnStationId').value = st.id;
-            document.getElementById('displayReturnStation').value = st.name + " (Còn " + availableSlots + " chỗ)";
-            document.getElementById('displayReturnStation').classList.remove('text-danger');
-            document.getElementById('displayReturnStation').classList.add('text-success');
+            document.getElementById('displayReturnStation').value = st.name + " (" + availableSlots + " slots left)";
+            document.getElementById('displayReturnStation').classList.replace('text-danger', 'text-success');
         });
     });
-
-    if(bounds.length > 0) map.fitBounds(bounds, { padding: [20, 20] });
+    if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
 </script>

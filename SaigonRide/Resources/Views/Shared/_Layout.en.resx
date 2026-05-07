@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="BrandSlogan" xml:space="preserve"><value>Explore Saigon, Your Way</value></data>
+	<data name="Menu_Home" xml:space="preserve"><value>Home</value></data>
+	<data name="Menu_Rent" xml:space="preserve"><value>Rent Vehicles</value></data>
+	<data name="Menu_History" xml:space="preserve"><value>History</value></data>
+	<data name="Menu_Support" xml:space="preserve"><value>Contact Support</value></data>
+	<data name="Menu_Settings" xml:space="preserve"><value>Settings</value></data>
+	<data name="AccountLabel" xml:space="preserve"><value>Account</value></data>
+	<data name="UserType_Tourist" xml:space="preserve"><value>Tourist</value></data>
+	<data name="UserType_Local" xml:space="preserve"><value>Local Resident</value></data>
+	<data name="SidebarPromoTitle" xml:space="preserve"><value>Discover Saigon&lt;br&gt;With SaigonRide</value></data>
+	<data name="SidebarPromoDesc" xml:space="preserve"><value>Your journey, your way.</value></data>
+	<data name="BtnLearnMore" xml:space="preserve"><value>Learn More</value></data>
+	<data name="SearchPlaceholder" xml:space="preserve"><value>Search station, vehicle...</value></data>
+	<data name="BtnLogout" xml:space="preserve"><value>Logout</value></data>
+</root>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Hỗ trợ Khách hàng</value></data>
+	<data name="PageSubtitle" xml:space="preserve"><value>Chúng tôi có thể giúp gì cho bạn?</value></data>
+	<data name="CallUs" xml:space="preserve"><value>Gọi điện thoại</value></data>
+	<data name="EmailUs" xml:space="preserve"><value>Gửi Email</value></data>
+	<data name="SendFeedback" xml:space="preserve"><value>Gửi phản hồi</value></data>
+	<data name="LabelTopic" xml:space="preserve"><value>Chủ đề</value></data>
+	<data name="Topic_AppIssue" xml:space="preserve"><value>Lỗi Ứng dụng</value></data>
+	<data name="Topic_VehicleIssue" xml:space="preserve"><value>Vấn đề về Xe</value></data>
+	<data name="Topic_Payment" xml:space="preserve"><value>Thanh toán</value></data>
+	<data name="Topic_Other" xml:space="preserve"><value>Khác</value></data>
+	<data name="LabelMessage" xml:space="preserve"><value>Nội dung</value></data>
+	<data name="MsgPlaceholder" xml:space="preserve"><value>Mô tả vấn đề của bạn...</value></data>
+	<data name="BtnSubmit" xml:space="preserve"><value>Gửi tin nhắn</value></data>
+	<data name="MsgSentAlert" xml:space="preserve"><value>Đã gửi thành công!</value></data>
+</root>

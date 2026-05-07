@@ -1,0 +1,122 @@
+﻿@model SaigonRide.Models.entities.RentalTransaction
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["PageTitle"].Value;
+
+    // Tính số phút từ StartTime và EndTime (nếu EndTime null -> coi như kết thúc ngay bây giờ)
+    var endTime = Model.EndTime ?? DateTime.Now;
+    var durationMinutes = (int)(endTime - Model.StartTime).TotalMinutes;
+    var pricePerMinute = Model.Vehicle?.PricePerMinute ?? 0;
+    var subtotal = pricePerMinute * durationMinutes;
+    var distanceKm = durationMinutes * 0.25; // giả sử 0.25 km/phút
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    .receipt-card { background: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-color); overflow: hidden; }
+    .receipt-header { background: linear-gradient(135deg, #0a3b22 0%, #1b6e3c 100%); color: white; padding: 2rem; text-align: center; }
+    #miniMap { height: 200px; width: 100%; z-index: 1; }
+    body.dark-mode .receipt-card { border-color: #333; }
+</style>
+
+<div class="container-fluid px-0 d-flex justify-content-center mt-3 mb-5">
+    <div class="col-md-8 col-lg-6 col-xl-5">
+        
+        <div class="d-flex align-items-center mb-4 px-2">
+            <a href="javascript:history.back()" class="btn btn-light rounded-circle me-3 shadow-sm text-dark"><i class="bi bi-arrow-left"></i></a>
+            <div>
+                <h4 class="fw-bold text-dark mb-0">@Localizer["PageTitle"]</h4>
+                <small class="text-muted">#SR-@Model.Id.ToString().PadLeft(6, '0')</small>
+            </div>
+        </div>
+
+        <div class="receipt-card shadow-sm mb-4">
+            <div class="receipt-header position-relative">
+                <div class="bg-white text-success rounded-circle d-inline-flex justify-content-center align-items-center mb-3 shadow" style="width: 60px; height: 60px;">
+                    <i class="bi @(Model.Vehicle.Category.Contains("Scooter") ? "bi-scooter" : "bi-bicycle") fs-2"></i>
+                </div>
+                <h5 class="fw-bold mb-0">@Model.Vehicle.Category</h5>
+                <p class="mb-0 opacity-75 small">@Model.StartTime.ToString("dd MMM yyyy, hh:mm tt")</p>
+                
+                <!-- Huy hiệu Trạng thái -->
+                <span class="badge bg-white text-success position-absolute top-0 end-0 m-3 rounded-pill px-3 py-2 shadow-sm">
+                    <i class="bi bi-check-circle-fill me-1"></i> @Localizer["StatusCompleted"]
+                </span>
+            </div>
+
+            <!-- Mini Map -->
+            <div id="miniMap"></div>
+
+            <div class="p-4">
+                <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">@Localizer["TripDetails"]</h6>
+                
+                <div class="d-flex justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2"><i class="bi bi-geo-alt-fill text-danger"></i> <span class="text-muted">@Localizer["ReturnStation"]</span></div>
+                    <span class="fw-bold text-dark text-end" style="max-width: 60%;">@Model.ReturnStation.LocationName</span>
+                </div>
+                
+                <!-- THỜI LƯỢNG -->
+                <div class="d-flex justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2"><i class="bi bi-clock-history text-warning"></i> <span class="text-muted">@Localizer["Duration"]</span></div>
+                    <span class="fw-bold text-dark">@durationMinutes @Localizer["Minutes"]</span>
+                </div>
+
+                <!-- QUÃNG ĐƯỜNG -->
+                <div class="d-flex justify-content-between mb-4">
+                    <div class="d-flex align-items-center gap-2"><i class="bi bi-signpost-split text-primary"></i> <span class="text-muted">@Localizer["Distance"]</span></div>
+                    <span class="fw-bold text-dark">@distanceKm.ToString("0.0") km</span>
+                </div>
+
+                <hr class="text-muted opacity-25 my-4">
+
+                <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">@Localizer["PaymentSummary"]</h6>
+
+                <!-- TẠM TÍNH -->
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">@Localizer["Subtotal"]</span>
+                    <span class="fw-bold text-dark">@subtotal.ToString("N0") đ</span>
+                </div>
+
+                @if (Model.IsDiscountApplied)
+                {
+                    <div class="d-flex justify-content-between mb-3 text-warning">
+                        <span><i class="bi bi-tags-fill me-1"></i> @Localizer["Discount"]</span>
+                        <span class="fw-bold">-15%</span>
+                    </div>
+                }
+
+                <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center mt-3 border border-light">
+                    <span class="fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">@Localizer["TotalPaid"]</span>
+                    <h3 class="fw-bold text-success mb-0">@Model.TotalDue.ToString("N0") đ</h3>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn btn-outline-success w-100 rounded-pill py-3 fw-bold" onclick="window.print()">
+            <i class="bi bi-printer me-2"></i> @Localizer["PrintReceipt"]
+        </button>
+
+    </div>
+</div>
+
+<script>
+    // Khởi tạo Mini Map với tọa độ trạm trả xe
+    // Ép chuẩn InvariantCulture để tránh lỗi dấu phẩy thập phân trong Tiếng Việt
+    var lat = @(Model.ReturnStation.Latitude != 0 ? Model.ReturnStation.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture) : "10.776889");
+    var lng = @(Model.ReturnStation.Longitude != 0 ? Model.ReturnStation.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture) : "106.700806");
+    
+    var map = L.map('miniMap', { zoomControl: false, dragging: false, scrollWheelZoom: false }).setView([lat, lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    var customIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div style="text-align:center; filter: hue-rotate(120deg);"><i class="bi bi-geo-alt-fill fs-2 text-success" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i></div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42]
+    });
+
+    L.marker([lat, lng], { icon: customIcon }).addTo(map);
+</script>

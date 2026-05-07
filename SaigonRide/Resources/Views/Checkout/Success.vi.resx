@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Thành công</value></data>
+	<data name="SuccessTitle" xml:space="preserve"><value>Thanh toán thành công!</value></data>
+	<data name="SuccessDesc" xml:space="preserve"><value>Hệ thống đã nhận thanh toán. Xe của bạn đã được mở khóa và sẵn sàng tại trạm. Chúc bạn có một chuyến đi an toàn và vui vẻ!</value></data>
+	<data name="BackToHome" xml:space="preserve"><value>Quay về Bảng điều khiển</value></data>
+	<data name="ViewHistory" xml:space="preserve"><value>Xem Lịch sử chuyến đi</value></data>
+</root>

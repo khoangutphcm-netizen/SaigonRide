@@ -1,0 +1,184 @@
+@model SaigonRide.Models.entities.PendingRentalOrder
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["MockGatewayTitle"];
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <style>
+            body {
+                background: #e9ecef;
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-family: 'Segoe UI', Tahoma, sans-serif;
+                padding: 20px;
+            }
+            /* Phóng to container */
+            .payment-container {
+                background: white;
+                border-radius: 24px;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                max-width: 600px; /* Bơm to chiều ngang */
+                width: 100%;
+                padding: 50px 40px; /* Tăng padding */
+                text-align: center;
+            }
+
+            .amount-display {
+                font-size: 3.5rem; /* Phóng to số tiền */
+                font-weight: 800;
+                color: #212529;
+                margin: 25px 0;
+                letter-spacing: -1px;
+            }
+
+            .mock-ui-box {
+                background: #f8f9fa;
+                border: 2px solid #e9ecef;
+                border-radius: 16px;
+                padding: 35px;
+                margin-bottom: 30px;
+            }
+            /* Cải thiện input field cho to và dễ gõ */
+            .form-control-payment {
+                background-color: #fff;
+                border: 2px solid #dee2e6;
+                border-radius: 12px;
+                padding: 15px 20px;
+                font-size: 1.1rem;
+                font-weight: 500;
+                transition: all 0.2s;
+            }
+
+                .form-control-payment:focus {
+                    border-color: #0d6efd;
+                    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+                }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        
+        <!-- BỌC TẤT CẢ VÀO 1 FORM ĐỂ VALIDATE DỮ LIỆU NGƯỜI DÙNG NHẬP -->
+        <form method="post">
+            
+            @switch (Model.PaymentMethod)
+            {
+                case "vnpay":
+                    <i class="bi bi-qr-code-scan text-primary" style="font-size: 5rem;"></i>
+                    <h3 class="fw-bold mt-3 text-primary">@Localizer["PayWithVNPay"]</h3>
+                    <div class="mock-ui-box mt-4">
+                        <!-- Tăng kích thước mã QR -->
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MockPayment" alt="QR" class="mb-4 rounded-3 shadow-sm" />
+                        <p class="text-muted mb-3 fs-5">@Localizer["ScanAppToPay"]</p>
+                        <!-- Cho khách nhập mã giảm giá VNPay giả -->
+                        <input type="text" class="form-control form-control-payment text-center mx-auto" style="max-width: 300px;" placeholder="@Localizer["EnterPromoCodePlaceholder"]">
+                    </div>
+                    break;
+
+                case "momo":
+                    <i class="bi bi-wallet2" style="font-size: 5rem; color: #a50064;"></i>
+                    <h3 class="fw-bold mt-3" style="color: #a50064;">@Localizer["PayWithMoMo"]</h3>
+                    <div class="mock-ui-box mt-4">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MoMoMock" alt="Momo QR" class="mb-4 rounded-3 shadow-sm" />
+                        <p class="text-muted mb-3 fs-5">@Localizer["OpenMoMoToScan"]</p>
+                        <!-- Giả lập nhập SĐT MoMo -->
+                        <input type="text" class="form-control form-control-payment text-center mx-auto" style="max-width: 300px;" placeholder="@Localizer["MoMoPhonePlaceholder"]">
+                    </div>
+                    break;
+
+                case "card":
+                    <i class="bi bi-credit-card-2-front text-secondary" style="font-size: 5rem;"></i>
+                    <h3 class="fw-bold mt-3 text-secondary">@Localizer["PayWithCard"]</h3>
+                    <div class="mock-ui-box mt-4 text-start">
+                        <!-- Input NHẬP ĐƯỢC cho thẻ -->
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">@Localizer["CardNumberLabel"]</label>
+                            <input type="text" class="form-control form-control-payment" placeholder="0000 0000 0000 0000" required maxlength="19">
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label text-muted small fw-bold">@Localizer["ExpiryLabel"]</label>
+                                <input type="text" class="form-control form-control-payment" placeholder="MM/YY" required maxlength="5">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label text-muted small fw-bold">CVC/CVV</label>
+                                <input type="password" class="form-control form-control-payment" placeholder="***" required maxlength="3">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="form-label text-muted small fw-bold">@Localizer["CardHolderLabel"]</label>
+                            <input type="text" class="form-control form-control-payment text-uppercase" placeholder="@Localizer["CardHolderPlaceholder"]" required>
+                        </div>
+                    </div>
+                    break;
+
+                case "paypal":
+                    <i class="bi bi-paypal" style="font-size: 5rem; color: #003087;"></i>
+                    <h3 class="fw-bold mt-3" style="color: #003087;">@Localizer["PayWithPayPal"]</h3>
+                    <div class="mock-ui-box mt-4 text-start">
+                        <!-- Giả lập form Login của PayPal -->
+                        <div class="mb-4 text-center">
+                            <p class="text-muted">@Localizer["LoginToPayPal"]</p>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" class="form-control form-control-payment" placeholder="@Localizer["PayPalEmailPlaceholder"]" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" class="form-control form-control-payment" placeholder="@Localizer["PayPalPasswordPlaceholder"]" required>
+                        </div>
+                    </div>
+                    break;
+
+                case "applepay":
+                    <i class="bi bi-apple text-dark" style="font-size: 5rem;"></i>
+                    <h3 class="fw-bold mt-3 text-dark">@Localizer["PayWithApplePay"]</h3>
+                    <div class="mock-ui-box mt-4 bg-dark text-white rounded-4 border-0 py-5">
+                        <i class="bi bi-fingerprint" style="font-size: 4.5rem; color: #fff;"></i>
+                        <p class="fs-5 mb-0 mt-3">@Localizer["DoubleClickToPay"]</p>
+                        <p class="text-white-50 small mt-1">@Localizer["FaceIDRequired"]</p>
+                    </div>
+                    break;
+
+                default:
+                    <i class="bi bi-shield-lock text-success" style="font-size: 5rem;"></i>
+                    <h3 class="fw-bold mt-3 text-success">@Localizer["SecureCheckout"]</h3>
+                    break;
+            }
+
+            <div class="amount-display">@Model.FinalPrice.ToString("N0") ₫</div>
+            
+            <div class="alert alert-warning border-0 rounded-3 mb-4 text-start">
+                <i class="bi bi-exclamation-triangle-fill me-2 text-warning"></i>
+                <small class="fw-bold text-dark">@Localizer["TestingModeWarning"]</small>
+            </div>
+
+            <!-- NÚT ĐIỀU HƯỚNG BỌC TRONG FORM -->
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <!-- Lưu ý: formnovalidate giúp nút Hủy bỏ qua việc check Validate của các thẻ Input -->
+                    <button type="submit" formaction="/MockPaymentGateway/PaymentCancelled" class="btn btn-light btn-lg w-100 rounded-pill fw-bold text-muted py-3 border" formnovalidate onclick="return confirm('@Localizer["ConfirmCancel"]');">
+                        @Localizer["CancelTransaction"]
+                    </button>
+                </div>
+                <div class="col-sm-6">
+                    <button type="submit" formaction="/MockPaymentGateway/PaymentSuccess" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold py-3 shadow-sm">
+                        <i class="bi bi-check-circle-fill me-2"></i>@Localizer["SimulateSuccess"]
+                    </button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</body>
+</html>

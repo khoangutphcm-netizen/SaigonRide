@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="MsgUpdateSuccess" xml:space="preserve"><value>Profile updated successfully!</value></data>
+	<data name="MsgUpdateError" xml:space="preserve"><value>Full name cannot be empty!</value></data>
+	<data name="MsgAvatarSuccess" xml:space="preserve"><value>Profile picture updated successfully!</value></data>
+</root>

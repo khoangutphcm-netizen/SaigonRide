@@ -1,0 +1,185 @@
+@model IEnumerable<SaigonRide.Models.entities.Announcement>
+@{
+    ViewData["Title"] = "Quản lý Thông báo";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4">
+        <i class="bi bi-exclamation-circle-fill me-2"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex justify-content-between align-items-center shadow-none border-light">
+        <h5 class="fw-bold mb-0"><i class="bi bi-megaphone-fill text-success me-2"></i>Quản lý Thông báo</h5>
+        <button class="btn btn-success fw-bold rounded-pill btn-sm px-4 shadow-none border-0" data-bs-toggle="modal" data-bs-target="#modalAddAnn">
+            <i class="bi bi-plus-lg me-1"></i>Đăng tin mới
+        </button>
+    </div>
+    <div class="card-body p-0">
+        <div class="p-3 border-bottom bg-light bg-opacity-50">
+            <form method="get" asp-action="Announcements" class="d-flex w-50">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control border-start-0 shadow-none" placeholder="Tìm theo Tiêu đề hoặc Nội dung thông báo..." />
+                    <button type="submit" class="btn btn-success fw-bold px-4">Tìm</button>
+                </div>
+                @if(!string.IsNullOrEmpty(ViewBag.CurrentSearch)) {
+                    <a href="/AdminDashboard/Announcements" class="btn btn-light border ms-2">Xóa</a>
+                }
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 shadow-none border-light">
+                <thead class="bg-light text-muted">
+                    <tr>
+                        <th class="ps-4">Hình</th>
+                        <th>Tiêu đề / Nội dung</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đăng</th>
+                        <th class="text-end pe-4">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="announcement" class="rounded-3 shadow-none border-light" style="width: 60px; height: 60px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light rounded-3 d-flex align-items-center justify-content-center text-muted shadow-none border-light" style="width: 60px; height: 60px;">
+                                            <i class="bi bi-megaphone"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <strong class="text-dark d-block">@item.Title</strong>
+                                    <small class="text-muted text-truncate d-inline-block" style="max-width: 350px;">@item.Content</small>
+                                </td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success rounded-pill">Đang hiển thị</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger rounded-pill">Ẩn</span>
+                                    }
+                                </td>
+                                <td><small class="text-muted">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small></td>
+                                <td class="text-end pe-4">
+                                    <!-- Nút Sửa -->
+                                    <a asp-controller="AdminDashboard" asp-action="EditAnnouncement" asp-route-id="@item.Id" class="btn btn-sm btn-light text-primary me-1 rounded-circle shadow-none border-0" title="Chỉnh sửa">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <!-- Nút Xóa (Xác nhận) -->
+                                    <form asp-controller="AdminDashboard" asp-action="DeleteAnnouncement" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn chắc chắn muốn xóa thông báo này? Ảnh sẽ bị xóa vĩnh viễn.');">
+                                        <button type="submit" class="btn btn-sm btn-light text-danger rounded-circle shadow-none border-0" title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-info-circle me-2"></i>Hệ thống chưa có thông báo nào. Hãy tạo thông báo đầu tiên!
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================= -->
+<!-- MODAL THÊM THÔNG BÁO -->
+<!-- ========================================= -->
+<div class="modal fade" id="modalAddAnn" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0">
+            <form id="addAnnouncementForm" asp-controller="AdminDashboard" asp-action="CreateAnnouncement" method="post" enctype="multipart/form-data">
+                <div class="modal-header border-bottom pt-4 pb-3 px-4 shadow-none border-light">
+                    <h6 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2 text-success"></i>Tạo thông báo mới</h6>
+                    <button type="button" class="btn-close shadow-none border-0" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted"><i class="bi bi-image me-1"></i>Chọn ảnh thông báo</label>
+                        <input type="file" id="imageFile" name="imageFile" class="form-control bg-light" accept="image/*" />
+                        <small class="text-muted d-block mt-1">Để trống nếu không có ảnh</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted"><i class="bi bi-type me-1"></i>Tiêu đề</label>
+                        <input type="text" id="title" name="title" class="form-control bg-light" required placeholder="VD: Khuyến mãi cuối tuần" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted"><i class="bi bi-chat-left-text me-1"></i>Nội dung</label>
+                        <textarea id="content" name="content" class="form-control bg-light" rows="4" required placeholder="Chi tiết thông báo..."></textarea>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="isActiveCheckbox" name="IsActive" value="true" checked />
+                        <label class="form-check-label" for="isActiveCheckbox">
+                            Hiển thị ngay cho khách hàng
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0 shadow-none">
+                    <button type="button" class="btn btn-light rounded-pill px-4 btn-sm" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success fw-bold rounded-pill px-4 btn-sm" id="submitBtn">Đăng ngay</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fix checkbox để gửi giá trị "true/false" thay vì "on/off"
+    document.getElementById('addAnnouncementForm').addEventListener('submit', function(e) {
+        // Đảm bảo checkbox được gửi đúng định dạng
+        const checkbox = document.getElementById('isActiveCheckbox');
+        if (!checkbox.checked) {
+            // Nếu unchecked, tạo hidden input
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'IsActive';
+            hiddenInput.value = 'false';
+            this.appendChild(hiddenInput);
+            checkbox.name = ''; // Loại bỏ checkbox từ submission
+        }
+    });
+</script>
+
+<style>
+    .rounded-4 { border-radius: 1rem !important; }
+    .table-responsive::-webkit-scrollbar { height: 6px; }
+    .table-responsive::-webkit-scrollbar-thumb { background: #e9ecef; border-radius: 3px; }
+    .table > :not(caption) > * > * { border-bottom-color: #f1f3f5; }
+    .table > tbody > tr { transition: background 0.1s ease; }
+    .bg-light { background-color: #f8f9fa !important; }
+    .btn-light { background-color: #f1f3f5; }
+    .alert-success { background-color: #d3f9d8; color: #157347; }
+</style>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Contact Support</value></data>
+	<data name="PageSubtitle" xml:space="preserve"><value>How can we help you?</value></data>
+	<data name="CallUs" xml:space="preserve"><value>Call Us</value></data>
+	<data name="EmailUs" xml:space="preserve"><value>Email Us</value></data>
+	<data name="SendFeedback" xml:space="preserve"><value>Send Feedback</value></data>
+	<data name="LabelTopic" xml:space="preserve"><value>Topic</value></data>
+	<data name="Topic_AppIssue" xml:space="preserve"><value>App Issue</value></data>
+	<data name="Topic_VehicleIssue" xml:space="preserve"><value>Vehicle Issue</value></data>
+	<data name="Topic_Payment" xml:space="preserve"><value>Payment &amp; Billing</value></data>
+	<data name="Topic_Other" xml:space="preserve"><value>Other</value></data>
+	<data name="LabelMessage" xml:space="preserve"><value>Message</value></data>
+	<data name="MsgPlaceholder" xml:space="preserve"><value>Describe your issue here...</value></data>
+	<data name="BtnSubmit" xml:space="preserve"><value>Send Message</value></data>
+	<data name="MsgSentAlert" xml:space="preserve"><value>Message sent successfully!</value></data>
+</root>

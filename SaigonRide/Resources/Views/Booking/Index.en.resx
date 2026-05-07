@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Rent Vehicles</value></data>
+	<data name="PageSubtitle" xml:space="preserve"><value>Find a nearby station and rent your ride. Return at any station in the city.</value></data>
+	<data name="SearchPlaceholder" xml:space="preserve"><value>Search by vehicle name or ID...</value></data>
+	<data name="FilterAll" xml:space="preserve"><value>All</value></data>
+	<data name="FilterAllTypes" xml:space="preserve"><value>All Types</value></data>
+	<data name="FilterAvailability" xml:space="preserve"><value>Availability</value></data>
+	<data name="ClosestStation" xml:space="preserve"><value>Closest Station</value></data>
+	<data name="ViewStation" xml:space="preserve"><value>View Station</value></data>
+	<data name="StationDetails" xml:space="preserve"><value>Station Details</value></data>
+	<data name="SelectStationPrompt" xml:space="preserve"><value>Please select a station on the map to view vehicles.</value></data>
+	<data name="GetDirections" xml:space="preserve"><value>Get Directions</value></data>
+	<data name="NoVehicles" xml:space="preserve"><value>No vehicles available at this station.</value></data>
+	<data name="BtnSelect" xml:space="preserve"><value>Select</value></data>
+</root>

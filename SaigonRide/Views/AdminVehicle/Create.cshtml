@@ -1,0 +1,46 @@
+﻿@model SaigonRide.Models.entities.Vehicle
+@{
+    ViewData["Title"] = "Nhập Xe Mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-plus-circle text-warning me-2"></i>Thông tin xe nhập kho</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Phân loại xe</label>
+                        <select asp-for="Category" class="form-select bg-light" required>
+                            <option value="">-- Chọn loại xe --</option>
+                            <option value="Standard Bike">Xe đạp thường (Standard Bike)</option>
+                            <option value="E-Scooter">Xe trượt điện (E-Scooter)</option>
+                            <option value="Premium E-Bike">Xe đạp điện cao cấp (Premium E-Bike)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Đơn giá thuê (VNĐ / Phút)</label>
+                        <input asp-for="PricePerMinute" type="number" min="500" step="500" class="form-control bg-light" value="1000" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Phân bổ về Trạm</label>
+                        <select asp-for="StationId" class="form-select bg-light" asp-items="ViewBag.Stations" required>
+                            <option value="">-- Chọn trạm tiếp nhận --</option>
+                        </select>
+                        <small class="text-muted fst-italic">* Xe sẽ tự động cộng vào sức chứa hiện tại của trạm này.</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning text-dark fw-bold py-2"><i class="bi bi-save me-1"></i> Lưu vào kho</button>
+                        <a href="/AdminVehicle/Index" class="btn btn-light border fw-bold py-2">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

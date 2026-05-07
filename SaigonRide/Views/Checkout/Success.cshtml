@@ -1,9 +1,20 @@
-﻿@{
-    ViewData["Title"] = "Thành công!";
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["PageTitle"].Value;
 }
-<div class="text-center mt-5">
-    <h1 class="text-success display-1">✔️</h1>
-    <h2 class="text-success fw-bold">Thanh toán thành công!</h2>
-    <p class="fs-5">Chuyến đi của bạn đã được ghi nhận vào hệ thống.</p>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">Quay lại Trang chủ</a>
+
+<div class="container-fluid px-0 d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="text-center col-md-6 col-lg-4">
+        <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 120px; height: 120px;">
+            <i class="bi bi-check-lg text-success" style="font-size: 5rem;"></i>
+        </div>
+        <h2 class="fw-bold text-dark mb-3">@Localizer["SuccessTitle"]</h2>
+        <p class="text-muted mb-5">@Localizer["SuccessDesc"]</p>
+        
+        <div class="d-grid gap-3">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-success py-3 fw-bold rounded-pill shadow">@Localizer["BackToHome"]</a>
+            <a asp-controller="History" asp-action="Index" class="btn btn-light bg-white border py-3 fw-bold text-dark rounded-pill">@Localizer["ViewHistory"]</a>
+        </div>
+    </div>
 </div>

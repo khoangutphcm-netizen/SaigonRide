@@ -7,7 +7,9 @@ namespace SaigonRide.Models.entities
     {
         public int Id { get; set; }
 
-        public string CustomerName { get; set; } // BIẾN MỚI: Lưu tên khách để biết ai thuê
+        // THE NEW FOREIGN KEY
+        public int UserId { get; set; }
+        public User? User { get; set; }
 
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }

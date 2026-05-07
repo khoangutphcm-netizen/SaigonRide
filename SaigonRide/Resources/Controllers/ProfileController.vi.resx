@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="MsgUpdateSuccess" xml:space="preserve"><value>Cập nhật hồ sơ thành công!</value></data>
+	<data name="MsgUpdateError" xml:space="preserve"><value>Tên không được để trống!</value></data>
+	<data name="MsgAvatarSuccess" xml:space="preserve"><value>Cập nhật ảnh đại diện thành công!</value></data>
+</root>

@@ -10,5 +10,8 @@
         public string UserType { get; set; } // "Local", "Tourist" hoặc "Admin"
 
         public string DocumentId { get; set; } // Chứa số CCCD (nếu là Local) hoặc Passport (nếu là Tourist)
+        public string? Phone { get; set; }
+        public string? AvatarUrl { get; set; }
+        public bool IsBanned { get; set; } = false; // Mặc định tạo tài khoản là không bị khóa
     }
 }

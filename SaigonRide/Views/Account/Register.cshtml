@@ -1,73 +1,143 @@
-﻿@{
-    ViewData["Title"] = "Đăng ký tài khoản";
-}
+﻿@{ Layout = null; }
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-header bg-success text-white text-center py-3">
-                    <h4 class="mb-0">Tham gia SaigonRide</h4>
-                </div>
-                <div class="card-body p-4">
-                    @if (ViewBag.Error != null)
-                    {
-                        <div class="alert alert-danger">@ViewBag.Error</div>
-                    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Localizer["RegisterPageTitle"] - SaigonRide</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?q=80&w=2074&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 2rem 0; 
+        }
 
-                    <form asp-controller="Account" asp-action="Register" method="post">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Họ và tên</label>
-                            <input type="text" name="FullName" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Email</label>
-                            <input type="email" name="Email" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Mật khẩu</label>
-                            <input type="password" name="Password" class="form-control" required />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Bạn là ai?</label>
-                            <select id="userTypeSelect" name="UserType" class="form-select" onchange="toggleDocumentType()" required>
-                                <option value="Local">Người dân địa phương (Local)</option>
-                                <option value="Tourist">Khách du lịch (Tourist)</option>
-                            </select>
-                        </div>
+        .lang-switcher { position: fixed; top: 20px; right: 30px; z-index: 1050; }
+        
+        .register-card {
+            max-width: 1300px; 
+            min-height: 750px;
+            width: 95%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            margin: auto;
+        }
 
-                        <!-- Khu vực ID động -->
-                        <div class="mb-4">
-                            <label id="docLabel" class="form-label fw-bold text-primary">Số CCCD (Identity Card)</label>
-                            <input type="text" name="DocumentId" id="docInput" class="form-control" placeholder="Nhập mã số định danh..." required />
-                        </div>
+        .left-panel { background-color: #f8fcf9; padding: 4rem 5rem; width: 45%; display: flex; flex-direction: column; align-items: center; text-align: center; border-right: 1px solid #e9ecef; justify-content: center;}
+        .right-panel { padding: 4rem 5rem; width: 55%; display: flex; flex-direction: column; justify-content: center;}
 
-                        <button type="submit" class="btn btn-dark w-100 fs-5 mb-3">Tạo tài khoản</button>
+        .form-control, .form-select { border-radius: 10px; padding: 1.1rem; border: 2px solid #e9ecef; font-size: 1.1rem; }
+        .form-control:focus, .form-select:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.2); }
+        .form-label { font-size: 1.1rem; }
 
-                        <div class="text-center">
-                            <span class="text-muted">Đã có tài khoản?</span>
-                            <a asp-controller="Account" asp-action="Login" class="text-decoration-none fw-bold text-success">Đăng nhập</a>
-                        </div>
-                    </form>
-                </div>
+        .btn-custom-dark { background-color: #212529; color: white; border: none; padding: 1.2rem; font-size: 1.3rem; transition: all 0.3s; }
+        .btn-custom-dark:hover { background-color: #343a40; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(33,37,41,0.3); }
+
+        .premium-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            margin-top: 2rem;
+            border: 5px solid white;
+        }
+    </style>
+</head>
+<body>
+    <div class="dropdown position-absolute top-0 end-0 m-4 z-3">
+        <button class="btn btn-white bg-white border shadow-sm rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 fs-5" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-globe2 text-success"></i> @(Context.Request.Cookies[Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName]?.Contains("en") == true ? "EN" : "VI") <i class="bi bi-chevron-down ms-1" style="font-size: 0.8rem;"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 p-2">
+            <li>
+                <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                    <input type="hidden" name="culture" value="vi" />
+                    <button type="submit" class="dropdown-item rounded fw-bold text-success fs-5 py-2">🇻🇳 Tiếng Việt</button>
+                </form>
+            </li>
+            <li>
+                <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 mt-1">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                    <input type="hidden" name="culture" value="en" />
+                    <button type="submit" class="dropdown-item rounded text-muted fs-5 py-2">🇬🇧 English</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <div class="register-card flex-wrap flex-md-nowrap">
+        <div class="left-panel col-12 col-md-5">
+            <h2 class="fw-bold text-dark mb-3" style="font-size: 2.5rem;">@Html.Raw(Localizer["JoinMovementTitle"].Value)</h2>
+            <p class="text-muted fs-5 mb-4" style="line-height: 1.6;">@Localizer["JoinMovementDesc"]</p>
+            
+            <img src="https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=80&w=800&auto=format&fit=crop" alt="Eco Ride" class="premium-image">
+        </div>
+
+        <div class="right-panel col-12 col-md-7">
+            <div class="text-center py-3 rounded-3 mb-5 fw-bold fs-4" style="background-color: #198754; color: white; box-shadow: 0 8px 20px rgba(25,135,84,0.2);">
+                @Localizer["RegisterHeader"]
             </div>
+
+            <form asp-controller="Account" asp-action="Register" method="post">
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">@Localizer["FullNameLabel"]</label>
+                        <input type="text" name="FullName" class="form-control" required placeholder="@Localizer["FullNamePlaceholder"]" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success">@Localizer["EmailLabel"]</label>
+                        <input type="email" name="Email" class="form-control border-success" required placeholder="@Localizer["EmailPlaceholder"]" />
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label fw-bold">@Localizer["PasswordLabel"]</label>
+                    <input type="password" name="Password" class="form-control" required placeholder="••••••••" />
+                </div>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">@Localizer["UserTypeLabel"]</label>
+                        <select name="UserType" class="form-select" required>
+                            <option value="Local">@Localizer["LocalResidentOption"]</option>
+                            <option value="Tourist">@Localizer["ForeignTouristOption"]</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-success">@Localizer["DocumentIdLabel"]</label>
+                        <input type="text" name="DocumentId" class="form-control border-success" required placeholder="@Localizer["DocumentIdPlaceholder"]" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-custom-dark w-100 fw-bold rounded-3 shadow mt-2 mb-4">@Localizer["RegisterButton"]</button>
+                
+                <div class="text-center fs-5 mt-4 border-top pt-4">
+                    <span class="text-muted">@Localizer["AlreadyHaveAccount"]</span>
+                    <a href="/Account/Login" class="text-success fw-bold text-decoration-none ms-2">@Localizer["SignInHere"]</a>
+                </div>
+            </form>
         </div>
     </div>
-</div>
-
-<script>
-    function toggleDocumentType() {
-        var userType = document.getElementById("userTypeSelect").value;
-        var docLabel = document.getElementById("docLabel");
-        var docInput = document.getElementById("docInput");
-        
-        if (userType === "Local") {
-            docLabel.innerText = "Số CCCD (Identity Card)";
-            docInput.placeholder = "Nhập 12 số CCCD...";
-        } else {
-            docLabel.innerText = "Số Hộ Chiếu (Passport Number)";
-            docInput.placeholder = "Nhập mã số Hộ chiếu...";
-        }
-    }
-</script>
+     
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

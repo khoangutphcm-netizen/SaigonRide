@@ -1,0 +1,97 @@
+﻿@model SaigonRide.Models.entities.Station
+@{
+    ViewData["Title"] = "Thêm Trạm Mới";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- Nhúng thư viện Bản đồ Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #stationMap {
+        height: 400px;
+        width: 100%;
+        border-radius: 10px;
+        border: 2px solid #dee2e6;
+        cursor: crosshair;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-geo-alt-fill text-success me-2"></i>Thông tin Trạm</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên Trạm (Khu vực)</label>
+                        <input asp-for="LocationName" class="form-control bg-light" placeholder="VD: Trạm Đại học Bách Khoa..." required />
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Sức chứa tối đa (Số xe)</label>
+                        <input asp-for="MaxCapacity" type="number" min="5" max="100" class="form-control bg-light" value="20" required />
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-muted small">Vĩ độ (Latitude)</label>
+                            <input asp-for="Latitude" id="latInput" class="form-control bg-light text-muted" readonly required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-muted small">Kinh độ (Longitude)</label>
+                            <input asp-for="Longitude" id="lngInput" class="form-control bg-light text-muted" readonly required />
+                        </div>
+                        <small class="text-danger mt-1 fst-italic">* Hãy click vào bản đồ bên cạnh để chọn tọa độ</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success fw-bold py-2"><i class="bi bi-save me-1"></i> Lưu Trạm Mới</button>
+                        <a href="/AdminStation/Index" class="btn btn-light border fw-bold py-2">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-3">
+                <!-- KHUNG CHỨA BẢN ĐỒ -->
+                <div id="stationMap"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+        // Khởi tạo bản đồ, focus ngay trung tâm TP.HCM
+        var map = L.map('stationMap').setView([10.7769, 106.7009], 13);
+        var marker;
+
+        // Load bản đồ đường phố từ OpenStreetMap
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+        // Bắt sự kiện khi Admin CLICK vào bản đồ
+        map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+
+        // Nếu có cắm cờ cũ rồi thì gỡ đi
+        if (marker) { map.removeLayer(marker); }
+
+        // Cắm cờ mới vào vị trí vừa click
+        marker = L.marker([lat, lng]).addTo(map)
+        .bindPopup("Vị trí Trạm mới").openPopup();
+
+        // Tự động đẩy số liệu vào 2 ô Input bên trái
+        document.getElementById('latInput').value = lat.toFixed(6);
+        document.getElementById('lngInput').value = lng.toFixed(6);
+        });
+        });
+    </script>
+}

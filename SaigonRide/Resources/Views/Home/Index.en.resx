@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="DashboardTitle" xml:space="preserve"><value>Dashboard</value></data>
+	<data name="Greeting" xml:space="preserve"><value>Hello, {0}!</value></data>
+	<data name="GreetingSubtitle" xml:space="preserve"><value>Where will your journey in Saigon take you today?</value></data>
+	<data name="RentVehicles" xml:space="preserve"><value>Rent Vehicles</value></data>
+	<data name="RentVehiclesDesc" xml:space="preserve"><value>Choose from a wide range of bikes and scooters.</value></data>
+	<data name="RentNow" xml:space="preserve"><value>Rent Now</value></data>
+	<data name="History" xml:space="preserve"><value>History</value></data>
+	<data name="HistoryDesc" xml:space="preserve"><value>View your past rides and invoices.</value></data>
+	<data name="ViewHistory" xml:space="preserve"><value>View History</value></data>
+	<data name="Support" xml:space="preserve"><value>Contact Support</value></data>
+	<data name="SupportDesc" xml:space="preserve"><value>We're here to help you 24/7 during your trip.</value></data>
+	<data name="ContactUs" xml:space="preserve"><value>Contact Us</value></data>
+	<data name="Settings" xml:space="preserve"><value>Settings</value></data>
+	<data name="SettingsDesc" xml:space="preserve"><value>Manage your profile, payment and preferences.</value></data>
+	<data name="GoToSettings" xml:space="preserve"><value>Go to Settings</value></data>
+	<data name="RecentRides" xml:space="preserve"><value>Recent Rides</value></data>
+	<data name="ViewAll" xml:space="preserve"><value>View All</value></data>
+	<data name="Completed" xml:space="preserve"><value>Completed</value></data>
+	<data name="NoRides" xml:space="preserve"><value>No recent rides.</value></data>
+	<data name="SpendingOverview" xml:space="preserve"><value>Spending Overview</value></data>
+	<data name="ThisMonth" xml:space="preserve"><value>This Month</value></data>
+	<data name="TotalSpending" xml:space="preserve"><value>Total Spending</value></data>
+	<data name="VsLastMonth" xml:space="preserve"><value>vs last month</value></data>
+	<data name="TotalRidesCount" xml:space="preserve"><value>Total Rides</value></data>
+	<data name="Distance" xml:space="preserve"><value>Distance</value></data>
+	<data name="AvgCost" xml:space="preserve"><value>Avg. Cost</value></data>
+	<data name="Announcements" xml:space="preserve"><value>Announcements</value></data>
+	<data name="New" xml:space="preserve"><value>New</value></data>
+	<data name="HolidayPromo" xml:space="preserve"><value>Holiday Promotion!</value></data>
+	<data name="HolidayPromoDesc" xml:space="preserve"><value>Get 15% off on all e-scooter rentals this long weekend.</value></data>
+	<data name="Maintenance" xml:space="preserve"><value>System Maintenance</value></data>
+	<data name="MaintenanceDesc" xml:space="preserve"><value>Scheduled maintenance on 28 May 2026, 00:00 - 02:00 AM.</value></data>
+	<data name="ExplorePromoTitle" xml:space="preserve"><value>Explore Saigon&lt;br&gt;In Comfort</value></data>
+	<data name="ExplorePromoDesc" xml:space="preserve"><value>Affordable, reliable and eco-friendly rides for every adventure.</value></data>
+	<data name="BannerTitle" xml:space="preserve"><value>Go Green. Travel Clean.</value></data>
+	<data name="BannerDesc" xml:space="preserve"><value>Drive eco-friendly and help keep Saigon beautiful.</value></data>
+	<data name="LearnMore" xml:space="preserve"><value>Learn More</value></data>
+</root>

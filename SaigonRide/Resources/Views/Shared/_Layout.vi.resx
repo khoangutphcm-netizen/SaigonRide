@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="BrandSlogan" xml:space="preserve"><value>Khám phá Sài Gòn theo cách của bạn</value></data>
+	<data name="Menu_Home" xml:space="preserve"><value>Trang chủ</value></data>
+	<data name="Menu_Rent" xml:space="preserve"><value>Thuê xe</value></data>
+	<data name="Menu_History" xml:space="preserve"><value>Lịch sử</value></data>
+	<data name="Menu_Support" xml:space="preserve"><value>Hỗ trợ</value></data>
+	<data name="Menu_Settings" xml:space="preserve"><value>Cài đặt</value></data>
+	<data name="AccountLabel" xml:space="preserve"><value>Tài khoản</value></data>
+	<data name="UserType_Tourist" xml:space="preserve"><value>Khách du lịch</value></data>
+	<data name="UserType_Local" xml:space="preserve"><value>Cư dân</value></data>
+	<data name="SidebarPromoTitle" xml:space="preserve"><value>Khám phá Sài Gòn&lt;br&gt;Cùng SaigonRide</value></data>
+	<data name="SidebarPromoDesc" xml:space="preserve"><value>Chuyến đi của bạn.</value></data>
+	<data name="BtnLearnMore" xml:space="preserve"><value>Tìm hiểu</value></data>
+	<data name="SearchPlaceholder" xml:space="preserve"><value>Tìm trạm, loại xe...</value></data>
+	<data name="BtnLogout" xml:space="preserve"><value>Đăng xuất</value></data>
+</root>

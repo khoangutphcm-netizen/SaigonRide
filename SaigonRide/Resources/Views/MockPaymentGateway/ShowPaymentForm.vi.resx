@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="MockGatewayTitle" xml:space="preserve"><value>Cổng Thanh Toán Giả Lập</value></data>
+	<data name="PayWithVNPay" xml:space="preserve"><value>Thanh toán qua VNPay</value></data>
+	<data name="ScanAppToPay" xml:space="preserve"><value>Vui lòng dùng App Ngân hàng quét mã QR để thanh toán</value></data>
+	<data name="EnterPromoCodePlaceholder" xml:space="preserve"><value>Nhập mã giảm giá (Nếu có)</value></data>
+	<data name="PayWithMoMo" xml:space="preserve"><value>Thanh toán qua MoMo</value></data>
+	<data name="OpenMoMoToScan" xml:space="preserve"><value>Mở ứng dụng MoMo trên điện thoại để quét mã</value></data>
+	<data name="MoMoPhonePlaceholder" xml:space="preserve"><value>Hoặc nhập số điện thoại MoMo</value></data>
+	<data name="PayWithCard" xml:space="preserve"><value>Thanh toán bằng Thẻ Quốc Tế</value></data>
+	<data name="CardNumberLabel" xml:space="preserve"><value>SỐ THẺ</value></data>
+	<data name="ExpiryLabel" xml:space="preserve"><value>NGÀY HẾT HẠN</value></data>
+	<data name="CardHolderLabel" xml:space="preserve"><value>TÊN IN TRÊN THẺ</value></data>
+	<data name="CardHolderPlaceholder" xml:space="preserve"><value>NGUYEN VAN A</value></data>
+	<data name="PayWithPayPal" xml:space="preserve"><value>Thanh toán qua PayPal</value></data>
+	<data name="LoginToPayPal" xml:space="preserve"><value>Đăng nhập vào tài khoản PayPal của bạn</value></data>
+	<data name="PayPalEmailPlaceholder" xml:space="preserve"><value>Email hoặc số điện thoại di động</value></data>
+	<data name="PayPalPasswordPlaceholder" xml:space="preserve"><value>Nhập mật khẩu</value></data>
+	<data name="PayWithApplePay" xml:space="preserve"><value>Thanh toán bằng Apple Pay</value></data>
+	<data name="DoubleClickToPay" xml:space="preserve"><value>Nhấn đúp nút sườn để Thanh toán</value></data>
+	<data name="FaceIDRequired" xml:space="preserve"><value>Yêu cầu Face ID</value></data>
+	<data name="SecureCheckout" xml:space="preserve"><value>Cổng thanh toán an toàn</value></data>
+	<data name="TestingModeWarning" xml:space="preserve"><value>DEMO</value></data>
+	<data name="CancelTransaction" xml:space="preserve"><value>HỦY GIAO DỊCH</value></data>
+	<data name="SimulateSuccess" xml:space="preserve"><value>GIAO DỊCH</value></data>
+	<data name="ConfirmCancel" xml:space="preserve"><value>Bạn chắc chắn muốn hủy giao dịch này chứ?</value></data>
+</root>

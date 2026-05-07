@@ -1,95 +1,291 @@
-﻿@model SaigonRide.Models.entities.RentalTransaction
-@using Microsoft.AspNetCore.Mvc.Localization
+﻿﻿@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
+@model IEnumerable<SaigonRide.Models.entities.RentalTransaction>
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = Localizer["DashboardTitle"].Value;
 }
 
-<div class="row justify-content-center super-app-bg pt-3 pb-5">
-    <div class="col-md-8 col-lg-6">
-
-        <!-- Header: User & Wallet Widget -->
-        <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-            <div>
-                <h4 class="fw-bold text-dark mb-0">@Localizer["Greeting", User.Identity.Name]</h4>
-                <span class="badge bg-dark rounded-pill mt-1">@User.FindFirst("UserType")?.Value Member</span>
-            </div>
-            <!-- Nút Avatar nhỏ bên góc cho cân đối -->
-            <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 45px; height: 45px; font-size: 1.2rem; font-weight: bold;">
-                @User.Identity.Name.Substring(0, 1).ToUpper()
-            </div>
-        </div>
-
-        <!-- BIG BUTTON: Rent Car (The Real Thing) -->
-        <a asp-controller="Booking" asp-action="Index" class="btn-main-action shadow p-4 mb-4">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="fw-bold mb-1 text-white">@Localizer["StartRide"]</h2>
-                    <p class="mb-0 text-white-50 fs-6">@Localizer["FindMap"]</p>
-                </div>
-                <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
-                    <i class="bi bi-scooter fs-1 text-white"></i>
-                </div>
-            </div>
-        </a>
-
-        <!-- 3 Essential Buttons (History, Settings, Contact) -->
-        <div class="row g-3 mb-4">
-            <div class="col-4">
-                <a asp-controller="History" asp-action="Index" class="btn-secondary-action shadow-sm widget-card h-100">
-                    <div class="icon-box bg-primary bg-opacity-10 text-primary"><i class="bi bi-clock-history"></i></div>
-                    <span class="fw-bold text-dark" style="font-size: 0.9rem;">@Localizer["History"]</span>
-                </a>
-            </div>
-            <div class="col-4">
-                <a asp-controller="Profile" asp-action="Index" class="btn-secondary-action shadow-sm widget-card h-100">
-                    <div class="icon-box bg-secondary bg-opacity-10 text-secondary"><i class="bi bi-gear"></i></div>
-                    <span class="fw-bold text-dark" style="font-size: 0.9rem;">@Localizer["Settings"]</span>
-                </a>
-            </div>
-            <div class="col-4">
-                <a asp-controller="Profile" asp-action="Support" class="btn-secondary-action shadow-sm widget-card h-100">
-                    <div class="icon-box bg-danger bg-opacity-10 text-danger"><i class="bi bi-headset"></i></div>
-                    <span class="fw-bold text-dark" style="font-size: 0.9rem;">@Localizer["Support"]</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Thêm Options/Widgets mở rộng cho hiện đại -->
-        <h6 class="fw-bold text-muted mb-3 px-2">@Localizer["RecentActivity"]</h6>
-        @if (Model != null)
-        {
-            <div class="card widget-card p-3 mb-4 border-start border-success border-4">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <small class="text-muted d-block">@Model.StartTime.ToString("dd/MM/yyyy HH:mm")</small>
-                        <span class="fw-bold text-dark">@Model.Vehicle.Category</span>
-                        <span class="text-muted mx-1">→</span>
-                        <span class="fw-bold text-success">@Model.ReturnStation.LocationName</span>
-                    </div>
-                    <div class="text-end">
-                        <span class="badge bg-light text-dark border">@Model.TotalDue.ToString("N0")đ</span>
-                    </div>
-                </div>
-            </div>
+<style> 
+    @@keyframes aurora-shift {
+        0% {
+            background-position: 0% 50%;
+            box-shadow: 0 0 5px rgba(0, 255, 128, 0.6), 0 0 15px rgba(0, 255, 128, 0.4), 0 0 30px rgba(0, 200, 100, 0.2);
         }
-        else
-        {
-            <div class="card widget-card p-4 text-center mb-4 bg-white">
-                <i class="bi bi-journal-x fs-1 text-muted opacity-50 mb-2"></i>
-                <p class="text-muted mb-0">@Localizer["NoRidesYet"]</p>
-            </div>
+        50% {
+            background-position: 100% 50%;
+            box-shadow: 0 0 15px rgba(64, 255, 128, 0.8), 0 0 30px rgba(64, 255, 128, 0.6), 0 0 50px rgba(0, 200, 100, 0.4);
         }
+        100% {
+            background-position: 0% 50%;
+            box-shadow: 0 0 5px rgba(0, 255, 128, 0.6), 0 0 15px rgba(0, 255, 128, 0.4), 0 0 30px rgba(0, 200, 100, 0.2);
+        }
+    }
 
-        <!-- Promo Widget -->
-        <div class="card widget-card bg-dark text-white p-3 overflow-hidden position-relative">
-            <div class="position-relative z-1">
-                <span class="badge bg-warning text-dark mb-2">@Localizer["Promo"]</span>
-                <h6 class="fw-bold">@Localizer["PromoTitle"]</h6>
-                <small class="text-white-50">@Localizer["PromoDesc"]</small>
+    .btn-aurora {
+        background: linear-gradient(90deg, #00c853, #00e676, #1de9b6, #00e676, #00c853);
+        background-size: 200% 100%;
+        animation: aurora-shift 3s ease infinite;
+        border: none;
+        color: white;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .btn-aurora:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(0, 255, 128, 0.9);
+        animation-duration: 1.5s;
+    }
+     
+    .btn-aurora::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        transition: width 0.3s, height 0.3s;
+        z-index: -1;
+    }
+
+    .btn-aurora:active::after {
+        width: 200%;
+        height: 200%;
+        transition: 0s;
+    }
+     
+    .rounded-4 { border-radius: 1rem !important; }
+    .action-card { background: var(--card-bg); border: 1px solid #e0e0e0; border-radius: 1rem; padding: 1.5rem; text-align: center; transition: all 0.2s; height: 100%; display: flex; flex-direction: column; }
+    .action-card:hover { border-color: #20994a; box-shadow: 0 8px 20px rgba(32, 153, 74, 0.1); transform: translateY(-3px); }
+    .icon-wrapper { width: 60px; height: 60px; border-radius: 50%; background-color: #e8f5e9; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; }
+    
+    .list-item-custom { border-bottom: 1px solid #f0f0f0; padding: 1rem 0; display: flex; align-items: center; }
+    .list-item-custom:last-child { border-bottom: none; }
+    
+    .promo-banner { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 1rem; position: relative; overflow: hidden; padding: 2rem; border: 1px solid #a5d6a7; }
+    
+    .dark-mode .action-card { border-color: #333; }
+    .dark-mode .list-item-custom { border-color: #333; }
+    .dark-mode .icon-wrapper { background-color: #143621; }
+    .dark-mode .promo-banner { background: linear-gradient(135deg, #0a1f12 0%, #143621 100%); border-color: #1b5e38; }
+</style>
+
+<div class="container-fluid px-0">
+     
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark mb-1">@Localizer["Greeting", User.Identity.Name] <i class="bi bi-emoji-smile text-success"></i></h3>
+        <p class="text-muted">@Localizer["GreetingSubtitle"]</p>
+    </div>
+     
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="action-card bg-white shadow-sm">
+                <div class="icon-wrapper text-success"><i class="bi bi-bicycle fs-2"></i></div>
+                <h6 class="fw-bold text-dark">@Localizer["RentVehicles"]</h6>
+                <p class="text-muted small mb-3 flex-grow-1">@Localizer["RentVehiclesDesc"]</p> 
+                <a asp-controller="Booking" asp-action="Index" class="btn btn-aurora rounded-pill fw-bold w-100 py-2">@Localizer["RentNow"] <i class="bi bi-arrow-right ms-1"></i></a>
             </div>
-            <i class="bi bi-gift-fill position-absolute text-white opacity-10" style="font-size: 8rem; right: -20px; top: -30px;"></i>
+        </div>
+         
+        <div class="col-6 col-xl-3">
+            <div class="action-card bg-white shadow-sm">
+                <div class="icon-wrapper text-success"><i class="bi bi-clock-history fs-2"></i></div>
+                <h6 class="fw-bold text-dark">@Localizer["History"]</h6>
+                <p class="text-muted small mb-3 flex-grow-1">@Localizer["HistoryDesc"]</p>
+                <a asp-controller="History" asp-action="Index" class="btn btn-success rounded-pill fw-bold w-100">@Localizer["ViewHistory"] <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="action-card bg-white shadow-sm">
+                <div class="icon-wrapper text-success"><i class="bi bi-headset fs-2"></i></div>
+                <h6 class="fw-bold text-dark">@Localizer["Support"]</h6>
+                <p class="text-muted small mb-3 flex-grow-1">@Localizer["SupportDesc"]</p>
+                <a asp-controller="Profile" asp-action="Support" class="btn btn-success rounded-pill fw-bold w-100">@Localizer["ContactUs"] <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="action-card bg-white shadow-sm">
+                <div class="icon-wrapper text-success"><i class="bi bi-gear fs-2"></i></div>
+                <h6 class="fw-bold text-dark">@Localizer["Settings"]</h6>
+                <p class="text-muted small mb-3 flex-grow-1">@Localizer["SettingsDesc"]</p>
+                <a asp-controller="Profile" asp-action="Index" class="btn btn-outline-success rounded-pill fw-bold w-100">@Localizer["GoToSettings"] <i class="bi bi-arrow-right ms-1"></i></a>
+            </div>
+        </div>
+    </div>
+     
+    <!-- ========== RECENT RIDES ========== -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-5 col-xl-4">
+            <div class="card bg-white border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
+                    <h6 class="fw-bold text-dark mb-0">@Localizer["RecentRides"]</h6>
+                    <a asp-controller="History" asp-action="Index" class="text-success text-decoration-none small fw-bold">@Localizer["ViewAll"]</a>
+                </div>
+                <div class="card-body px-4">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <div class="list-item-custom">
+                                <div class="bg-light rounded p-2 me-3">
+                                    <i class="bi @(item.Vehicle.Category.Contains("Scooter") ? "bi-scooter" : "bi-bicycle") fs-3 text-dark"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold text-dark mb-1">@item.Vehicle.Category</h6>
+                                    <small class="text-muted">@item.StartTime.ToString("dd MMM yyyy • hh:mm tt")</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill mb-1">@Localizer["Completed"]</span><br>
+                                    <span class="fw-bold text-dark">@item.TotalDue.ToString("N0") đ</span>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted small"><i class="bi bi-journal-x fs-1 d-block mb-2 opacity-50"></i>@Localizer["NoRides"]</div>
+                    }
+                </div>
+            </div>
         </div>
 
+        <!-- SPENDING OVERVIEW -->
+        <div class="col-lg-7 col-xl-5">
+            <div class="card bg-white border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-0 px-4">
+                    <h6 class="fw-bold text-dark mb-0">@Localizer["SpendingOverview"]</h6>
+                    <select class="form-select form-select-sm w-auto rounded-pill text-muted border-light"><option>@Localizer["ThisMonth"]</option></select>
+                </div>
+                <div class="card-body px-4">
+                    <div class="d-flex justify-content-between align-items-end mb-3">
+                        <div>
+                            <small class="text-muted d-block mb-1">@Localizer["TotalSpending"]</small>
+                            <h3 class="fw-bold text-success mb-0">@Convert.ToDecimal(ViewBag.TotalSpending).ToString("N0") đ</h3>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill"><i class="bi bi-arrow-up-short"></i> 12.5%</span>
+                            <small class="d-block text-muted mt-1" style="font-size: 0.7rem;">@Localizer["VsLastMonth"]</small>
+                        </div>
+                    </div>
+                    <div style="height: 180px; width: 100%;">
+                        <canvas id="spendingChart"></canvas>
+                    </div>
+                    <div class="row text-center mt-3 border-top pt-3">
+                        <div class="col-4 border-end">
+                            <small class="text-muted d-block mb-1"><i class="bi bi-bicycle text-success me-1"></i> @Localizer["TotalRidesCount"]</small>
+                            <h5 class="fw-bold text-dark mb-0">@ViewBag.TotalRides</h5>
+                        </div>
+                        <div class="col-4 border-end">
+                            <small class="text-muted d-block mb-1"><i class="bi bi-clock-history text-success me-1"></i> Tổng số phút</small>
+                            <h5 class="fw-bold text-dark mb-0">@ViewBag.TotalMinutes phút</h5>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted d-block mb-1"><i class="bi bi-cash-stack text-success me-1"></i> @Localizer["AvgCost"]</small>
+                            <h5 class="fw-bold text-dark mb-0">@Convert.ToDecimal(ViewBag.AvgCost).ToString("N0") đ</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANNOUNCEMENTS & PROMO -->
+        <div class="col-lg-12 col-xl-3 d-flex flex-column gap-4">
+            <div class="card bg-white border-0 shadow-sm rounded-4 flex-grow-1">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
+                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-megaphone-fill text-success me-2"></i> @Localizer["Announcements"]</h6>
+                    <a href="/Home/Announcements" class="text-success text-decoration-none small fw-bold">@Localizer["ViewAll"]</a>
+                </div>
+                <div class="card-body px-4 pt-0">
+                    @if (ViewBag.Announcements != null)
+                    {
+                        foreach (var item in ViewBag.Announcements)
+                        {
+                            <div class="list-item-custom">
+                                <div class="bg-success bg-opacity-10 p-2 rounded text-success me-3"><i class="bi bi-bell"></i></div>
+                                <div>
+                                    @if ((DateTime.Now - item.CreatedAt).TotalDays <= 3)
+                                    {
+                                        <span class="badge bg-success rounded-pill mb-1" style="font-size: 0.6rem;">@Localizer["New"]</span>
+                                    }
+                                    <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">@item.Title</h6>
+                                    <p class="text-muted mb-1" style="font-size: 0.75rem;">@item.Content</p>
+                                    <small class="text-muted" style="font-size: 0.7rem;">@item.CreatedAt.ToString("dd MMM yyyy")</small>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted small py-3">Chưa có thông báo nào.</div>
+                    }
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #114728 0%, #0a2e19 100%); color: white;">
+                <div class="card-body p-4 position-relative z-1">
+                    <h5 class="fw-bold mb-2">@Html.Raw(Localizer["ExplorePromoTitle"].Value)</h5>
+                    <p class="small mb-4" style="color: rgba(255,255,255,0.7);">@Localizer["ExplorePromoDesc"]</p>
+                    <a asp-controller="Booking" asp-action="Index" class="btn btn-light text-success fw-bold rounded-pill px-4 btn-sm">@Localizer["RentNow"] <i class="bi bi-arrow-right ms-1"></i></a>
+                </div>
+                <i class="bi bi-scooter position-absolute opacity-25" style="font-size: 8rem; right: -20px; bottom: -20px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER BANNER -->
+    <div class="promo-banner d-flex align-items-center shadow-sm">
+        <i class="bi bi-tree-fill text-success fs-1 me-4"></i>
+        <div>
+            <h5 class="fw-bold text-dark mb-1">@Localizer["BannerTitle"]</h5>
+            <p class="text-muted mb-0">@Localizer["BannerDesc"]</p>
+        </div>
+        <a href="#" class="btn btn-outline-success rounded-pill fw-bold bg-white ms-auto px-4">@Localizer["LearnMore"] <i class="bi bi-arrow-right ms-1"></i></a>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('spendingChart').getContext('2d');
+        let gradient = ctx.createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, 'rgba(32, 153, 74, 0.4)');
+        gradient.addColorStop(1, 'rgba(32, 153, 74, 0.0)');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(ViewBag.ChartLabels),
+                datasets: [{
+                    label: 'Spending (VNĐ)',
+                    data: @Html.Raw(ViewBag.ChartData),
+                    borderColor: '#20994a',
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#20994a',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#adb5bd', font: { size: 10 } } },
+                    y: {
+                        grid: { borderDash: [4, 4], color: '#e9ecef' },
+                        ticks: { color: '#adb5bd', font: { size: 10 }, callback: function(value) { return value / 1000 + 'K'; } },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>

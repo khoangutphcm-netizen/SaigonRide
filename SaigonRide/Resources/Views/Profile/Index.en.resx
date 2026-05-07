@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+
+	<data name="PageTitle" xml:space="preserve"><value>Settings</value></data>
+	<data name="TabAccount" xml:space="preserve"><value>Account</value></data>
+	<data name="TabPreferences" xml:space="preserve"><value>Preferences</value></data>
+	<data name="LabelName" xml:space="preserve"><value>Full Name</value></data>
+	<data name="LabelEmail" xml:space="preserve"><value>Email Address</value></data>
+	<data name="LabelPhone" xml:space="preserve"><value>Phone Number</value></data>
+	<data name="PrefDarkMode" xml:space="preserve"><value>Dark Mode</value></data>
+	<data name="PrefDarkModeDesc" xml:space="preserve"><value>Protect your eyes at night</value></data>
+	<data name="PrefLanguage" xml:space="preserve"><value>Language</value></data>
+	<data name="PrefLanguageDesc" xml:space="preserve"><value>English</value></data>
+	<data name="BtnSave" xml:space="preserve"><value>Save Changes</value></data>
+	<data name="BtnLogout" xml:space="preserve"><value>Logout</value></data>
+	<data name="UserType_Tourist" xml:space="preserve"><value>Tourist</value></data>
+	<data name="UserType_Local" xml:space="preserve"><value>Local Resident</value></data>
+</root>

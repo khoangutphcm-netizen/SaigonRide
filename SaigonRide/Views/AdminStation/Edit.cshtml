@@ -1,0 +1,131 @@
+﻿@model SaigonRide.Models.entities.Station
+@{
+    ViewData["Title"] = "Chỉnh sửa Trạm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #stationMap {
+        height: 400px;
+        width: 100%;
+        border-radius: 10px;
+        border: 2px solid #dee2e6;
+        cursor: crosshair;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Cập nhật Trạm #@Model.Id</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post" id="stationForm">
+                    <!-- BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ EF BIẾT ĐANG SỬA TRẠM NÀO -->
+                    <input type="hidden" asp-for="Id" />
+                    <!-- Trạng thái ẩn để không bị reset khi lưu -->
+                    <input type="hidden" asp-for="IsAvailable" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên Trạm (Khu vực)</label>
+                        <input asp-for="LocationName" class="form-control bg-light" required />
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Sức chứa tối đa</label>
+                            <input asp-for="MaxCapacity" id="maxCapacity" type="number" min="5" max="100" class="form-control bg-light text-primary fw-bold" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Số xe hiện tại</label>
+                            <!-- ĐÃ HIỂN THỊ Ô NÀY ĐỂ ADMIN SỬA -->
+                            <input asp-for="CurrentInventory" id="currentInventory" type="number" min="0" class="form-control bg-light text-success fw-bold" required />
+                        </div>
+                        <small class="text-danger mt-1 fst-italic d-none" id="inventoryError">* Số xe hiện tại không được lớn hơn sức chứa tối đa!</small>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-muted small">Vĩ độ</label>
+                            <input asp-for="Latitude" id="latInput" class="form-control bg-light text-muted" readonly required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-muted small">Kinh độ</label>
+                            <input asp-for="Longitude" id="lngInput" class="form-control bg-light text-muted" readonly required />
+                        </div>
+                        <small class="text-primary mt-1 fst-italic">* Click vào bản đồ để dời vị trí trạm</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary fw-bold py-2"><i class="bi bi-check-lg me-1"></i> Lưu Thay Đổi</button>
+                        <a href="/AdminStation/Index" class="btn btn-light border fw-bold py-2">Hủy bỏ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-3">
+                <div id="stationMap"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+        // Logic kiểm tra số xe hiện tại không vượt quá sức chứa
+        var form = document.getElementById('stationForm');
+        var maxInput = document.getElementById('maxCapacity');
+        var currInput = document.getElementById('currentInventory');
+        var errorMsg = document.getElementById('inventoryError');
+
+        form.addEventListener('submit', function(e) {
+        if (parseInt(currInput.value) > parseInt(maxInput.value)) {
+        e.preventDefault(); // Chặn không cho lưu
+        errorMsg.classList.remove('d-none');
+        currInput.classList.add('is-invalid');
+        } else {
+        errorMsg.classList.add('d-none');
+        currInput.classList.remove('is-invalid');
+        }
+        });
+
+        // Gỡ thông báo lỗi khi Admin gõ lại số
+        currInput.addEventListener('input', function() {
+        errorMsg.classList.add('d-none');
+        currInput.classList.remove('is-invalid');
+        });
+
+        // Lấy tọa độ hiện tại của trạm từ C# quăng xuống
+        var currentLat = @Model.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var currentLng = @Model.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+        var map = L.map('stationMap').setView([currentLat, currentLng], 15);
+        var marker = L.marker([currentLat, currentLng]).addTo(map).bindPopup("Vị trí hiện tại").openPopup();
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Bắt sự kiện khi click để dời trạm đi chỗ khác
+        map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+
+        if (marker) { map.removeLayer(marker); }
+
+        marker = L.marker([lat, lng]).addTo(map).bindPopup("Vị trí Trạm mới").openPopup();
+
+        document.getElementById('latInput').value = lat.toFixed(6);
+        document.getElementById('lngInput').value = lng.toFixed(6);
+        });
+        });
+    </script>
+}

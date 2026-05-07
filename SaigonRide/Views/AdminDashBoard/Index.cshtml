@@ -1,0 +1,250 @@
+﻿@{
+    ViewData["Title"] = "Tổng quan hệ thống";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; 
+}
+
+<style>
+    .bg-gradient-primary { background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); }
+    .bg-gradient-success { background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); }
+    .bg-gradient-warning { background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%); }
+    .bg-gradient-danger  { background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%); }
+    .stat-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+</style>
+
+<!-- 4 THẺ SỐ LIỆU TỔNG QUAN -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm rounded-4 h-100 bg-gradient-primary text-white">
+            <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase fw-bold text-white-50 mb-1">Người dùng</h6>
+                    <h2 class="fw-bold mb-0">@ViewBag.TotalUsers</h2>
+                </div>
+                <div class="fs-1 text-white-50"><i class="bi bi-people-fill"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm rounded-4 h-100 bg-gradient-success text-white">
+            <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase fw-bold text-white-50 mb-1">Trạm xe</h6>
+                    <h2 class="fw-bold mb-0">@ViewBag.TotalStations</h2>
+                </div>
+                <div class="fs-1 text-white-50"><i class="bi bi-geo-alt-fill"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm rounded-4 h-100 bg-gradient-warning text-white">
+            <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase fw-bold text-white-50 mb-1">Phương tiện</h6>
+                    <h2 class="fw-bold mb-0">@ViewBag.TotalVehicles</h2>
+                </div>
+                <div class="fs-1 text-white-50"><i class="bi bi-bicycle"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm rounded-4 h-100 bg-gradient-danger text-white">
+            <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase fw-bold text-white-50 mb-1">Chuyến đi</h6>
+                    <h2 class="fw-bold mb-0">@ViewBag.TotalTransactions</h2>
+                </div>
+                <div class="fs-1 text-white-50"><i class="bi bi-signpost-split-fill"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2 KHỐI BIỂU ĐỒ CHÍNH -->
+<div class="row g-4 mb-5">
+    <!-- Biểu đồ 1: Lưu lượng tồn kho -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4">
+                <h5 class="fw-bold text-dark mb-1" style="text-transform: uppercase;">Lưu lượng tồn kho</h5>
+                <p class="text-muted small mb-4">So sánh mức xe tại trạm</p>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    @if (ViewBag.InventoryData != null && ViewBag.InventoryData != "[]")
+                    {
+                        <canvas id="inventoryChart"></canvas>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-center align-items-center h-100 text-muted">
+                            <em>Chưa có dữ liệu trạm xe</em>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Biểu đồ 2: Phân bổ Doanh thu -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-body p-4 d-flex flex-column">
+                <h5 class="fw-bold text-dark mb-4 text-start">Phân bổ Doanh thu</h5>
+                <div style="position: relative; height: 250px; width: 100%; display: flex; justify-content: center; align-items: center; flex-grow: 1;">
+                    @if (ViewBag.RevenueData != null && ViewBag.RevenueData != "[0,0]")
+                    {
+                        <canvas id="revenueChart"></canvas>
+                        <!-- Chữ TỔNG ở giữa -->
+                        <div style="position: absolute; text-align: center; pointer-events: none;">
+                            <span class="text-muted small fw-bold">TỔNG</span><br>
+                            <span class="fs-4 fw-bold text-dark">@(ViewBag.TotalRevenue != null ? ((decimal)ViewBag.TotalRevenue).ToString("N0") : "0") đ</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex justify-content-center align-items-center h-100 text-muted">
+                            <em>Chưa phát sinh giao dịch nào</em>
+                        </div>
+                    }
+                </div>
+                <!-- Chú thích -->
+                <div class="mt-4 d-flex justify-content-center gap-5">
+                    <div class="text-center">
+                        <div class="text-muted small"><span style="color: #1cc88a; font-size: 1.2rem;">●</span> Xe đạp</div>
+                        <h5 class="fw-bold mt-1 mb-0">@(ViewBag.BikeRevenue != null ? ((decimal)ViewBag.BikeRevenue).ToString("N0") : "0") đ</h5>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-muted small"><span style="color: #4e73df; font-size: 1.2rem;">●</span> Xe điện</div>
+                        <h5 class="fw-bold mt-1 mb-0">@(ViewBag.ScooterRevenue != null ? ((decimal)ViewBag.ScooterRevenue).ToString("N0") : "0") đ</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QUICK ACCESS SHORTCUTS -->
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <h5 class="fw-bold text-dark mb-4" style="text-transform: uppercase;">Quick Access Management</h5>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <a href="/AdminStation" class="card text-decoration-none h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-all" style="transition: transform 0.3s;">
+                    <div class="card-body p-4 d-flex flex-column align-items-center text-center bg-primary bg-opacity-10">
+                        <i class="bi bi-geo-alt-fill text-primary" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <h6 class="fw-bold text-dark mb-1">Stations</h6>
+                        <p class="text-muted small mb-0">Manage stations</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/AdminVehicle" class="card text-decoration-none h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-all" style="transition: transform 0.3s;">
+                    <div class="card-body p-4 d-flex flex-column align-items-center text-center bg-success bg-opacity-10">
+                        <i class="bi bi-bicycle text-success" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <h6 class="fw-bold text-dark mb-1">Vehicles</h6>
+                        <p class="text-muted small mb-0">Manage vehicles</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/AdminUser" class="card text-decoration-none h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-all" style="transition: transform 0.3s;">
+                    <div class="card-body p-4 d-flex flex-column align-items-center text-center bg-warning bg-opacity-10">
+                        <i class="bi bi-people-fill text-warning" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <h6 class="fw-bold text-dark mb-1">Users</h6>
+                        <p class="text-muted small mb-0">Manage users</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/AdminDashBoard/Announcements" class="card text-decoration-none h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-all" style="transition: transform 0.3s;">
+                    <div class="card-body p-4 d-flex flex-column align-items-center text-center bg-info bg-opacity-10">
+                        <i class="bi bi-megaphone-fill text-info" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <h6 class="fw-bold text-dark mb-1">Announcements</h6>
+                        <p class="text-muted small mb-0">Manage announcements</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="/Reports/AdminReports" class="card text-decoration-none h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-all" style="transition: transform 0.3s;">
+                    <div class="card-body p-4 d-flex flex-column align-items-center text-center bg-danger bg-opacity-10">
+                        <i class="bi bi-flag-fill text-danger" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <h6 class="fw-bold text-dark mb-1">Reports</h6>
+                        <p class="text-muted small mb-0">Manage reports</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCRIPTS VẼ CHART -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // Đăng ký Plugin cho Chart.js
+        Chart.register(ChartDataLabels);
+
+        // 1. VẼ BAR CHART (TỒN KHO) - ĐÃ BẬT TÍNH NĂNG HIỆN SỐ TRÊN CỘT
+        var rawInventoryData = '@Html.Raw(ViewBag.InventoryData ?? "[]")';
+        if (rawInventoryData !== '[]') {
+            var invCtx = document.getElementById('inventoryChart').getContext('2d');
+            new Chart(invCtx, {
+                type: 'bar',
+                data: {
+                    labels: @Html.Raw(ViewBag.StationLabels ?? "[]"),
+                    datasets: [{
+                        label: 'Số lượng xe',
+                        data: JSON.parse(rawInventoryData),
+                        backgroundColor: @Html.Raw(ViewBag.InventoryColors ?? "[]"),
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        // Cấu hình hiện số lên đỉnh cột
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#333',
+                            font: { weight: 'bold', size: 14 }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5] }, suggestedMax: Math.max(...JSON.parse(rawInventoryData)) + 2 },
+                        x: { grid: { display: false }, ticks: { font: { weight: 'bold' } } }
+                    }
+                }
+            });
+        }
+
+        // 2. VẼ DONUT CHART (Giữ nguyên như cũ)
+        var rawRevenueData = '@Html.Raw(ViewBag.RevenueData ?? "[0,0]")';
+        if (rawRevenueData !== '[0,0]') {
+            var revCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: @Html.Raw(ViewBag.RevenueLabels ?? "['Xe đạp', 'Xe điện']"),
+                    datasets: [{
+                        data: JSON.parse(rawRevenueData),
+                        backgroundColor: ['#1cc88a', '#4e73df'],
+                        hoverOffset: 4, cutout: '75%', borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        // Tắt datalabels cho Donut chart để tránh rối mắt
+                        datalabels: { display: false } 
+                    }
+                }
+            });
+        }
+    });
+</script>

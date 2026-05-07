@@ -1,47 +1,55 @@
-﻿@{ ViewData["Title"] = "Hỗ trợ & Thông báo"; }
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["PageTitle"].Value;
+}
 
-<style>
-    .modern-card { border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-    .accordion-button:not(.collapsed) { background-color: #e8f5e9; color: #198754; font-weight: bold; }
-</style>
-
-<div class="container mt-5">
-    <div class="d-flex align-items-center mb-4">
-        <a href="javascript:history.back()" class="btn btn-light rounded-circle me-3 shadow-sm"><i class="bi bi-arrow-left"></i></a>
-        <h4 class="fw-bold mb-0">Cài đặt tài khoản</h4>
-    </div>
-    <div class="row">
-        <!-- Thông báo từ Admin -->
-        <div class="col-md-6 mb-4">
-            <div class="card modern-card p-4 h-100 border-start border-success border-5">
-                <h4 class="fw-bold mb-4">📢 Thông báo hệ thống</h4>
-                <div class="alert alert-warning border-0 rounded-3" role="alert">
-                    <h6 class="fw-bold">🚧 Bảo trì trạm Quận 1</h6>
-                    <p class="mb-0 small">Vào cuối tuần này (02/05/2026), trạm Quận 1 sẽ tạm ngưng nhận xe trả để nâng cấp mái che. Mong quý khách thông cảm!</p>
-                </div>
-                <div class="alert alert-info border-0 rounded-3" role="alert">
-                    <h6 class="fw-bold">🎉 Khuyến mãi chào hè</h6>
-                    <p class="mb-0 small">Trả xe tại trạm Bình Thạnh để luôn được giảm giá 15% vào giờ cao điểm.</p>
-                </div>
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="d-flex align-items-center mb-4 px-2">
+            <a href="javascript:history.back()" class="btn btn-light rounded-circle me-3 shadow-sm text-dark"><i class="bi bi-arrow-left"></i></a>
+            <div>
+                <h4 class="fw-bold text-dark mb-0">@Localizer["PageTitle"]</h4>
+                <small class="text-muted">@Localizer["PageSubtitle"]</small>
             </div>
         </div>
 
-        <!-- FAQ / Hỏi đáp -->
-        <div class="col-md-6 mb-4">
-            <div class="card modern-card p-4 h-100">
-                <h4 class="fw-bold mb-4">🎧 Câu hỏi thường gặp (FAQ)</h4>
-                <div class="accordion accordion-flush" id="faqAccordion">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header"><button class="accordion-button rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">Tôi có thể thanh toán bằng gì?</button></h2>
-                        <div id="faq1" class="accordion-collapse collapse show"><div class="accordion-body small text-muted">Hệ thống hỗ trợ Momo, VNPay, Tiền mặt và Apple Pay.</div></div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header"><button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">Làm sao để biết xe đang bận?</button></h2>
-                        <div id="faq2" class="accordion-collapse collapse"><div class="accordion-body small text-muted">Trên bản đồ, xe có màu xám nghĩa là Đang bảo trì hoặc Đang có người thuê.</div></div>
-                    </div>
-                </div>
-                <button class="btn btn-dark rounded-pill mt-4 w-100 fw-bold">Gửi yêu cầu hỗ trợ (Ticket)</button>
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+                <a href="tel:19001000" class="card border-0 shadow-sm rounded-4 text-decoration-none text-center p-4 bg-white h-100 action-card">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;"><i class="bi bi-telephone-fill fs-4"></i></div>
+                    <h6 class="fw-bold text-dark mb-1">@Localizer["CallUs"]</h6>
+                    <small class="text-muted">1900 1000</small>
+                </a>
             </div>
+            <div class="col-sm-6">
+                <a href="mailto:support@saigonride.vn" class="card border-0 shadow-sm rounded-4 text-decoration-none text-center p-4 bg-white h-100 action-card">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex justify-content-center align-items-center mx-auto mb-3" style="width: 50px; height: 50px;"><i class="bi bi-envelope-fill fs-4"></i></div>
+                    <h6 class="fw-bold text-dark mb-1">@Localizer["EmailUs"]</h6>
+                    <small class="text-muted">support@saigonride.vn</small>
+                </a>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+            <h6 class="fw-bold text-dark mb-4"><i class="bi bi-chat-left-text-fill text-success me-2"></i> @Localizer["SendFeedback"]</h6>
+            
+            <form action="#" method="get" onsubmit="event.preventDefault(); alert('@Localizer["MsgSentAlert"]');">
+                <div class="mb-3">
+                    <label class="form-label text-muted small fw-bold">@Localizer["LabelTopic"]</label>
+                    <select class="form-select border-light shadow-none bg-light fw-bold text-dark">
+                        <option>@Localizer["Topic_AppIssue"]</option>
+                        <option>@Localizer["Topic_VehicleIssue"]</option>
+                        <option>@Localizer["Topic_Payment"]</option>
+                        <option>@Localizer["Topic_Other"]</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-muted small fw-bold">@Localizer["LabelMessage"]</label>
+                    <textarea class="form-control border-light shadow-none bg-light" rows="4" placeholder="@Localizer["MsgPlaceholder"]" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm">@Localizer["BtnSubmit"] <i class="bi bi-send-fill ms-2"></i></button>
+            </form>
         </div>
     </div>
 </div>

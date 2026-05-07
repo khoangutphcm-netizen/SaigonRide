@@ -1,0 +1,69 @@
+@model IEnumerable<SaigonRide.Models.entities.Report>
+@{
+    ViewData["Title"] = "My Reports";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a href="/" class="btn btn-white bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <i class="bi bi-arrow-left text-dark"></i>
+        </a>
+        <div>
+            <h3 class="fw-bold text-dark mb-0">My Reports</h3>
+            <p class="text-muted mb-0">View status of your submitted reports</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Submitted</th>
+                        <th>Responded</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var report in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@report.Title</td>
+                            <td>
+                                <span class="badge bg-@(report.Status == SaigonRide.Models.entities.ReportStatus.Open ? "warning" : (report.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "success" : (report.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? "info" : "secondary")))">
+                                    @report.Status
+                                </span>
+                            </td>
+                            <td>@report.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (report.RespondedAt.HasValue)
+                                {
+                                    @report.RespondedAt.Value.ToString("dd/MM/yyyy")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                <a href="/Reports/ReportDetails/@report.Id" class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem; color: #999;"></i>
+                <p class="text-muted mt-3">No reports submitted yet</p>
+            </div>
+        }
+    </div>
+</div>

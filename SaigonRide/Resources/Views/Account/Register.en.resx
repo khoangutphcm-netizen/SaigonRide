@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Register - SaigonRide</value></data>
+	<data name="WelcomeTitle" xml:space="preserve"><value>Join the Green Movement</value></data>
+	<data name="WelcomeSubtitle" xml:space="preserve"><value>Create an account today to access hundreds of eco-friendly vehicles across the city.</value></data>
+	<data name="RegisterHeader" xml:space="preserve"><value>Join SaigonRide</value></data>
+	<data name="FullNameLabel" xml:space="preserve"><value>Full Name</value></data>
+	<data name="EmailLabel" xml:space="preserve"><value>Email Address</value></data>
+	<data name="PasswordLabel" xml:space="preserve"><value>Password</value></data>
+	<data name="WhoAreYouLabel" xml:space="preserve"><value>Who are you?</value></data>
+	<data name="LocalOption" xml:space="preserve"><value>Local Resident</value></data>
+	<data name="TouristOption" xml:space="preserve"><value>Tourist</value></data>
+	<data name="IdCardLabel" xml:space="preserve"><value>Identity Card Number</value></data>
+	<data name="IdCardPlaceholder" xml:space="preserve"><value>Enter 12-digit ID...</value></data>
+	<data name="PassportLabel" xml:space="preserve"><value>Passport Number</value></data>
+	<data name="PassportPlaceholder" xml:space="preserve"><value>Enter Passport Number...</value></data>
+	<data name="RegisterButton" xml:space="preserve"><value>Create Account</value></data>
+	<data name="HasAccount" xml:space="preserve"><value>Already have an account?</value></data>
+	<data name="LoginLink" xml:space="preserve"><value>Sign In</value></data>
+</root>

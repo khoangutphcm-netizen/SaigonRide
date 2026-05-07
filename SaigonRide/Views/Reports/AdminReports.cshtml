@@ -1,0 +1,132 @@
+@model IEnumerable<SaigonRide.Models.entities.Report>
+@{
+    ViewData["Title"] = "Manage User Reports";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center mb-4 gap-3">
+        <a href="/AdminDashBoard" class="btn btn-white bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <i class="bi bi-arrow-left text-dark"></i>
+        </a>
+        <div>
+            <h3 class="fw-bold text-dark mb-0">User Reports</h3>
+            <p class="text-muted mb-0">Manage and respond to user reports</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="mb-4">
+            <form method="get" asp-action="AdminReports" class="d-flex w-50">
+                <div class="input-group shadow-sm rounded-3">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control bg-light border-0 shadow-none" placeholder="Tìm theo Mã báo cáo, Tên User, hoặc Tiêu đề..." />
+                    <button type="submit" class="btn btn-primary fw-bold px-4">Tìm kiếm</button>
+                </div>
+                @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch))
+                {
+                    <a href="/Reports/AdminReports" class="btn btn-light border shadow-sm ms-2">Hủy</a>
+                }
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var report in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">#@report.Id</td>
+                            <td>@report.User.FullName</td>
+                            <td>@report.Title</td>
+                            <td>
+                                <span class="badge bg-@(report.Status == SaigonRide.Models.entities.ReportStatus.Open ? "warning" : (report.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "success" : "secondary"))">
+                                    @report.Status
+                                </span>
+                            </td>
+                            <td>@report.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#respondModal_@report.Id">
+                                    <i class="bi bi-reply"></i> Respond
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Respond Modal -->
+                        <div class="modal fade" id="respondModal_@report.Id" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Respond to Report #@report.Id</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Report Details</label>
+                                            <div class="bg-light p-3 rounded">
+                                                <p><strong>Title:</strong> @report.Title</p>
+                                                <p><strong>Description:</strong> @report.Description</p>
+                                                <p><strong>User:</strong> @report.User.FullName (@report.User.Email)</p>
+                                                <p><strong>Submitted:</strong> @report.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                                            </div>
+                                        </div>
+
+                                        <form asp-action="RespondToReport" method="post">
+                                            <input type="hidden" name="reportId" value="@report.Id" />
+
+                                            <div class="mb-3">
+                                                <label for="status_@report.Id" class="form-label fw-bold">Trạng thái xử lý</label>
+                                                <select class="form-select" id="status_@report.Id" name="status">
+                                                    <!-- ĐÃ FIX: Tự động bôi đậm (selected) trạng thái thực tế của Report -->
+                                                    <option value="Open" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.Open ? "selected" : null)">Open (Mới)</option>
+                                                    <option value="InProgress" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? "selected" : null)">In Progress (Đang xử lý)</option>
+                                                    <option value="Resolved" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "selected" : null)">Resolved (Đã giải quyết)</option>
+                                                    <option value="Closed" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.Closed ? "selected" : null)">Closed (Đóng)</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label for="response_@report.Id" class="form-label fw-bold">Admin Response</label>
+                                                <textarea class="form-control" id="response_@report.Id" name="adminResponse" rows="4" placeholder="Enter your response here..." required>@report.AdminResponse</textarea>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-primary">Send Response</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem; color: #999;"></i>
+                <p class="text-muted mt-3">No reports yet</p>
+            </div>
+        }
+    </div>
+</div>

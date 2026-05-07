@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Thuê Xe</value></data>
+	<data name="PageSubtitle" xml:space="preserve"><value>Tìm trạm gần bạn và bắt đầu chuyến đi. Trả xe tại bất kỳ trạm nào trong thành phố.</value></data>
+	<data name="SearchPlaceholder" xml:space="preserve"><value>Tìm theo tên xe hoặc ID...</value></data>
+	<data name="FilterAll" xml:space="preserve"><value>Tất cả</value></data>
+	<data name="FilterAllTypes" xml:space="preserve"><value>Mọi loại xe</value></data>
+	<data name="FilterAvailability" xml:space="preserve"><value>Trạng thái</value></data>
+	<data name="ClosestStation" xml:space="preserve"><value>Trạm gần nhất</value></data>
+	<data name="ViewStation" xml:space="preserve"><value>Xem trạm</value></data>
+	<data name="StationDetails" xml:space="preserve"><value>Chi tiết trạm</value></data>
+	<data name="SelectStationPrompt" xml:space="preserve"><value>Vui lòng chọn một trạm trên bản đồ để xem xe.</value></data>
+	<data name="GetDirections" xml:space="preserve"><value>Chỉ đường</value></data>
+	<data name="NoVehicles" xml:space="preserve"><value>Trạm này hiện đang hết xe.</value></data>
+	<data name="BtnSelect" xml:space="preserve"><value>Chọn</value></data>
+</root>

@@ -37,16 +37,16 @@ namespace SaigonRide.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -59,8 +59,7 @@ namespace SaigonRide.Migrations
                             Content = "Giảm ngay 15% khi trả xe tại trạm Bình Thạnh.",
                             CreatedAt = new DateTime(2026, 4, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
-                            Title = "Thả ga vi vu cuối tuần!",
-                            Type = "Promo"
+                            Title = "Thả ga vi vu cuối tuần!"
                         },
                         new
                         {
@@ -68,8 +67,7 @@ namespace SaigonRide.Migrations
                             Content = "Cuối tuần này trạm Quận 1 sẽ tạm ngưng nhận xe trả để nâng cấp.",
                             CreatedAt = new DateTime(2026, 4, 30, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
-                            Title = "Bảo trì trạm Quận 1",
-                            Type = "Warning"
+                            Title = "Bảo trì trạm Quận 1"
                         });
                 });
 
@@ -80,10 +78,6 @@ namespace SaigonRide.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
@@ -100,6 +94,9 @@ namespace SaigonRide.Migrations
                     b.Property<decimal>("TotalDue")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
 
@@ -107,9 +104,58 @@ namespace SaigonRide.Migrations
 
                     b.HasIndex("ReturnStationId");
 
+                    b.HasIndex("UserId");
+
                     b.HasIndex("VehicleId");
 
                     b.ToTable("RentalTransactions");
+                });
+
+            modelBuilder.Entity("SaigonRide.Models.entities.Report", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AdminResponse")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("RentalTransactionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RentalTransactionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("SaigonRide.Models.entities.Station", b =>
@@ -122,6 +168,9 @@ namespace SaigonRide.Migrations
 
                     b.Property<int>("CurrentInventory")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("float");
@@ -145,6 +194,7 @@ namespace SaigonRide.Migrations
                         {
                             Id = 1,
                             CurrentInventory = 42,
+                            IsAvailable = true,
                             Latitude = 0.0,
                             LocationName = "District 1, HCM",
                             Longitude = 0.0,
@@ -154,6 +204,7 @@ namespace SaigonRide.Migrations
                         {
                             Id = 3,
                             CurrentInventory = 3,
+                            IsAvailable = true,
                             Latitude = 0.0,
                             LocationName = "Binh Thanh, HCM",
                             Longitude = 0.0,
@@ -169,6 +220,9 @@ namespace SaigonRide.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("DocumentId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -181,8 +235,14 @@ namespace SaigonRide.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsBanned")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserType")
@@ -200,6 +260,7 @@ namespace SaigonRide.Migrations
                             DocumentId = "000000000",
                             Email = "admin@saigonride.com",
                             FullName = "System Admin",
+                            IsBanned = false,
                             Password = "123",
                             UserType = "Admin"
                         });
@@ -267,6 +328,12 @@ namespace SaigonRide.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("SaigonRide.Models.entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SaigonRide.Models.entities.Vehicle", "Vehicle")
                         .WithMany()
                         .HasForeignKey("VehicleId")
@@ -275,7 +342,28 @@ namespace SaigonRide.Migrations
 
                     b.Navigation("ReturnStation");
 
+                    b.Navigation("User");
+
                     b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("SaigonRide.Models.entities.Report", b =>
+                {
+                    b.HasOne("SaigonRide.Models.entities.RentalTransaction", "RentalTransaction")
+                        .WithMany()
+                        .HasForeignKey("RentalTransactionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SaigonRide.Models.entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("RentalTransaction");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SaigonRide.Models.entities.Vehicle", b =>

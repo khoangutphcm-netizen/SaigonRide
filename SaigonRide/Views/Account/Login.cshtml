@@ -1,46 +1,132 @@
-﻿@{
-    ViewData["Title"] = "Đăng nhập";
-}
+﻿@{ Layout = null; }
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow border-0 rounded-3">
-                <div class="card-header bg-dark text-white text-center py-3">
-                    <h4 class="mb-0">Đăng Nhập SaigonRide</h4>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Localizer["PageTitle"] - SaigonRide</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            min-height: 100vh; 
+            margin: 0;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?q=80&w=2074&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .login-container { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px);
+            border-radius: 20px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4); 
+            overflow: hidden; 
+            max-width: 1200px; 
+            min-height: 700px; 
+            width: 95%; 
+            margin: 2rem; 
+        }
+
+        .image-side { background-color: #f8fcf9; padding: 4rem 5rem; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .form-side { padding: 4rem 5rem; display: flex; flex-direction: column; justify-content: center; }
+        
+        .login-header { 
+            background-color: #212529; color: white; text-align: center; 
+            padding: 1.5rem; border-radius: 12px; font-weight: bold; font-size: 1.5rem; margin-bottom: 3rem; 
+            box-shadow: 0 10px 20px rgba(33, 37, 41, 0.2);
+        }
+        
+        .form-control { border-radius: 10px; padding: 1.2rem; border: 2px solid #e9ecef; font-size: 1.2rem; }
+        .form-control:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); }
+        .form-label { font-size: 1.1rem; }
+        
+        .btn-success { background-color: #198754; border-color: #198754; border-radius: 10px; font-weight: bold; padding: 1.2rem; transition: all 0.3s; }
+        .btn-success:hover { background-color: #157347; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(25,135,84,0.4); }
+
+        .premium-image {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            margin-top: 2rem;
+            border: 5px solid white;
+        }
+    </style>
+</head>
+<body>
+    <div class="dropdown position-absolute top-0 end-0 m-4 z-3">
+        <button class="btn btn-white bg-white border shadow-sm rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 fs-5" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-globe2 text-success"></i> @(Context.Request.Cookies[Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName]?.Contains("en") == true ? "EN" : "VI") <i class="bi bi-chevron-down ms-1" style="font-size: 0.8rem;"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 p-2">
+            <li>
+                <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                    <input type="hidden" name="culture" value="vi" />
+                    <button type="submit" class="dropdown-item rounded fw-bold text-success fs-5 py-2">🇻🇳 Tiếng Việt</button>
+                </form>
+            </li>
+            <li>
+                <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 mt-1">
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                    <input type="hidden" name="culture" value="en" />
+                    <button type="submit" class="dropdown-item rounded text-muted fs-5 py-2">🇬🇧 English</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <div class="login-container d-flex flex-wrap flex-md-nowrap">
+        <div class="image-side col-12 col-md-6 border-end border-light">
+            <h2 class="fw-bold text-dark mb-3" style="font-size: 2.2rem;">@Localizer["WelcomeTitle"]</h2>
+            <p class="text-muted fs-5 mb-0 px-4">@Localizer["WelcomeSubtitle"]</p>
+             
+            <!-- ĐÃ FIX: CHỈ CÒN MỘT THẺ IMG DUY NHẤT -->
+            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=800&auto=format&fit=crop" alt="Eco City Ride" class="premium-image">
+        </div>
+        
+        <div class="form-side col-12 col-md-6">
+            <div class="login-header">
+                @Localizer["LoginHeader"]
+            </div>
+
+            <form asp-controller="Account" asp-action="Login" method="post">
+                <div class="mb-4">
+                    <label class="form-label text-dark fw-bold mb-2">@Localizer["EmailLabel"]</label>
+                    <input type="email" name="Email" class="form-control" placeholder="example@email.com" required>
                 </div>
-                <div class="card-body p-4">
-                    @if (ViewBag.Error != null)
-                    {
-                        <div class="alert alert-danger">@ViewBag.Error</div>
-                    }
-
-                    <form asp-controller="Account" asp-action="Login" method="post">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Email</label>
-                            <input type="email" name="email" class="form-control" placeholder="example@email.com" required />
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Mật khẩu</label>
-                            <input type="password" name="password" class="form-control" placeholder="••••••••" required />
-                        </div>
-
-                        <!-- Chức năng QoL: Quên mật khẩu -->
-                        <div class="d-flex justify-content-end mb-4">
-                            <a href="#" class="text-decoration-none text-success small" onclick="alert('Tính năng gửi email khôi phục đang được phát triển!')">Quên mật khẩu?</a>
-                        </div>
-
-                        <button type="submit" class="btn btn-success w-100 fs-5 mb-3">Vào hệ thống</button>
-                        
-                        <!-- Chuyển sang Đăng ký -->
-                        <div class="text-center">
-                            <span class="text-muted">Chưa có tài khoản?</span>
-                            <a asp-controller="Account" asp-action="Register" class="text-decoration-none fw-bold">Đăng ký ngay</a>
-                        </div>
-                    </form>
+                <div class="mb-3">
+                    <label class="form-label text-dark fw-bold mb-2">@Localizer["PasswordLabel"]</label>
+                    <input type="password" name="Password" class="form-control" placeholder="••••••••" required>
                 </div>
+                
+                <div class="text-end mb-5">
+                    <a href="#" class="text-success text-decoration-none fw-bold fs-6">@Localizer["ForgotPassword"]</a>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 fs-4 mb-4">
+                    @Localizer["LoginButton"]
+                </button>
+            </form>
+            
+            <div class="text-center mt-3 text-muted fs-5">
+                @Localizer["NoAccount"] <a asp-controller="Account" asp-action="Register" class="text-success fw-bold text-decoration-none ms-1">@Localizer["RegisterNow"]</a>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- ĐÃ FIX: CHÈN THƯ VIỆN BOOTSTRAP ĐỂ DROPDOWN HOẠT ĐỘNG -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

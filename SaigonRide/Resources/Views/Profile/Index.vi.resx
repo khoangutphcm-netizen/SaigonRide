@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="PageTitle" xml:space="preserve"><value>Cài đặt</value></data>
+	<data name="TabAccount" xml:space="preserve"><value>Tài khoản</value></data>
+	<data name="TabPreferences" xml:space="preserve"><value>Tùy chọn</value></data>
+	<data name="LabelName" xml:space="preserve"><value>Họ và tên</value></data>
+	<data name="LabelEmail" xml:space="preserve"><value>Địa chỉ Email</value></data>
+	<data name="LabelPhone" xml:space="preserve"><value>Số điện thoại</value></data>
+	<data name="PrefDarkMode" xml:space="preserve"><value>Giao diện tối</value></data>
+	<data name="PrefDarkModeDesc" xml:space="preserve"><value>Bảo vệ mắt vào ban đêm</value></data>
+	<data name="PrefLanguage" xml:space="preserve"><value>Ngôn ngữ</value></data>
+	<data name="PrefLanguageDesc" xml:space="preserve"><value>Tiếng Việt</value></data>
+	<data name="BtnSave" xml:space="preserve"><value>Lưu thay đổi</value></data>
+	<data name="BtnLogout" xml:space="preserve"><value>Đăng xuất</value></data>
+	<data name="UserType_Tourist" xml:space="preserve"><value>Khách du lịch</value></data>
+	<data name="UserType_Local" xml:space="preserve"><value>Cư dân</value></data>
+</root>

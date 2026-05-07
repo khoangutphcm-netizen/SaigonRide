@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Login - SaigonRide</value></data>
+	<data name="WelcomeTitle" xml:space="preserve"><value>Welcome to SaigonRide</value></data>
+	<data name="WelcomeSubtitle" xml:space="preserve"><value>Discover Ho Chi Minh City on two wheels. Book your bike or e-scooter in seconds.</value></data>
+	<data name="LoginHeader" xml:space="preserve"><value>SaigonRide Login</value></data>
+	<data name="EmailLabel" xml:space="preserve"><value>Email Address</value></data>
+	<data name="PasswordLabel" xml:space="preserve"><value>Password</value></data>
+	<data name="ForgotPassword" xml:space="preserve"><value>Forgot Password?</value></data>
+	<data name="LoginButton" xml:space="preserve"><value>Sign In</value></data>
+	<data name="NoAccount" xml:space="preserve"><value>Don't have an account?</value></data>
+	<data name="RegisterNow" xml:space="preserve"><value>Sign up now</value></data>
+</root>

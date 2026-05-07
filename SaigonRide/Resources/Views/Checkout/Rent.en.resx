@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Plan Your Ride</value></data>
+	<data name="PageSubtitle" xml:space="preserve"><value>Set your destination</value></data>
+	<data name="StationFull" xml:space="preserve"><value>Full</value></data>
+	<data name="StationAvailable" xml:space="preserve"><value>Available</value></data>
+	<data name="StationPromo" xml:space="preserve"><value>Promo</value></data>
+	<data name="PickupPoint" xml:space="preserve"><value>Pickup Station</value></data>
+	<data name="DropoffPoint" xml:space="preserve"><value>Drop-off Station</value></data>
+	<data name="SelectOnMap" xml:space="preserve"><value>Select a station on the map...</value></data>
+	<data name="EstimatedTime" xml:space="preserve"><value>Estimated Duration</value></data>
+	<data name="Minutes" xml:space="preserve"><value>Mins</value></data>
+	<data name="ProceedToCheckout" xml:space="preserve"><value>Proceed to Checkout</value></data>
+	<data name="StartRental" xml:space="preserve"><value>Start Rental</value></data>
+</root>

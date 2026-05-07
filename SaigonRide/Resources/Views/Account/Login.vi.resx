@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Đăng nhập - SaigonRide</value></data>
+	<data name="WelcomeTitle" xml:space="preserve"><value>Chào mừng đến SaigonRide</value></data>
+	<data name="WelcomeSubtitle" xml:space="preserve"><value>Khám phá TP.HCM trên hai bánh xe. Đặt xe đạp hoặc xe điện chỉ trong vài giây.</value></data>
+	<data name="LoginHeader" xml:space="preserve"><value>Đăng Nhập SaigonRide</value></data>
+	<data name="EmailLabel" xml:space="preserve"><value>Email</value></data>
+	<data name="PasswordLabel" xml:space="preserve"><value>Mật khẩu</value></data>
+	<data name="ForgotPassword" xml:space="preserve"><value>Quên mật khẩu?</value></data>
+	<data name="LoginButton" xml:space="preserve"><value>Vào hệ thống</value></data>
+	<data name="NoAccount" xml:space="preserve"><value>Chưa có tài khoản?</value></data>
+	<data name="RegisterNow" xml:space="preserve"><value>Đăng ký ngay</value></data>
+</root>

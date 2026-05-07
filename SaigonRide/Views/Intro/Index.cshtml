@@ -1,59 +1,89 @@
 ﻿@{
-    Layout = null; // Trang này không dùng chung Navbar để tạo hiệu ứng tràn màn hình
+    Layout = null; 
 }
+
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SaigonRide</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    
     <style>
-            body {
-                background: radial-gradient(circle at center, #0a2e1f 0%, #000000 100%);
-                height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                overflow: hidden;
-                font-family: 'Segoe UI', sans-serif;
-            }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a2e38;
+        }
 
-            .galaxy-overlay {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
-                opacity: 0.3;
-            }
+        /* ========== AURORA BUTTON EFFECT ========== */
+        /* ĐÃ SỬA THÀNH @@ ĐỂ RAZOR KHÔNG BÁO LỖI */
+        @@keyframes aurora-shift {
+            0% { background-position: 0% 50%; box-shadow: 0 0 5px rgba(0, 255, 128, 0.6), 0 0 15px rgba(0, 255, 128, 0.4), 0 0 30px rgba(0, 200, 100, 0.2); }
+            50% { background-position: 100% 50%; box-shadow: 0 0 15px rgba(64, 255, 128, 0.8), 0 0 30px rgba(64, 255, 128, 0.6), 0 0 50px rgba(0, 200, 100, 0.4); }
+            100% { background-position: 0% 50%; box-shadow: 0 0 5px rgba(0, 255, 128, 0.6), 0 0 15px rgba(0, 255, 128, 0.4), 0 0 30px rgba(0, 200, 100, 0.2); }
+        }
 
-            .hero-content {
-                z-index: 10;
-                text-align: center;
-            }
+        .btn-aurora {
+            background: linear-gradient(90deg, #00c853, #00e676, #1de9b6, #00e676, #00c853);
+            background-size: 200% 100%;
+            animation: aurora-shift 3s ease infinite;
+            border: none;
+            color: white !important;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-            .btn-get-started {
-                background: #28a745;
-                color: white;
-                padding: 15px 40px;
-                border-radius: 50px;
-                text-decoration: none;
-                font-weight: bold;
-                box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
-                transition: 0.3s;
-            }
+        .btn-aurora:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 255, 128, 0.9);
+            animation-duration: 1.5s;
+        }
 
-                .btn-get-started:hover {
-                    transform: scale(1.1);
-                    box-shadow: 0 0 40px rgba(40, 167, 69, 0.8);
-                    color: white;
-                }
+        .hero-wrapper {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f4c5c 0%, #0a2e38 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
-    <div class="galaxy-overlay"></div>
-    <div class="hero-content">
-        <h1 class="display-1 fw-bold mb-3" style="color: #4ade80;">SaigonRide</h1>
-        <p class="fs-4 mb-5 text-secondary">Hệ thống thuê xe thông minh cho thành phố hiện đại</p>
-        <a href="/Account/Login" class="btn-get-started">GET STARTED</a>
+
+    <div class="hero-wrapper">
+        <div class="position-absolute bg-success rounded-circle opacity-10" style="width: 50vw; height: 50vw; top: -10vw; left: -10vw; filter: blur(80px); z-index: 0; pointer-events: none;"></div>
+        
+        <div class="container position-relative z-1 px-4">
+            <i class="bi bi-scooter text-success mb-4 d-block" style="font-size: 6rem; filter: drop-shadow(0 0 15px rgba(0, 200, 83, 0.6));"></i>
+            
+            <h1 class="display-3 fw-bold mb-4">SaigonRide<br>Distributed Vehicle Rental System</h1>
+            
+            <p class="lead mx-auto mb-5" style="max-width: 800px; color: rgba(255,255,255,0.85); line-height: 1.8; font-size: 1.25rem;">
+                Kẹt xe? Khói bụi? Quên đi! <strong>SaigonRide</strong> mang đến giải pháp di chuyển thông minh, tiện lợi và xanh sạch nhất thành phố. Với hàng trăm trạm xe đạp và xe máy điện phủ sóng khắp các quận trung tâm, phương tiện luôn sẵn sàng 24/7. Chỉ cần mở điện thoại, quét mã và bắt đầu hành trình của bạn với chi phí chưa tới một ly trà đá.
+            </p>
+
+            <a href="/Account/Login" class="btn-aurora rounded-pill px-5 py-3 fs-5 shadow-lg">
+                Bắt đầu ngay <i class="bi bi-arrow-right-circle-fill ms-2 fs-4"></i>
+            </a>
+        </div>
     </div>
+
 </body>
 </html>

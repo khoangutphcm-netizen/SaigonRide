@@ -1,0 +1,54 @@
+﻿@model SaigonRide.Models.entities.Announcement
+@{
+    ViewData["Title"] = "Chỉnh sửa Thông báo";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card border-0 shadow-sm rounded-4 col-md-6 mx-auto mt-5">
+    <div class="card-header bg-white border-bottom pt-4 pb-3 px-4">
+        <h5 class="fw-bold mb-0">Chỉnh sửa Thông báo</h5>
+    </div>
+    <div class="card-body p-4">
+        <!-- BẮT BUỘC có enctype="multipart/form-data" để truyền ảnh -->
+        <form asp-controller="AdminDashboard" asp-action="EditAnnouncement" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ImageUrl" /> <!-- Giữ lại link ảnh cũ nếu không đổi -->
+            
+            <div class="mb-4 text-center">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" alt="Current Image" class="rounded-3 mb-2 shadow-sm" style="max-height: 150px; object-fit: cover;" />
+                    <div class="small text-muted">Ảnh hiện tại</div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Thay đổi ảnh (Bỏ trống nếu giữ nguyên)</label>
+                <input type="file" name="imageFile" class="form-control bg-light" accept="image/*" />
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Tiêu đề</label>
+                <input asp-for="Title" class="form-control bg-light" required />
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label fw-bold">Trạng thái hiển thị</label>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" asp-for="IsActive">
+                    <label class="form-check-label">Bật hiển thị cho Khách hàng</label>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Nội dung</label>
+                <textarea asp-for="Content" class="form-control bg-light" rows="5" required></textarea>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success fw-bold px-4 rounded-pill">Lưu thay đổi</button>
+                <a href="/AdminDashboard/Announcements" class="btn btn-light border fw-bold px-4 rounded-pill">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,5 +1,7 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+<!DOCTYPE html>
+<html lang="@(System.Globalization.CultureInfo.CurrentUICulture.Name)">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,113 +11,326 @@
     
     <style>
         :root {
-            --bg-color: #f4f6f8;
+            --sidebar-bg-start: #0a3b22;
+            --sidebar-bg-end: #1b6e3c;
+            --sidebar-hover: #2a8a4a;
+            --main-bg: #f5f7f6;
             --card-bg: #ffffff;
-            --text-color: #333333;
-            --text-muted: #6c757d;
-            --border-color: #e9ecef;
-            --primary-bg: #e7f1ff; 
-            --secondary-bg: #e2e3e5; 
-            --danger-bg: #f8d7da; 
+            --text-main: #333333;
+            --text-muted: #888888;
+            --accent-green: #20994a;
         }
 
         body.dark-mode {
-            --bg-color: #121212;
+            --sidebar-bg-start: #051a0e;
+            --sidebar-bg-end: #0d3d20;
+            --sidebar-hover: #1a5c31;
+            --main-bg: #121212;
             --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
+            --text-main: #e0e0e0;
             --text-muted: #aaaaaa;
-            --border-color: #333333;
-            --primary-bg: #1a233a; 
-            --secondary-bg: #2a2b2d; 
-            --danger-bg: #3a1c1e; 
         }
 
-        body { background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
-        
-        body.dark-mode .card, body.dark-mode .navbar, body.dark-mode .settings-card, 
-        body.dark-mode .list-group-item, body.dark-mode .dropdown-menu,
-        body.dark-mode .bg-white, body.dark-mode .bg-light,
-        body.dark-mode .super-app-bg, body.dark-mode .widget-card { 
-            background-color: var(--card-bg) !important; border-color: var(--border-color) !important; color: var(--text-color) !important; 
-        }
+        body { background-color: var(--main-bg); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
 
-        body.dark-mode .bg-primary.bg-opacity-10 { background-color: var(--primary-bg) !important; color: #6ea8fe !important; }
-        body.dark-mode .bg-secondary.bg-opacity-10 { background-color: var(--secondary-bg) !important; color: #a3a6cb !important; }
-        body.dark-mode .bg-danger.bg-opacity-10 { background-color: var(--danger-bg) !important; color: #ea868f !important; }
+        /* Bố cục chính */
+        #wrapper { display: flex; min-height: 100vh; }
         
-        body.dark-mode .text-muted { color: #adb5bd !important; }
-        body.dark-mode .btn-secondary-action { background-color: #212529 !important; border-color: #333 !important; }
-        body.dark-mode .text-primary { color: #6ea8fe !important; }
-        body.dark-mode .text-secondary { color: #a3a6cb !important; }
-        body.dark-mode .text-danger { color: #ea868f !important; }
-        body.dark-mode .card.bg-dark { background-color: #1a1d20 !important; border: 1px solid #333 !important; }
+        /* SIDEBAR WITH GRADIENT */
+        #sidebar { 
+            width: 260px; 
+            background: linear-gradient(135deg, var(--sidebar-bg-start) 0%, var(--sidebar-bg-end) 100%);
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            flex-shrink: 0; 
+            transition: all 0.3s; 
+            z-index: 1000; 
+        }
+        .sidebar-brand { padding: 1.5rem; display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; }
+        .sidebar-nav .nav-link { color: rgba(255,255,255,0.8); padding: 0.8rem 1.5rem; display: flex; align-items: center; gap: 12px; font-weight: 500; border-radius: 0 25px 25px 0; margin-right: 1.5rem; transition: all 0.2s; }
+        .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { 
+            background-color: var(--sidebar-hover); 
+            color: white; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
         
-        .btn-main-action { display: block; text-decoration: none; background: linear-gradient(135deg, #20c997 0%, #198754 100%); border-radius: 1rem; transition: transform 0.2s; }
-        .btn-main-action:hover { transform: translateY(-3px); }
-        .btn-secondary-action { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 1rem; padding: 1.25rem 0.5rem; transition: all 0.2s; }
-        .btn-secondary-action:hover { background-color: var(--bg-color); transform: translateY(-2px); }
-        .icon-box { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 0.75rem; }
+        /* Cột bên phải */
+        #page-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        
+        /* TOPBAR */
+        .topbar { background-color: transparent; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .search-bar { background: var(--card-bg); border: 1px solid #e0e0e0; border-radius: 20px; padding: 0.4rem 1rem; display: flex; align-items: center; width: 300px; }
+        .search-bar input { border: none; background: transparent; outline: none; margin-left: 8px; width: 100%; color: var(--text-main); }
+        
+        /* Ghi đè nền Dark Mode (Đã fix lỗi chữ chìm) */
+        body.dark-mode .bg-white, body.dark-mode .card { background-color: var(--card-bg) !important; border-color: #333 !important; color: var(--text-main) !important; }
+        body.dark-mode .search-bar { border-color: #333; }
+        body.dark-mode .text-dark { color: #e0e0e0 !important; } 
+        body.dark-mode .text-muted { color: var(--text-muted) !important; }
+        body.dark-mode .border-bottom, body.dark-mode .border-end { border-color: #333 !important; }
+        body.dark-mode .list-group-item { background-color: var(--card-bg) !important; color: var(--text-main) !important; border-color: #333 !important; }
+        body.dark-mode .bg-light { background-color: #1a1d20 !important; color: var(--text-main) !important; }
+        body.dark-mode .form-control, body.dark-mode .form-select { background-color: var(--main-bg) !important; color: var(--text-main) !important; border-color: #333 !important; }
+        body.dark-mode .form-control:focus, body.dark-mode .form-select:focus { background-color: var(--card-bg) !important; color: var(--text-main) !important; border-color: #20994a !important; }
+        body.dark-mode input[readonly] { background-color: #1e1e1e !important; }
     </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light sticky-top mb-4 py-2 shadow-sm">
-            <div class="container">
-                <a class="navbar-brand fw-bold text-success fs-4" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-scooter"></i> SaigonRide
-                </a>
-                
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end" id="navbarApp">
-                    <ul class="navbar-nav align-items-center">
-                        <li class="nav-item dropdown me-3">
-                            <a class="nav-link dropdown-toggle fw-bold text-color" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-globe2 text-success"></i> @(Context.Request.Cookies[Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName]?.Contains("en") == true ? "EN" : "VI")
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 p-2">
-                                <li>
-                                    <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0">
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-                                        <input type="hidden" name="culture" value="vi" />
-                                        <button type="submit" class="dropdown-item fw-bold text-success rounded">🇻🇳 Tiếng Việt</button>
-                                    </form>
-                                </li>
-                                <li>
-                                    <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 mt-1">
-                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-                                        <input type="hidden" name="culture" value="en" />
-                                        <button type="submit" class="dropdown-item text-muted rounded">🇬🇧 English</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-
-                        @if (User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle fw-bold d-flex align-items-center text-color" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                    <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center me-2 shadow-sm" style="width: 38px; height: 38px;">
-                                        @User.Identity.Name.Substring(0, 1).ToUpper()
-                                    </div>
-                                    @User.Identity.Name
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 12px; min-width: 180px;">
-                                    <li><h6 class="dropdown-header">@User.FindFirst("UserType")?.Value Account</h6></li>
-                                    <!-- NÚT FIX LỖI ÁM DARK MODE -->
-                                    <li><a class="dropdown-item py-2 text-danger fw-bold" href="javascript:void(0);" onclick="localStorage.removeItem('theme'); document.body.classList.remove('dark-mode'); window.location.href='/Account/Logout';"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
-                                </ul>
-                            </li>
-                        }
-                    </ul>
+    <div id="wrapper">
+        <!-- SIDEBAR -->
+        <aside id="sidebar">
+            <a href="/Home/Index" class="sidebar-brand mb-4 mt-2">
+                <i class="bi bi-scooter fs-2 text-white"></i>
+                <div>
+                    <h4 class="fw-bold mb-0 text-white" style="letter-spacing: 0.5px;">SaigonRide</h4>
+                    <small style="font-size: 0.7rem; color: rgba(255,255,255,0.7);">@Localizer["BrandSlogan"]</small>
                 </div>
-            </div>
-        </nav>
-    </header>
+            </a>
 
-    <div class="container"><main role="main" class="pb-5">@RenderBody()</main></div>
+            @{
+                var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+                var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+            }
+            
+            <nav class="sidebar-nav flex-grow-1">
+                <a asp-controller="Home" asp-action="Index" class="nav-link @(currentController == "Home" ? "active" : "")">
+                    <i class="bi bi-house-door fs-5"></i> @Localizer["Menu_Home"]
+                </a>
+                <a asp-controller="Booking" asp-action="Index" class="nav-link @(currentController == "Booking" ? "active" : "")">
+                    <i class="bi bi-bicycle fs-5"></i> @Localizer["Menu_Rent"]
+                </a>
+                <a asp-controller="History" asp-action="Index" class="nav-link @(currentController == "History" ? "active" : "")">
+                    <i class="bi bi-clock-history fs-5"></i> @Localizer["Menu_History"]
+                </a>
+                <a asp-controller="Profile" asp-action="Support" class="nav-link @(currentController == "Profile" && currentAction == "Support" ? "active" : "")">
+                    <i class="bi bi-headset fs-5"></i> @Localizer["Menu_Support"]
+                </a>
+                <a asp-controller="Profile" asp-action="Index" class="nav-link @(currentController == "Profile" && currentAction == "Index" ? "active" : "")">
+                    <i class="bi bi-gear fs-5"></i> @Localizer["Menu_Settings"]
+                </a>
+            </nav>
+
+            <!-- Khối Account Góc Dưới -->
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="px-3 pb-4">
+                    <h6 class="text-uppercase mb-3" style="font-size: 0.75rem; color: rgba(255,255,255,0.6); padding-left: 1rem;">@Localizer["AccountLabel"]</h6>
+                    <div class="d-flex align-items-center mb-4 px-3">
+                        <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px; font-weight: bold;">
+                            @{
+                                var avatarUrl = User.FindFirst("AvatarUrl")?.Value;
+                                var currentName = User.Identity.Name ?? "User";
+                            }
+                            @if (!string.IsNullOrEmpty(avatarUrl))
+                            {
+                                <img src="@avatarUrl" alt="Avatar" class="rounded-circle shadow-sm" style="width: 35px; height: 35px; object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=@currentName&background=0a3b22&color=fff'" />
+                            }
+                            else
+                            {
+                                <img src="https://ui-avatars.com/api/?name=@currentName&background=0a3b22&color=fff" alt="Avatar" class="rounded-circle shadow-sm" style="width: 35px; height: 35px; object-fit: cover;" />
+                            }
+                        </div>
+                        <div style="line-height: 1.2;">
+                            <span class="d-block fw-bold fs-6">@User.Identity.Name</span>
+                            <small style="color: rgba(255,255,255,0.7); font-size: 0.75rem;">
+                                @(User.FindFirst("UserType")?.Value == "Tourist" ? Localizer["UserType_Tourist"] : Localizer["UserType_Local"])
+                            </small>
+                        </div>
+                    </div>
+                    <!-- NÚT BÍ MẬT CHỈ DÀNH CHO ADMIN -->
+                    @if (User.FindFirst("UserType")?.Value == "Admin")
+                    {
+                        <li class="nav-item mt-4">
+                            <a class="nav-link text-danger fw-bold" style="background-color: #ffcccc; border-radius: 8px; padding: 10px;" href="/AdminDashBoard/Index">
+                                <i class="bi bi-shield-lock-fill"></i> Vào Admin Dashboard
+                            </a>
+                        </li>
+                    }
+                    <!-- Khối Promo nhỏ xíu ở sidebar -->
+                    <div class="rounded-4 p-3 position-relative overflow-hidden" style="background: linear-gradient(135deg, #1b5e38 0%, #0f4225 100%); border: 1px solid rgba(255,255,255,0.15);">
+                        <h6 class="fw-bold mb-1 fs-6">@Html.Raw(Localizer["SidebarPromoTitle"].Value)</h6>
+                        <small class="d-block mb-3" style="color: rgba(255,255,255,0.8); font-size: 0.75rem;">@Localizer["SidebarPromoDesc"]</small>
+                        <a asp-controller="Booking" asp-action="Index" class="btn btn-sm btn-success rounded-pill px-3 fw-bold" style="font-size: 0.75rem; background-color: #20994a; border: none;">@Localizer["BtnLearnMore"] <i class="bi bi-arrow-right"></i></a>
+                        <i class="bi bi-buildings position-absolute opacity-25" style="font-size: 4rem; right: -10px; bottom: -15px;"></i>
+                    </div>
+                </div>
+            }
+        </aside>
+
+        <!-- NỘI DUNG CHÍNH BÊN PHẢI -->
+        <div id="page-content">
+            <!-- TOPBAR -->
+            <header class="topbar">
+                <button class="btn btn-light rounded-circle shadow-sm border d-md-none"><i class="bi bi-list"></i></button>
+                <div class="d-none d-md-block"></div> <!-- Spacer -->
+
+                <div class="d-flex align-items-center gap-3">
+                    <form action="/Booking/Index" method="get" class="search-bar shadow-sm mb-0 p-0 ps-3">
+                        <i class="bi bi-search text-muted"></i>
+                        <input type="text" name="keyword" placeholder="@Localizer["SearchPlaceholder"]" value="@Context.Request.Query["keyword"]" style="border: none; background: transparent; outline: none; margin-left: 8px; width: 100%; color: var(--text-main); padding: 0.4rem 1rem 0.4rem 0;">
+                        <button type="submit" class="d-none"></button>
+                    </form>
+
+                    <!-- Nút đổi ngôn ngữ -->
+                    <div class="dropdown">
+                        <button class="btn btn-white bg-white border shadow-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+                            <i class="bi bi-globe2 text-success"></i> 
+                            @(System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("en") ? "EN" : "VI") 
+                            <i class="bi bi-chevron-down ms-1" style="font-size: 0.7rem;"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                            <li>
+                                <form asp-controller="Language" asp-action="SetLanguage" method="post" id="langFormVi" class="m-0">
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <input type="hidden" name="culture" value="vi" />
+                                    <button type="button" onclick="submitLanguageForm('langFormVi')" class="dropdown-item fw-bold text-success">🇻🇳 Tiếng Việt</button>
+                                </form>
+                            </li>
+                            <li>
+                                <form asp-controller="Language" asp-action="SetLanguage" method="post" id="langFormEn" class="m-0 mt-1">
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <input type="hidden" name="culture" value="en" />
+                                    <button type="button" onclick="submitLanguageForm('langFormEn')" class="dropdown-item text-muted">🇬🇧 English</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <!-- Notifications Bell Icon -->
+                        <div class="dropdown">
+                            <button class="btn btn-white bg-white border shadow-sm rounded-circle d-flex align-items-center justify-content-center position-relative" style="width: 40px; height: 40px;" data-bs-toggle="dropdown">
+                                <i class="bi bi-bell fs-5 text-success"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge" style="font-size: 0.6rem; display: none;">
+                                    <span id="notificationCount">0</span>
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" style="min-width: 350px;">
+                                <li class="dropdown-header fw-bold text-dark">Notifications</li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li id="notificationList">
+                                    <a class="dropdown-item text-muted text-center py-3"><small>No notifications</small></a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center fw-bold text-success" href="/Reports/MyReports">View All Reports</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn btn-white bg-white border shadow-sm rounded-pill d-flex align-items-center gap-2 p-1 pe-3" data-bs-toggle="dropdown">
+                                <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;">
+                                    @{
+                                        var avatarUrl = User.FindFirst("AvatarUrl")?.Value;
+                                        var currentName = User.Identity.Name ?? "User";
+                                    }
+                                    @if (!string.IsNullOrEmpty(avatarUrl))
+                                    {
+                                        <img src="@avatarUrl" alt="Avatar" class="rounded-circle shadow-sm" style="width: 35px; height: 35px; object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=@currentName&background=0a3b22&color=fff'" />
+                                    }
+                                    else
+                                    {
+                                        <img src="https://ui-avatars.com/api/?name=@currentName&background=0a3b22&color=fff" alt="Avatar" class="rounded-circle shadow-sm" style="width: 35px; height: 35px; object-fit: cover;" />
+                                    }
+                                </div>
+                                <div class="text-start" style="line-height: 1;">
+                                    <span class="d-block fw-bold text-dark" style="font-size: 0.8rem;">@User.Identity.Name</span>
+                                    <small class="text-muted" style="font-size: 0.7rem;">
+                                        @(User.FindFirst("UserType")?.Value == "Tourist" ? Localizer["UserType_Tourist"] : Localizer["UserType_Local"])
+                                    </small>
+                                </div>
+                                <i class="bi bi-chevron-down ms-1 text-muted" style="font-size: 0.7rem;"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+                                <li><a class="dropdown-item py-2 text-danger fw-bold" href="javascript:void(0);" onclick="localStorage.removeItem('theme'); document.body.classList.remove('dark-mode'); window.location.href='/Account/Logout';"><i class="bi bi-box-arrow-right me-2"></i>@Localizer["BtnLogout"]</a></li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </header>
+
+            <!-- MAIN VIEW -->
+            <main class="p-4" style="overflow-y: auto;">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         if(localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark-mode'); }
+        function submitLanguageForm(formId) {
+            var langForm = document.getElementById(formId);
+            var cultureValue = langForm.querySelector('input[name="culture"]').value;
+            
+            var paymentForm = document.getElementById('paymentForm') || document.getElementById('rentForm');
+            
+            if (paymentForm) {
+                var returnUrlInput = document.createElement('input');
+                returnUrlInput.type = 'hidden';
+                returnUrlInput.name = 'returnUrl';
+                returnUrlInput.value = window.location.pathname + window.location.search;
+
+                var cultureInput = document.createElement('input');
+                cultureInput.type = 'hidden';
+                cultureInput.name = 'culture';
+                cultureInput.value = cultureValue;
+
+                paymentForm.appendChild(returnUrlInput);
+                paymentForm.appendChild(cultureInput);
+
+                var originalAction = paymentForm.action;
+                paymentForm.action = '/Language/SetLanguage';
+                paymentForm.submit();
+                
+                paymentForm.action = originalAction;
+            } else {
+                langForm.submit();
+            }
+        }
+
+        // Load notifications on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotifications();
+            setInterval(loadNotifications, 30000); // Refresh every 30 seconds
+        });
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch('/api/notifications/count');
+                const data = await response.json();
+
+                if (data.count > 0) {
+                    document.getElementById('notificationBadge').style.display = 'inline-block';
+                    document.getElementById('notificationCount').textContent = data.count;
+
+                    // Load notification list
+                    const listResponse = await fetch('/api/notifications/list');
+                    const notifications = await listResponse.json();
+
+                    let listHTML = '';
+                    notifications.forEach(notif => {
+                        listHTML += `<a class="dropdown-item py-2" href="/Reports/ReportDetails/${notif.reportId}">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-info-circle text-info mt-1"></i>
+                                <div>
+                                    <small class="fw-bold">${notif.title}</small><br>
+                                    <small class="text-muted">${notif.status}</small>
+                                </div>
+                            </div>
+                        </a>`;
+                    });
+
+                    document.getElementById('notificationList').innerHTML = listHTML;
+                } else {
+                    document.getElementById('notificationBadge').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
     </script>
 </body>
 </html>

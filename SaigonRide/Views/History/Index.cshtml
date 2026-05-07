@@ -1,53 +1,202 @@
 ﻿@model IEnumerable<SaigonRide.Models.entities.RentalTransaction>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 @{
-    ViewData["Title"] = "Lịch sử chuyến đi";
+    ViewData["Title"] = Localizer["PageTitle"].Value;
 }
-<div class="d-flex align-items-center mb-4">
-    <a href="javascript:history.back()" class="btn btn-light rounded-circle me-3 shadow-sm"><i class="bi bi-arrow-left"></i></a>
-    <h4 class="fw-bold mb-0">Lịch sử chuyến đi</h4>
-</div>
-<div class="container mt-4">
-    <h2 class="text-success mb-4">Lịch sử thuê xe của @User.Identity.Name</h2>
+
+<style>
+    .stat-card { border: 1px solid #e9ecef; border-radius: 12px; padding: 1.2rem; background: var(--card-bg); }
+    .stat-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #e8f5e9; color: #198754; font-size: 1.2rem; }
+    .history-row { display: flex; align-items: center; padding: 1.5rem 0; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
+    .history-row:hover { background-color: #f8fcf9; }
+    .history-row:last-child { border-bottom: none; }
+    .vehicle-img-placeholder { width: 60px; height: 60px; background: #f4f6f8; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #555; }
     
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info">Bạn chưa có chuyến đi nào. Hãy ra Trang chủ thuê một chiếc nhé!</div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-hover shadow-sm bg-white">
-                <thead class="table-success">
-                    <tr>
-                        <th>Ngày thuê</th>
-                        <th>Loại xe</th>
-                        <th>Trạm trả</th>
-                        <th>Thanh toán</th>
-                        <th>Trạng thái</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
+    body.dark-mode .stat-card { border-color: #333; }
+    body.dark-mode .history-row { border-color: #333; }
+    body.dark-mode .history-row:hover { background-color: #1a1d20; }
+    body.dark-mode .vehicle-img-placeholder { background: #2a2d30; color: #aaa; }
+</style>
+
+<div class="container-fluid px-0">
+    <div class="mb-4 d-flex align-items-center gap-2">
+        <h3 class="fw-bold text-dark mb-0">@Localizer["PageTitle"]</h3>
+        <i class="bi bi-clock-history text-success fs-4"></i>
+    </div>
+    <p class="text-muted mb-4">@Localizer["PageSubtitle"]</p>
+
+    <div class="row g-4">
+        <!-- CỘT TRÁI (Lịch sử & Thống kê) -->
+        <div class="col-lg-8 col-xl-9">
+            
+            <!-- 4 Thẻ Thống Kê (tính toán dựa trên StartTime và EndTime) -->
+            @{
+                var totalRides = Model?.Count() ?? 0;
+                var totalMinutes = Model?.Sum(x => (x.EndTime.HasValue ? (x.EndTime.Value - x.StartTime).TotalMinutes : (DateTime.Now - x.StartTime).TotalMinutes)) ?? 0;
+                var totalSpent = Model?.Sum(x => x.TotalDue) ?? 0;
+                var totalDistanceKm = totalMinutes * 0.25;
+                var co2SavedKg = totalMinutes * 0.05;
+            }
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="stat-icon"><i class="bi bi-signpost-split"></i></div>
+                        </div>
+                        <small class="text-muted">@Localizer["TotalRides"]</small>
+                        <h4 class="fw-bold text-dark mb-0">@totalRides</h4>
+                        <small class="text-muted" style="font-size: 0.7rem;">@Localizer["AllTime"]</small>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="stat-icon"><i class="bi bi-map"></i></div>
+                        </div>
+                        <small class="text-muted">@Localizer["TotalDistance"]</small>
+                        <h4 class="fw-bold text-dark mb-0">@totalDistanceKm.ToString("0.0") km</h4>
+                        <small class="text-muted" style="font-size: 0.7rem;">@Localizer["AllTime"]</small>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="stat-icon"><i class="bi bi-wallet2"></i></div>
+                        </div>
+                        <small class="text-muted">@Localizer["TotalSpent"]</small>
+                        <h4 class="fw-bold text-dark mb-0">@totalSpent.ToString("N0") đ</h4>
+                        <small class="text-muted" style="font-size: 0.7rem;">@Localizer["AllTime"]</small>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="stat-icon"><i class="bi bi-tree"></i></div>
+                        </div>
+                        <small class="text-muted">@Localizer["Co2Saved"]</small>
+                        <h4 class="fw-bold text-dark mb-0">@co2SavedKg.ToString("0.0") kg</h4>
+                        <small class="text-muted" style="font-size: 0.7rem;">@Localizer["AllTime"]</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách chuyến đi -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white">
+                <!-- CARD HEADER MỚI (đã thay thế) -->
+                <div class="card-header bg-transparent border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center p-4 gap-3">
+                    <div class="d-flex gap-4">
+                        <a asp-action="Index" asp-route-type="all" asp-route-period="@ViewBag.ActivePeriod" 
+                           class="fw-bold text-decoration-none pb-2 @(ViewBag.ActiveType == "all" ? "text-success border-bottom border-success border-2" : "text-muted")">
+                           @Localizer["TabAll"]
+                        </a>
+                        <a asp-action="Index" asp-route-type="bike" asp-route-period="@ViewBag.ActivePeriod" 
+                           class="fw-bold text-decoration-none pb-2 @(ViewBag.ActiveType == "bike" ? "text-success border-bottom border-success border-2" : "text-muted")">
+                           @Localizer["TabBike"]
+                        </a>
+                        <a asp-action="Index" asp-route-type="scooter" asp-route-period="@ViewBag.ActivePeriod" 
+                           class="fw-bold text-decoration-none pb-2 @(ViewBag.ActiveType == "scooter" ? "text-success border-bottom border-success border-2" : "text-muted")">
+                           @Localizer["TabScooter"]
+                        </a>
+                    </div>
+                    
+                    <form method="get" asp-action="Index" class="d-flex gap-2 m-0">
+                        <input type="hidden" name="type" value="@ViewBag.ActiveType" />
+                        <select name="period" class="form-select form-select-sm rounded-pill shadow-none border-light text-muted w-auto" onchange="this.form.submit()">
+                            @if(ViewBag.ActivePeriod == "all"){ <option value="all" selected>@Localizer["FilterAllTime"]</option> } else { <option value="all">@Localizer["FilterAllTime"]</option> }
+                            @if(ViewBag.ActivePeriod == "month"){ <option value="month" selected>@Localizer["FilterMonth"]</option> } else { <option value="month">@Localizer["FilterMonth"]</option> }
+                            @if(ViewBag.ActivePeriod == "year"){ <option value="year" selected>@Localizer["FilterYear"]</option> } else { <option value="year">@Localizer["FilterYear"]</option> }
+                        </select>
+                        <button type="button" class="btn btn-sm btn-light border rounded-pill text-muted px-3"><i class="bi bi-funnel"></i></button>
+                    </form>
+                </div>
+
+                <div class="card-body p-0 px-4">
+                    @if (Model != null && Model.Any())
                     {
-                        <tr>
-                            <td>@item.StartTime.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>@item.Vehicle.Category</td>
-                            <td>@item.ReturnStation.LocationName</td>
-                            <td class="fw-bold text-danger">@item.TotalDue.ToString("N0") VNĐ</td>
-                            <td>
-                                @if (item.IsDiscountApplied)
-                                {
-                                    <span class="badge bg-warning text-dark">Giảm 15%</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Bình thường</span>
-                                }
-                            </td>
-                        </tr>
+                        foreach (var item in Model)
+                        {
+                            // TỰ ĐỘNG TÍNH SỐ PHÚT TỪ START TIME VÀ END TIME
+                            var durationMins = (int)((item.EndTime - item.StartTime)?.TotalMinutes ?? 0);
+
+                            <a asp-controller="History" asp-action="Details" asp-route-id="@item.Id" class="history-row flex-column flex-md-row gap-3 text-decoration-none text-dark">
+                                <div class="vehicle-img-placeholder flex-shrink-0">
+                                    <i class="bi @(item.Vehicle.Category.Contains("Scooter") ? "bi-scooter" : "bi-bicycle")"></i>
+                                </div>
+                                
+                                <div class="flex-grow-1" style="min-width: 250px;">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill">@item.Vehicle.Category</span>
+                                        <small class="text-muted" style="font-size: 0.75rem;">@item.StartTime.ToString("dd MMM yyyy • hh:mm tt")</small>
+                                    </div>
+                                    <div class="d-flex align-items-center mt-2">
+                                        <div>
+                                            <small class="d-block text-dark fw-bold"><i class="bi bi-circle-fill text-success" style="font-size: 0.5rem; transform: translateY(-2px); display: inline-block;"></i> Bắt đầu</small>
+                                        </div>
+                                        <i class="bi bi-arrow-right mx-3 text-muted"></i>
+                                        <div>
+                                            <small class="d-block text-dark fw-bold"><i class="bi bi-geo-alt-fill text-danger" style="font-size: 0.8rem;"></i> @item.ReturnStation.LocationName</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-4 text-center">
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0">@durationMins min</h6>
+                                        <small class="text-muted" style="font-size: 0.7rem;">@Localizer["Duration"]</small>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0">@((durationMins * 0.25).ToString("0.0")) km</h6>
+                                        <small class="text-muted" style="font-size: 0.7rem;">@Localizer["Distance"]</small>
+                                    </div>
+                                </div>
+
+                                <div class="text-end ms-md-4" style="min-width: 100px;">
+                                    <h5 class="fw-bold text-dark mb-0">@item.TotalDue.ToString("N0") đ <i class="bi bi-chevron-right text-muted" style="font-size: 0.8rem;"></i></h5>
+                                </div>
+                            </a>
+                        }
                     }
-                </tbody>
-            </table>
+                    else
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-journal-x fs-1 d-block mb-3 opacity-25"></i>
+                            <p>@Localizer["NoRides"]</p>
+                        </div>
+                    }
+                    <div class="text-center py-3 border-top">
+                        <small class="text-muted"><i class="bi bi-check2-all text-success"></i> @Localizer["NoMoreRides"]</small>
+                    </div>
+                </div>
+            </div>
         </div>
-    }
+
+        <!-- CỘT PHẢI (Widgets) -->
+        <div class="col-lg-4 col-xl-3 d-flex flex-column gap-4">
+            <!-- Announcements Widget -->
+            <div class="card bg-white border-0 shadow-sm rounded-4">
+                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
+                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-megaphone-fill text-success me-2"></i> @Localizer["Announcements"]</h6>
+                    <a href="#" class="text-success text-decoration-none small fw-bold">@Localizer["ViewAll"]</a>
+                </div>
+                <div class="card-body px-4 pt-0">
+                    <div class="py-3 border-bottom border-light">
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill mb-2" style="font-size: 0.6rem;">@Localizer["New"]</span>
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">Weekend Promotion!</h6>
+                        <p class="text-muted mb-1" style="font-size: 0.75rem;">Get 15% off on all rides this weekend.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Promo Card -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative flex-grow-1" style="background: linear-gradient(135deg, #114728 0%, #0a2e19 100%); color: white;">
+                <div class="card-body p-4 position-relative z-1 d-flex flex-column justify-content-center">
+                    <h5 class="fw-bold mb-2">Explore Saigon<br>With Every Ride</h5>
+                    <p class="small mb-4" style="color: rgba(255,255,255,0.7);">Affordable, convenient and eco-friendly rides for everyone.</p>
+                </div>
+                <i class="bi bi-scooter position-absolute opacity-25" style="font-size: 8rem; right: -20px; bottom: -20px;"></i>
+            </div>
+        </div>
+    </div>
 </div>

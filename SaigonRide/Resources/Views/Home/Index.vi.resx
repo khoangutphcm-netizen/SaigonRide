@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="DashboardTitle" xml:space="preserve"><value>Bảng điều khiển</value></data>
+	<data name="Greeting" xml:space="preserve"><value>Xin chào, {0}!</value></data>
+	<data name="GreetingSubtitle" xml:space="preserve"><value>Hành trình hôm nay của bạn tại Sài Gòn sẽ bắt đầu từ đâu?</value></data>
+	<data name="RentVehicles" xml:space="preserve"><value>Thuê Xe</value></data>
+	<data name="RentVehiclesDesc" xml:space="preserve"><value>Chọn từ nhiều loại xe đạp và xe điện khác nhau.</value></data>
+	<data name="RentNow" xml:space="preserve"><value>Thuê Ngay</value></data>
+	<data name="History" xml:space="preserve"><value>Lịch sử</value></data>
+	<data name="HistoryDesc" xml:space="preserve"><value>Xem lại các chuyến đi và hóa đơn trước đây.</value></data>
+	<data name="ViewHistory" xml:space="preserve"><value>Xem Lịch Sử</value></data>
+	<data name="Support" xml:space="preserve"><value>Hỗ trợ</value></data>
+	<data name="SupportDesc" xml:space="preserve"><value>Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7 trong chuyến đi.</value></data>
+	<data name="ContactUs" xml:space="preserve"><value>Liên Hệ</value></data>
+	<data name="Settings" xml:space="preserve"><value>Cài đặt</value></data>
+	<data name="SettingsDesc" xml:space="preserve"><value>Quản lý hồ sơ, thanh toán và tùy chọn của bạn.</value></data>
+	<data name="GoToSettings" xml:space="preserve"><value>Đi tới Cài đặt</value></data>
+	<data name="RecentRides" xml:space="preserve"><value>Chuyến đi gần đây</value></data>
+	<data name="ViewAll" xml:space="preserve"><value>Xem tất cả</value></data>
+	<data name="Completed" xml:space="preserve"><value>Hoàn thành</value></data>
+	<data name="NoRides" xml:space="preserve"><value>Chưa có chuyến đi nào.</value></data>
+	<data name="SpendingOverview" xml:space="preserve"><value>Tổng quan chi tiêu</value></data>
+	<data name="ThisMonth" xml:space="preserve"><value>Tháng này</value></data>
+	<data name="TotalSpending" xml:space="preserve"><value>Tổng chi tiêu</value></data>
+	<data name="VsLastMonth" xml:space="preserve"><value>so với tháng trước</value></data>
+	<data name="TotalRidesCount" xml:space="preserve"><value>Số chuyến</value></data>
+	<data name="Distance" xml:space="preserve"><value>Quãng đường</value></data>
+	<data name="AvgCost" xml:space="preserve"><value>Phí trung bình</value></data>
+	<data name="Announcements" xml:space="preserve"><value>Thông báo hệ thống</value></data>
+	<data name="New" xml:space="preserve"><value>Mới</value></data>
+	<data name="HolidayPromo" xml:space="preserve"><value>Khuyến mãi ngày lễ!</value></data>
+	<data name="HolidayPromoDesc" xml:space="preserve"><value>Giảm 15% cho tất cả các chuyến xe điện cuối tuần này.</value></data>
+	<data name="Maintenance" xml:space="preserve"><value>Bảo trì hệ thống</value></data>
+	<data name="MaintenanceDesc" xml:space="preserve"><value>Lịch bảo trì dự kiến: 28/05/2026, từ 00:00 - 02:00 sáng.</value></data>
+	<data name="ExplorePromoTitle" xml:space="preserve"><value>Khám phá Sài Gòn&lt;br&gt;Thật Thoải mái</value></data>
+	<data name="ExplorePromoDesc" xml:space="preserve"><value>Những chuyến đi tiết kiệm, an toàn và thân thiện môi trường.</value></data>
+	<data name="BannerTitle" xml:space="preserve"><value>Sống xanh. Đi sạch.</value></data>
+	<data name="BannerDesc" xml:space="preserve"><value>Lái xe thân thiện với môi trường để giữ gìn vẻ đẹp Sài Gòn.</value></data>
+	<data name="LearnMore" xml:space="preserve"><value>Tìm hiểu thêm</value></data>
+</root>

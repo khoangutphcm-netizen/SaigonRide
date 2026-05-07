@@ -7,7 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Admin\**" />
+    <Content Remove="Views\Admin\**" />
+    <EmbeddedResource Remove="Views\Admin\**" />
+    <None Remove="Views\Admin\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\AdminController.cs" />
     <Compile Remove="Models\Entities\BaseUser.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Views\AdminDashBoard\Index_AdminDash.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
