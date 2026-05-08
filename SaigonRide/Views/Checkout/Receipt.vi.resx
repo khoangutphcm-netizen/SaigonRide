@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="ReceiptTitle" xml:space="preserve"><value>Hóa đơn tạm tính</value></data>
+	<data name="ReceiptHeader" xml:space="preserve"><value>Hóa đơn tạm tính</value></data>
+	<data name="ReceiptSubHeader" xml:space="preserve"><value>Vui lòng kiểm tra thông tin chuyến đi trước khi thanh toán</value></data>
+	<data name="Vehicle" xml:space="preserve"><value>Phương tiện</value></data>
+	<data name="ReturnStation" xml:space="preserve"><value>Trạm trả xe</value></data>
+	<data name="CostDetails" xml:space="preserve"><value>Chi tiết chi phí</value></data>
+	<data name="EstimatedTime" xml:space="preserve"><value>Thời gian thuê dự kiến</value></data>
+	<data name="Minutes" xml:space="preserve"><value>phút</value></data>
+	<data name="BaseFare" xml:space="preserve"><value>Giá cước cơ bản</value></data>
+	<data name="StationBalancePromo" xml:space="preserve"><value>Khuyến mãi cân bằng trạm</value></data>
+	<data name="Total" xml:space="preserve"><value>TỔNG CỘNG</value></data>
+	<data name="SelectPaymentMethod" xml:space="preserve"><value>Chọn phương thức thanh toán</value></data>
+	<data name="ScanQR" xml:space="preserve"><value>Quét mã qua app ngân hàng</value></data>
+	<data name="EWallet" xml:space="preserve"><value>Thanh toán qua ví điện tử</value></data>
+	<data name="IntlCard" xml:space="preserve"><value>Thanh toán quốc tế</value></data>
+	<data name="SecurePay" xml:space="preserve"><value>Thanh toán an toàn</value></data>
+	<data name="OneTouchPay" xml:space="preserve"><value>Thanh toán 1 chạm</value></data>
+	<data name="CashPayment" xml:space="preserve"><value>Tiền mặt tại trạm</value></data>
+	<data name="PayAtStation" xml:space="preserve"><value>Thanh toán khi trả xe</value></data>
+	<data name="ConfirmPayment" xml:space="preserve"><value>XÁC NHẬN THANH TOÁN</value></data>
+	<data name="GoBack" xml:space="preserve"><value>Quay lại</value></data>
+	<data name="CompleteBooking" xml:space="preserve"><value>HOÀN TẤT THUÊ XE</value></data>
+	<data name="ProceedToGateway" xml:space="preserve"><value>CHUYỂN ĐẾN CỔNG THANH TOÁN</value></data>
+</root>

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="MockGatewayTitle" xml:space="preserve"><value>Mock Payment Gateway</value></data>
+	<data name="PayWithVNPay" xml:space="preserve"><value>Pay with VNPay</value></data>
+	<data name="ScanAppToPay" xml:space="preserve"><value>Please use your Banking App to scan the QR code</value></data>
+	<data name="EnterPromoCodePlaceholder" xml:space="preserve"><value>Enter promo code (If any)</value></data>
+	<data name="PayWithMoMo" xml:space="preserve"><value>Pay with MoMo</value></data>
+	<data name="OpenMoMoToScan" xml:space="preserve"><value>Open the MoMo app on your phone to scan</value></data>
+	<data name="MoMoPhonePlaceholder" xml:space="preserve"><value>Or enter MoMo phone number</value></data>
+	<data name="PayWithCard" xml:space="preserve"><value>Pay with International Card</value></data>
+	<data name="CardNumberLabel" xml:space="preserve"><value>CARD NUMBER</value></data>
+	<data name="ExpiryLabel" xml:space="preserve"><value>EXPIRY DATE</value></data>
+	<data name="CardHolderLabel" xml:space="preserve"><value>CARDHOLDER NAME</value></data>
+	<data name="CardHolderPlaceholder" xml:space="preserve"><value>JOHN DOE</value></data>
+	<data name="PayWithPayPal" xml:space="preserve"><value>Pay with PayPal</value></data>
+	<data name="LoginToPayPal" xml:space="preserve"><value>Log in to your PayPal account</value></data>
+	<data name="PayPalEmailPlaceholder" xml:space="preserve"><value>Email or mobile number</value></data>
+	<data name="PayPalPasswordPlaceholder" xml:space="preserve"><value>Enter your password</value></data>
+	<data name="PayWithApplePay" xml:space="preserve"><value>Pay with Apple Pay</value></data>
+	<data name="DoubleClickToPay" xml:space="preserve"><value>Double-click the side button to Pay</value></data>
+	<data name="FaceIDRequired" xml:space="preserve"><value>Face ID Required</value></data>
+	<data name="SecureCheckout" xml:space="preserve"><value>Secure Checkout</value></data>
+	<data name="TestingModeWarning" xml:space="preserve"><value>DEMO</value></data>
+	<data name="CancelTransaction" xml:space="preserve"><value>CANCEL TRANSACTION</value></data>
+	<data name="SimulateSuccess" xml:space="preserve"><value>COUNTINUE PAYMENT</value></data>
+	<data name="ConfirmCancel" xml:space="preserve"><value>Are you sure you want to cancel this transaction?</value></data>
+</root>

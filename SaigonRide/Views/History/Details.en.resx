@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Ride Details</value></data>
+	<data name="StatusCompleted" xml:space="preserve"><value>Completed</value></data>
+	<data name="TripDetails" xml:space="preserve"><value>Trip Details</value></data>
+	<data name="ReturnStation" xml:space="preserve"><value>Drop-off Station</value></data>
+	<data name="Duration" xml:space="preserve"><value>Duration</value></data>
+	<data name="Minutes" xml:space="preserve"><value>mins</value></data>
+	<data name="Distance" xml:space="preserve"><value>Distance (Est.)</value></data>
+	<data name="PaymentSummary" xml:space="preserve"><value>Payment Summary</value></data>
+	<data name="Subtotal" xml:space="preserve"><value>Subtotal</value></data>
+	<data name="Discount" xml:space="preserve"><value>Promo Discount</value></data>
+	<data name="TotalPaid" xml:space="preserve"><value>Total Paid</value></data>
+	<data name="PrintReceipt" xml:space="preserve"><value>Print Receipt</value></data>
+</root>

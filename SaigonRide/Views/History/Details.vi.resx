@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Chi tiết Chuyến đi</value></data>
+	<data name="StatusCompleted" xml:space="preserve"><value>Hoàn thành</value></data>
+	<data name="TripDetails" xml:space="preserve"><value>Thông tin di chuyển</value></data>
+	<data name="ReturnStation" xml:space="preserve"><value>Trạm trả xe</value></data>
+	<data name="Duration" xml:space="preserve"><value>Thời gian thuê</value></data>
+	<data name="Minutes" xml:space="preserve"><value>phút</value></data>
+	<data name="Distance" xml:space="preserve"><value>Quãng đường (Ước tính)</value></data>
+	<data name="PaymentSummary" xml:space="preserve"><value>Chi tiết thanh toán</value></data>
+	<data name="Subtotal" xml:space="preserve"><value>Tạm tính</value></data>
+	<data name="Discount" xml:space="preserve"><value>Trợ giá điều phối</value></data>
+	<data name="TotalPaid" xml:space="preserve"><value>Đã thanh toán</value></data>
+	<data name="PrintReceipt" xml:space="preserve"><value>In biên lai</value></data>
+</root>

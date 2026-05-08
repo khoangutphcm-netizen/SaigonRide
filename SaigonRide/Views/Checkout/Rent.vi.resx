@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Lên Lịch Trình</value></data>
+	<data name="PageSubtitle" xml:space="preserve"><value>Đặt trước điểm đến của bạn</value></data>
+	<data name="StationFull" xml:space="preserve"><value>Đã đầy</value></data>
+	<data name="StationAvailable" xml:space="preserve"><value>Còn chỗ</value></data>
+	<data name="StationPromo" xml:space="preserve"><value>Khuyến mãi</value></data>
+	<data name="PickupPoint" xml:space="preserve"><value>Trạm lấy xe</value></data>
+	<data name="DropoffPoint" xml:space="preserve"><value>Trạm trả xe (Chọn trên bản đồ)</value></data>
+	<data name="SelectOnMap" xml:space="preserve"><value>Vui lòng click vào trạm trên bản đồ...</value></data>
+	<data name="EstimatedTime" xml:space="preserve"><value>Thời gian dự kiến</value></data>
+	<data name="Minutes" xml:space="preserve"><value>Phút</value></data>
+	<data name="ProceedToCheckout" xml:space="preserve"><value>Tới phần Thanh toán</value></data>
+	<data name="StartRental" xml:space="preserve"><value>Bắt đầu Thuê xe</value></data>
+</root>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <data name="ActiveRental" xml:space="preserve"><value>Active Rental</value></data>
+    <data name="ElapsedTime" xml:space="preserve"><value>Elapsed Time</value></data>
+    <data name="Rate" xml:space="preserve"><value>Rate</value></data>
+    <data name="CurrentCost" xml:space="preserve"><value>Current Cost</value></data>
+    <data name="EstimatedTotal" xml:space="preserve"><value>Estimated Total</value></data>
+    <data name="ConfirmEnd" xml:space="preserve"><value>Are you sure you want to end the rental?</value></data>
+    <data name="EndRental" xml:space="preserve"><value>End Rental</value></data>
+</root>

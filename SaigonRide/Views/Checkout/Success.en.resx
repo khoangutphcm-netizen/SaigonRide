@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<data name="PageTitle" xml:space="preserve"><value>Success</value></data>
+	<data name="SuccessTitle" xml:space="preserve"><value>Payment Successful!</value></data>
+	<data name="SuccessDesc" xml:space="preserve"><value>Your payment has been received. The vehicle is unlocked and ready. Have a safe and joyful trip!</value></data>
+	<data name="BackToHome" xml:space="preserve"><value>Back to Dashboard</value></data>
+	<data name="ViewHistory" xml:space="preserve"><value>View Ride History</value></data>
+</root>
