@@ -1,0 +1,174 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["ReceiptTitle"];
+    Layout = "~/Views/Shared/_Layout.cshtml"; 
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-primary text-white p-4 border-0">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i> @Localizer["ReceiptHeader"]</h4>
+                    <p class="mb-0 text-white-50 small mt-1">@Localizer["ReceiptSubHeader"]</p>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <!-- THÔNG TIN CHUYẾN ĐI -->
+                    <div class="row mb-4 g-3">
+                        <div class="col-sm-6">
+                            <div class="bg-light p-3 rounded-3 h-100">
+                                <small class="text-muted d-block mb-1">@Localizer["Vehicle"]</small>
+                                <strong class="fs-5 text-dark"><i class="bi bi-bicycle text-primary me-2"></i>@ViewBag.VehicleName</strong>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="bg-light p-3 rounded-3 h-100">
+                                <small class="text-muted d-block mb-1">@Localizer["ReturnStation"]</small>
+                                <strong class="fs-5 text-dark"><i class="bi bi-geo-alt-fill text-danger me-2"></i>@ViewBag.StationName</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CHI TIẾT THANH TOÁN -->
+                    <h6 class="fw-bold text-dark mb-3 text-uppercase" style="letter-spacing: 1px;">@Localizer["CostDetails"]</h6>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-light">
+                            <span class="text-muted">@Localizer["EstimatedTime"]</span>
+                            <span class="fw-bold text-dark">@ViewBag.Duration @Localizer["Minutes"]</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-light">
+                            <span class="text-muted">@Localizer["BaseFare"]</span>
+                            <span class="fw-bold text-dark">@ViewBag.BasePrice.ToString("N0") đ</span>
+                        </li>
+                        
+                        @if (ViewBag.IsDiscountApplied != null && (bool)ViewBag.IsDiscountApplied)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-light bg-success bg-opacity-10 rounded mt-2 px-3">
+                                <span class="text-success fw-bold"><i class="bi bi-tag-fill me-2"></i>@Localizer["StationBalancePromo"]</span>
+                                <span class="text-success fw-bold">-@(((decimal)ViewBag.BasePrice - (decimal)ViewBag.FinalPrice).ToString("N0")) đ</span>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="d-flex justify-content-between align-items-center bg-primary bg-opacity-10 p-4 rounded-4 mb-5">
+                        <span class="fs-5 fw-bold text-primary">@Localizer["Total"]</span>
+                        <span class="fs-2 fw-bold text-primary">@ViewBag.FinalPrice.ToString("N0") đ</span>
+                    </div>
+
+                    <!-- KHU VỰC CHỌN PHƯƠNG THỨC THANH TOÁN -->
+                    <h6 class="fw-bold text-dark mb-3 text-uppercase" style="letter-spacing: 1px;">@Localizer["SelectPaymentMethod"]</h6>
+                    
+                    <form asp-action="ConfirmPayment" method="post" id="paymentForm">
+                        <input type="hidden" name="vehicleId" value="@ViewBag.VehicleId" />
+                        <input type="hidden" name="returnStationId" value="@ViewBag.ReturnStationId" />
+                        <input type="hidden" name="duration" value="@ViewBag.Duration" />
+                        
+                        <div class="row g-3 mb-4">
+                            <!-- VNPay -->
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="paymentMethod" id="pay_vnpay" value="vnpay" autocomplete="off" checked>
+                                <label class="btn btn-outline-primary w-100 p-3 text-start payment-option" for="pay_vnpay">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-qr-code fs-3 me-3 text-primary"></i>
+                                        <div><strong class="d-block">VNPay QR</strong><small class="opacity-75">@Localizer["ScanQR"]</small></div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- MoMo -->
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="paymentMethod" id="pay_momo" value="momo" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100 p-3 text-start payment-option" for="pay_momo">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-wallet2 fs-3 me-3" style="color: #a50064;"></i>
+                                        <div><strong class="d-block">Ví MoMo</strong><small class="opacity-75">@Localizer["EWallet"]</small></div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Thẻ Visa -->
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="paymentMethod" id="pay_card" value="card" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100 p-3 text-start payment-option" for="pay_card">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-credit-card-2-front fs-3 me-3 text-secondary"></i>
+                                        <div><strong class="d-block">Visa / Mastercard</strong><small class="opacity-75">@Localizer["IntlCard"]</small></div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- PayPal -->
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="paymentMethod" id="pay_paypal" value="paypal" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100 p-3 text-start payment-option" for="pay_paypal">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-paypal fs-3 me-3" style="color: #003087;"></i>
+                                        <div><strong class="d-block">PayPal</strong><small class="opacity-75">@Localizer["SecurePay"]</small></div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <!-- Apple Pay -->
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="paymentMethod" id="pay_applepay" value="applepay" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100 p-3 text-start payment-option" for="pay_applepay">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-apple fs-3 me-3 text-dark"></i>
+                                        <div><strong class="d-block">Apple Pay</strong><small class="opacity-75">@Localizer["OneTouchPay"]</small></div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Tiền mặt (Cash) -->
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="paymentMethod" id="pay_cash" value="cash" autocomplete="off">
+                                <label class="btn btn-outline-success w-100 p-3 text-start payment-option" for="pay_cash">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-cash-stack fs-3 me-3 text-success"></i>
+                                        <div><strong class="d-block">@Localizer["CashPayment"]</strong><small class="opacity-75">@Localizer["PayAtStation"]</small></div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold py-3 shadow-sm" id="btnSubmitPayment">
+                                @Localizer["ConfirmPayment"]
+                            </button>
+                            <a href="@Url.Action("Index", "Booking")" class="btn btn-light rounded-pill fw-bold py-3 text-muted">@Localizer["GoBack"]</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-option { border-width: 2px; transition: all 0.2s ease-in-out; }
+    .btn-check:checked + .btn-outline-primary { background-color: rgba(13, 110, 253, 0.05); border-color: #0d6efd; color: #000; }
+    .btn-check:checked + .btn-outline-success { background-color: rgba(25, 135, 84, 0.05); border-color: #198754; color: #000; }
+    .payment-option:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    #pay_cash:checked ~ .d-grid #btnSubmitPayment { background-color: #198754; border-color: #198754; }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const radios = document.querySelectorAll('input[name="paymentMethod"]');
+        const btn = document.getElementById('btnSubmitPayment');
+        
+        radios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if(this.value === 'cash') {
+                    btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>@Localizer["CompleteBooking"]';
+                    btn.className = 'btn btn-success btn-lg rounded-pill fw-bold py-3 shadow-sm';
+                } else {
+                    btn.innerHTML = '<i class="bi bi-shield-lock me-2"></i>@Localizer["ProceedToGateway"]';
+                    btn.className = 'btn btn-primary btn-lg rounded-pill fw-bold py-3 shadow-sm';
+                }
+            });
+        });
+        document.querySelector('input[name="paymentMethod"]:checked').dispatchEvent(new Event('change'));
+    });
+</script>
