@@ -29,3 +29,29 @@ namespace SaigonRide.Controllers
         }
     }
 }
+// 1. HÀM BẮT ĐẦU TÍNH GIỜ (Nâng cấp logic quản lý phiên)
+        [HttpPost]
+        public IActionResult StartTimer(int vehicleId, int returnStationId)
+        {
+            var vehicle = _context.Vehicles.FirstOrDefault(v => v.Id == vehicleId);
+            var station = _context.Stations.FirstOrDefault(s => s.Id == returnStationId);
+
+            if (vehicle == null || station == null) return NotFound();
+
+            var startTime = DateTime.Now;
+            var sessionKey = $"rental_{vehicleId}_{startTime.Ticks}";
+
+            var rentalSession = new
+            {
+                VehicleId = vehicleId,
+                ReturnStationId = returnStationId,
+                StartTime = startTime.ToString("O"), // Ép chuẩn ISO 8601 theo chuẩn API
+                AdditionalMinutes = 0
+            };
+
+            // Lưu thông tin vào Session để quản lý trạng thái thuê xe
+            HttpContext.Session.SetString(sessionKey, System.Text.Json.JsonSerializer.Serialize(rentalSession));
+            HttpContext.Session.SetString("current_rental_session", sessionKey);
+
+            return RedirectToAction("Timer", new { vehicleId }); 
+        }
