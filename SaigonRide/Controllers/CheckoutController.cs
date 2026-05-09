@@ -55,3 +55,33 @@ namespace SaigonRide.Controllers
 
             return RedirectToAction("Timer", new { vehicleId }); 
         }
+        // 2. HÀM HIỂN THỊ GIAO DIỆN TIMER (Đồng bộ thời gian thực)
+        [HttpGet]
+        public IActionResult Timer(int vehicleId)
+        {
+            var sessionKey = HttpContext.Session.GetString("current_rental_session");
+            if (string.IsNullOrEmpty(sessionKey)) return RedirectToAction("Index", "Booking");
+
+            var sessionData = HttpContext.Session.GetString(sessionKey);
+            using (System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(sessionData))
+            {
+                var root = doc.RootElement;
+                int returnStationId = root.GetProperty("ReturnStationId").GetInt32();
+
+                var vehicle = _context.Vehicles.FirstOrDefault(v => v.Id == vehicleId);
+                var station = _context.Stations.FirstOrDefault(s => s.Id == returnStationId);
+
+                ViewBag.VehicleId = vehicleId;
+                ViewBag.VehicleCategory = vehicle?.Category;
+                ViewBag.StationName = station?.LocationName;
+                ViewBag.PricePerMinute = vehicle?.PricePerMinute ?? 0;
+
+                // Xử lý kỹ thuật: Ép thời gian thành số nguyên Unix (Miliseconds) để JavaScript tính toán chính xác
+                DateTime st = DateTime.Parse(root.GetProperty("StartTime").GetString());
+                ViewBag.StartTimeUnix = ((DateTimeOffset)st).ToUnixTimeMilliseconds();
+
+                ViewBag.AdditionalMinutes = root.GetProperty("AdditionalMinutes").GetInt32();
+            }
+
+            return View();
+        }
