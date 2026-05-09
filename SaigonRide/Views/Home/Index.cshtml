@@ -1,11 +1,24 @@
-﻿﻿@using Microsoft.AspNetCore.Mvc.Localization
+﻿﻿﻿@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
 @model IEnumerable<SaigonRide.Models.entities.RentalTransaction>
 @{
     ViewData["Title"] = Localizer["DashboardTitle"].Value;
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style> 
+<style>  
+    .bg-grad-rent { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); }
+    .bg-grad-history { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); }
+    .bg-grad-support { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); }
+    .bg-grad-settings { background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); }
+    .bg-grad-about { background: linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%); }
+
+    /* Khi body có class dark-mode, tự động ghi đè dải màu siêu ngầu */
+    body.dark-mode .bg-grad-rent { background: linear-gradient(135deg, #0a2916 0%, #144d29 100%); border: 1px solid #1b6335 !important; }
+    body.dark-mode .bg-grad-history { background: linear-gradient(135deg, #0a243a 0%, #123e63 100%); border: 1px solid #1a568a !important; }
+    body.dark-mode .bg-grad-support { background: linear-gradient(135deg, #3a250a 0%, #634012 100%); border: 1px solid #8f5c1a !important; }
+    body.dark-mode .bg-grad-settings { background: linear-gradient(135deg, #2e1436 0%, #4c2258 100%); border: 1px solid #6c307d !important; }
+    body.dark-mode .bg-grad-about { background: linear-gradient(135deg, #072226 0%, #0a2916 100%); border: 1px solid #104852 !important; }
     @@keyframes aurora-shift {
         0% {
             background-position: 0% 50%;
@@ -61,18 +74,35 @@
     }
      
     .rounded-4 { border-radius: 1rem !important; }
-    .action-card { background: var(--card-bg); border: 1px solid #e0e0e0; border-radius: 1rem; padding: 1.5rem; text-align: center; transition: all 0.2s; height: 100%; display: flex; flex-direction: column; }
-    .action-card:hover { border-color: #20994a; box-shadow: 0 8px 20px rgba(32, 153, 74, 0.1); transform: translateY(-3px); }
-    .icon-wrapper { width: 60px; height: 60px; border-radius: 50%; background-color: #e8f5e9; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto; }
+    
+    .action-card { 
+        border-radius: 1rem; 
+        padding: 1.5rem; 
+        text-align: center;
+        transition: all 0.3s ease; 
+        height: 100%; 
+        display: flex; 
+        flex-direction: column; 
+    }
+    
+    .action-card:hover { 
+        transform: translateY(-5px); 
+        box-shadow: 0 12px 24px rgba(0,0,0,0.1) !important;
+    }
+    
+    .icon-wrapper { 
+        width: 60px; height: 60px;
+        border-radius: 50%; 
+        display: flex; align-items: center; justify-content: center; 
+        margin: 0 auto 1rem auto;
+    }
     
     .list-item-custom { border-bottom: 1px solid #f0f0f0; padding: 1rem 0; display: flex; align-items: center; }
     .list-item-custom:last-child { border-bottom: none; }
     
     .promo-banner { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 1rem; position: relative; overflow: hidden; padding: 2rem; border: 1px solid #a5d6a7; }
     
-    .dark-mode .action-card { border-color: #333; }
     .dark-mode .list-item-custom { border-color: #333; }
-    .dark-mode .icon-wrapper { background-color: #143621; }
     .dark-mode .promo-banner { background: linear-gradient(135deg, #0a1f12 0%, #143621 100%); border-color: #1b5e38; }
 </style>
 
@@ -82,131 +112,78 @@
         <h3 class="fw-bold text-dark mb-1">@Localizer["Greeting", User.Identity.Name] <i class="bi bi-emoji-smile text-success"></i></h3>
         <p class="text-muted">@Localizer["GreetingSubtitle"]</p>
     </div>
-     
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-xl-3">
-            <div class="action-card bg-white shadow-sm">
-                <div class="icon-wrapper text-success"><i class="bi bi-bicycle fs-2"></i></div>
-                <h6 class="fw-bold text-dark">@Localizer["RentVehicles"]</h6>
-                <p class="text-muted small mb-3 flex-grow-1">@Localizer["RentVehiclesDesc"]</p> 
-                <a asp-controller="Booking" asp-action="Index" class="btn btn-aurora rounded-pill fw-bold w-100 py-2">@Localizer["RentNow"] <i class="bi bi-arrow-right ms-1"></i></a>
+
+    <div class="card border-0 rounded-4 shadow-lg mb-4 text-white overflow-hidden" 
+         style="background-image: linear-gradient(90deg, rgba(0, 200, 83, 0.98) 35%, rgba(17, 71, 40, 0.1) 100%), url('/images/banner.jpg'); background-size: cover; background-position: center right;">
+        <div class="card-body p-4 p-md-5 position-relative">
+            <div class="z-1 position-relative" style="max-width: 65%;">
+                <span id="dynamic-station-badge" class="badge bg-white text-success rounded-pill mb-3 px-3 py-2 shadow-sm" style="display: none;">
+                    <i class="bi bi-geo-alt-fill me-1"></i> <span id="station-name-text">@Localizer["FindingNearestStation"]</span>
+                </span>
+                <h2 class="fw-bold mb-3 display-6 text-white">@Localizer["ReadyToRideTitle"]</h2>
+                <p class="mb-4 opacity-75 fs-5">@Localizer["ReadyToRideDesc"]</p>
+                <a asp-controller="Booking" asp-action="Index" class="btn btn-aurora btn-lg rounded-pill px-5 py-3 fw-bold fs-5 shadow">@Localizer["RentNow"] <i class="bi bi-arrow-right-circle ms-2"></i></a>
             </div>
-        </div>
-         
-        <div class="col-6 col-xl-3">
-            <div class="action-card bg-white shadow-sm">
-                <div class="icon-wrapper text-success"><i class="bi bi-clock-history fs-2"></i></div>
-                <h6 class="fw-bold text-dark">@Localizer["History"]</h6>
-                <p class="text-muted small mb-3 flex-grow-1">@Localizer["HistoryDesc"]</p>
-                <a asp-controller="History" asp-action="Index" class="btn btn-success rounded-pill fw-bold w-100">@Localizer["ViewHistory"] <i class="bi bi-arrow-right ms-1"></i></a>
             </div>
-        </div>
-        <div class="col-6 col-xl-3">
-            <div class="action-card bg-white shadow-sm">
-                <div class="icon-wrapper text-success"><i class="bi bi-headset fs-2"></i></div>
-                <h6 class="fw-bold text-dark">@Localizer["Support"]</h6>
-                <p class="text-muted small mb-3 flex-grow-1">@Localizer["SupportDesc"]</p>
-                <a asp-controller="Profile" asp-action="Support" class="btn btn-success rounded-pill fw-bold w-100">@Localizer["ContactUs"] <i class="bi bi-arrow-right ms-1"></i></a>
-            </div>
-        </div>
-        <div class="col-6 col-xl-3">
-            <div class="action-card bg-white shadow-sm">
-                <div class="icon-wrapper text-success"><i class="bi bi-gear fs-2"></i></div>
-                <h6 class="fw-bold text-dark">@Localizer["Settings"]</h6>
-                <p class="text-muted small mb-3 flex-grow-1">@Localizer["SettingsDesc"]</p>
-                <a asp-controller="Profile" asp-action="Index" class="btn btn-outline-success rounded-pill fw-bold w-100">@Localizer["GoToSettings"] <i class="bi bi-arrow-right ms-1"></i></a>
-            </div>
-        </div>
     </div>
-     
-    <!-- ========== RECENT RIDES ========== -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-5 col-xl-4">
-            <div class="card bg-white border-0 shadow-sm rounded-4 h-100">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
-                    <h6 class="fw-bold text-dark mb-0">@Localizer["RecentRides"]</h6>
-                    <a asp-controller="History" asp-action="Index" class="text-success text-decoration-none small fw-bold">@Localizer["ViewAll"]</a>
+    <div class="row g-4 mb-4 align-items-stretch">
+        
+        <div class="col-lg-8">
+            <div class="row g-4 h-100">
+                <div class="col-md-6">
+                    <div class="action-card shadow-sm border-0 position-relative overflow-hidden bg-grad-rent">
+                        <div class="icon-wrapper bg-white text-success shadow-sm position-relative z-1"><i class="bi bi-bicycle fs-2"></i></div>
+                        <h6 class="fw-bold text-dark position-relative z-1">@Localizer["RentVehicles"]</h6>
+                        <p class="text-muted small mb-3 flex-grow-1 position-relative z-1">@Localizer["RentVehiclesDesc"]</p> 
+                        <a asp-controller="Booking" asp-action="Index" class="btn btn-success rounded-pill fw-bold w-100 py-2 position-relative z-1 shadow-sm">@Localizer["RentNow"] <i class="bi bi-arrow-right ms-1"></i></a>
+                        <i class="bi bi-bicycle position-absolute opacity-10" style="font-size: 8rem; right: -20px; bottom: -20px; transform: rotate(-15deg);"></i>
+                    </div>
                 </div>
-                <div class="card-body px-4">
-                    @if (Model != null && Model.Any())
-                    {
-                        foreach (var item in Model)
-                        {
-                            <div class="list-item-custom">
-                                <div class="bg-light rounded p-2 me-3">
-                                    <i class="bi @(item.Vehicle.Category.Contains("Scooter") ? "bi-scooter" : "bi-bicycle") fs-3 text-dark"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="fw-bold text-dark mb-1">@item.Vehicle.Category</h6>
-                                    <small class="text-muted">@item.StartTime.ToString("dd MMM yyyy • hh:mm tt")</small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill mb-1">@Localizer["Completed"]</span><br>
-                                    <span class="fw-bold text-dark">@item.TotalDue.ToString("N0") đ</span>
-                                </div>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="text-center py-4 text-muted small"><i class="bi bi-journal-x fs-1 d-block mb-2 opacity-50"></i>@Localizer["NoRides"]</div>
-                    }
+                
+                <div class="col-md-6">
+                    <div class="action-card shadow-sm border-0 position-relative overflow-hidden bg-grad-history">
+                        <div class="icon-wrapper bg-white text-primary shadow-sm position-relative z-1"><i class="bi bi-clock-history fs-2"></i></div>
+                        <h6 class="fw-bold text-dark position-relative z-1">@Localizer["History"]</h6>
+                        <p class="text-muted small mb-3 flex-grow-1 position-relative z-1">@Localizer["HistoryDesc"]</p>
+                        <a asp-controller="History" asp-action="Index" class="btn btn-primary rounded-pill fw-bold w-100 position-relative z-1">@Localizer["ViewHistory"] <i class="bi bi-arrow-right ms-1"></i></a>
+                        <i class="bi bi-journal-text position-absolute opacity-10" style="font-size: 8rem; right: -20px; bottom: -20px; transform: rotate(10deg);"></i>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- SPENDING OVERVIEW -->
-        <div class="col-lg-7 col-xl-5">
-            <div class="card bg-white border-0 shadow-sm rounded-4 h-100">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-0 px-4">
-                    <h6 class="fw-bold text-dark mb-0">@Localizer["SpendingOverview"]</h6>
-                    <select class="form-select form-select-sm w-auto rounded-pill text-muted border-light"><option>@Localizer["ThisMonth"]</option></select>
+                <div class="col-md-6">
+                    <div class="action-card shadow-sm border-0 position-relative overflow-hidden bg-grad-support">
+                        <div class="icon-wrapper bg-white text-warning shadow-sm position-relative z-1"><i class="bi bi-headset fs-2"></i></div>
+                        <h6 class="fw-bold text-dark position-relative z-1">@Localizer["Support"]</h6>
+                        <p class="text-muted small mb-3 flex-grow-1 position-relative z-1">@Localizer["SupportDesc"]</p>
+                        <a asp-controller="Profile" asp-action="Support" class="btn btn-warning text-dark rounded-pill fw-bold w-100 position-relative z-1">@Localizer["ContactUs"] <i class="bi bi-arrow-right ms-1"></i></a>
+                        <i class="bi bi-chat-dots position-absolute opacity-10" style="font-size: 8rem; right: -20px; bottom: -20px; transform: rotate(-10deg);"></i>
+                    </div>
                 </div>
-                <div class="card-body px-4">
-                    <div class="d-flex justify-content-between align-items-end mb-3">
-                        <div>
-                            <small class="text-muted d-block mb-1">@Localizer["TotalSpending"]</small>
-                            <h3 class="fw-bold text-success mb-0">@Convert.ToDecimal(ViewBag.TotalSpending).ToString("N0") đ</h3>
-                        </div>
-                        <div class="text-end">
-                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill"><i class="bi bi-arrow-up-short"></i> 12.5%</span>
-                            <small class="d-block text-muted mt-1" style="font-size: 0.7rem;">@Localizer["VsLastMonth"]</small>
-                        </div>
-                    </div>
-                    <div style="height: 180px; width: 100%;">
-                        <canvas id="spendingChart"></canvas>
-                    </div>
-                    <div class="row text-center mt-3 border-top pt-3">
-                        <div class="col-4 border-end">
-                            <small class="text-muted d-block mb-1"><i class="bi bi-bicycle text-success me-1"></i> @Localizer["TotalRidesCount"]</small>
-                            <h5 class="fw-bold text-dark mb-0">@ViewBag.TotalRides</h5>
-                        </div>
-                        <div class="col-4 border-end">
-                            <small class="text-muted d-block mb-1"><i class="bi bi-clock-history text-success me-1"></i> Tổng số phút</small>
-                            <h5 class="fw-bold text-dark mb-0">@ViewBag.TotalMinutes phút</h5>
-                        </div>
-                        <div class="col-4">
-                            <small class="text-muted d-block mb-1"><i class="bi bi-cash-stack text-success me-1"></i> @Localizer["AvgCost"]</small>
-                            <h5 class="fw-bold text-dark mb-0">@Convert.ToDecimal(ViewBag.AvgCost).ToString("N0") đ</h5>
-                        </div>
+
+                <div class="col-md-6">
+                    <div class="action-card shadow-sm border-0 position-relative overflow-hidden bg-grad-settings">
+                        <div class="icon-wrapper bg-white shadow-sm position-relative z-1" style="color: #8e24aa;"><i class="bi bi-gear fs-2"></i></div>
+                        <h6 class="fw-bold text-dark position-relative z-1">@Localizer["Settings"]</h6>
+                        <p class="text-muted small mb-3 flex-grow-1 position-relative z-1">@Localizer["SettingsDesc"]</p>
+                        <a asp-controller="Profile" asp-action="Index" class="btn text-white rounded-pill fw-bold w-100 position-relative z-1" style="background-color: #8e24aa;">@Localizer["GoToSettings"] <i class="bi bi-arrow-right ms-1"></i></a>
+                        <i class="bi bi-sliders position-absolute opacity-10" style="font-size: 8rem; right: -20px; bottom: -20px; transform: rotate(15deg);"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ANNOUNCEMENTS & PROMO -->
-        <div class="col-lg-12 col-xl-3 d-flex flex-column gap-4">
-            <div class="card bg-white border-0 shadow-sm rounded-4 flex-grow-1">
+        <div class="col-lg-4 d-flex">
+            <div class="card bg-white border-0 shadow-sm rounded-4 flex-grow-1 w-100">
                 <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
                     <h6 class="fw-bold text-dark mb-0"><i class="bi bi-megaphone-fill text-success me-2"></i> @Localizer["Announcements"]</h6>
                     <a href="/Home/Announcements" class="text-success text-decoration-none small fw-bold">@Localizer["ViewAll"]</a>
                 </div>
-                <div class="card-body px-4 pt-0">
+                <div class="card-body px-4 pt-0" style="overflow-y: auto; max-height: 480px;">
                     @if (ViewBag.Announcements != null)
                     {
                         foreach (var item in ViewBag.Announcements)
                         {
-                            <div class="list-item-custom">
+                            <div class="list-item-custom border-bottom border-light py-3">
                                 <div class="bg-success bg-opacity-10 p-2 rounded text-success me-3"><i class="bi bi-bell"></i></div>
                                 <div>
                                     @if ((DateTime.Now - item.CreatedAt).TotalDays <= 3)
@@ -222,70 +199,102 @@
                     }
                     else
                     {
-                        <div class="text-center text-muted small py-3">Chưa có thông báo nào.</div>
+                        <div class="text-center text-muted small py-4">@Localizer["NoAnnouncements"]</div>
                     }
                 </div>
             </div>
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #114728 0%, #0a2e19 100%); color: white;">
-                <div class="card-body p-4 position-relative z-1">
-                    <h5 class="fw-bold mb-2">@Html.Raw(Localizer["ExplorePromoTitle"].Value)</h5>
-                    <p class="small mb-4" style="color: rgba(255,255,255,0.7);">@Localizer["ExplorePromoDesc"]</p>
-                    <a asp-controller="Booking" asp-action="Index" class="btn btn-light text-success fw-bold rounded-pill px-4 btn-sm">@Localizer["RentNow"] <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
+
+    </div>
+
+    <div class="row g-4 mb-4 align-items-stretch">
+        
+    <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative h-100" 
+                 style="min-height: 200px; background-image: linear-gradient(to right, rgba(232, 245, 233, 0.95) 30%, rgba(232, 245, 233, 0.4) 100%), url('/images/promo.png'); background-size: cover; background-position: center;">
+                <div class="card-body p-4 position-relative z-1 d-flex align-items-center">
+                    <div style="max-width: 75%;">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-tree-fill text-success fs-3 me-2"></i>
+                            <h4 class="fw-bold text-dark mb-0">@Localizer["BannerTitle"]</h4>
+                        </div>
+                        <p class="text-muted mb-0 fw-medium" style="font-size: 0.95rem; line-height: 1.5;">@Localizer["BannerDesc"]</p>
+                    </div>
                 </div>
-                <i class="bi bi-scooter position-absolute opacity-25" style="font-size: 8rem; right: -20px; bottom: -20px;"></i>
             </div>
         </div>
-    </div>
 
-    <!-- FOOTER BANNER -->
-    <div class="promo-banner d-flex align-items-center shadow-sm">
-        <i class="bi bi-tree-fill text-success fs-1 me-4"></i>
-        <div>
-            <h5 class="fw-bold text-dark mb-1">@Localizer["BannerTitle"]</h5>
-            <p class="text-muted mb-0">@Localizer["BannerDesc"]</p>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative h-100" 
+                 style="min-height: 180px; background-image: linear-gradient(to right, rgba(10, 46, 25, 0.95) 10%, rgba(10, 46, 25, 0.3) 100%), url('/images/hiring.png'); background-size: cover; background-position: center; color: white;">
+                <div class="card-body p-4 position-relative z-1 d-flex flex-column justify-content-center">
+                    <div style="max-width: 80%;">
+                        <h4 class="fw-bold mb-2">@Html.Raw(Localizer["JoinUsTitle"].Value)</h4>
+                        <p class="small mb-3" style="color: rgba(255,255,255,0.8);">@Localizer["JoinUsDesc"]</p>
+                        <a href="mailto:contact@saigonride.com" class="btn btn-light text-success fw-bold rounded-pill px-4 py-2 btn-sm shadow-sm">
+                            @Localizer["EmailUs"] <i class="bi bi-envelope-paper ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <a href="#" class="btn btn-outline-success rounded-pill fw-bold bg-white ms-auto px-4">@Localizer["LearnMore"] <i class="bi bi-arrow-right ms-1"></i></a>
-    </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
+    </div>
+    <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const ctx = document.getElementById('spendingChart').getContext('2d');
-        let gradient = ctx.createLinearGradient(0, 0, 0, 200);
-        gradient.addColorStop(0, 'rgba(32, 153, 74, 0.4)');
-        gradient.addColorStop(1, 'rgba(32, 153, 74, 0.0)');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: @Html.Raw(ViewBag.ChartLabels),
-                datasets: [{
-                    label: 'Spending (VNĐ)',
-                    data: @Html.Raw(ViewBag.ChartData),
-                    borderColor: '#20994a',
-                    backgroundColor: gradient,
-                    borderWidth: 3,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#20994a',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { display: false }, ticks: { color: '#adb5bd', font: { size: 10 } } },
-                    y: {
-                        grid: { borderDash: [4, 4], color: '#e9ecef' },
-                        ticks: { color: '#adb5bd', font: { size: 10 }, callback: function(value) { return value / 1000 + 'K'; } },
-                        beginAtZero: true
+        // Lấy dữ liệu trạm từ Controller
+        var stationData = JSON.parse('@Html.Raw(ViewBag.StationsJson)');
+        
+        // Kiểm tra xem trình duyệt có hỗ trợ định vị không 
+        if (navigator.geolocation && stationData.length > 0) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var userLat = position.coords.latitude;
+                var userLng = position.coords.longitude;
+
+                // Công thức tính khoảng cách 
+                function calcDist(lat1, lon1, lat2, lon2) {
+                    var R = 6371;
+                    var dLat = (lat2 - lat1) * Math.PI / 180;
+                    var dLon = (lon2 - lon1) * Math.PI / 180;
+                    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    return R * c;
+                }
+
+                let closest = null;
+                let minDistance = Infinity;
+
+                // Quét tìm trạm gần nhất [cite: 465, 466]
+                stationData.forEach(st => {
+                    if (st.lat && st.lng) {
+                        let dist = calcDist(userLat, userLng, st.lat, st.lng);
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closest = st;
+                        }
+                    }
+                });
+
+                // Cập nhật giao diện Banner
+                
+                    if (closest) {
+                        let distText = minDistance < 1 ? (minDistance * 1000).toFixed(0) + " m" : minDistance.toFixed(1) + " km";
+                        
+                        // Lấy chuỗi format từ Localizer và thay thế biến {0}, {1}
+                        let formatString = '@Html.Raw(Localizer["NearestStationFormat"].Value)';
+                        let finalText = formatString.replace('{0}', closest.name).replace('{1}', distText);
+                        
+                        // Thay thế text
+                        document.getElementById('station-name-text').innerText = finalText;
+                        
+                        // Hiện cái badge lên
+                        let badge = document.getElementById('dynamic-station-badge');
+                        if(badge) badge.style.display = 'inline-block';
                     }
                 }
-            }
-        });
+            });
+        }
     });
 </script>
