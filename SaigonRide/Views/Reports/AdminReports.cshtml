@@ -1,6 +1,6 @@
 @model IEnumerable<SaigonRide.Models.entities.Report>
 @{
-    ViewData["Title"] = "Manage User Reports";
+    ViewData["Title"] = "Quản lý Báo cáo";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -10,8 +10,8 @@
             <i class="bi bi-arrow-left text-dark"></i>
         </a>
         <div>
-            <h3 class="fw-bold text-dark mb-0">User Reports</h3>
-            <p class="text-muted mb-0">Manage and respond to user reports</p>
+            <h3 class="fw-bold text-dark mb-0">Báo cáo từ Người dùng</h3>
+            <p class="text-muted mb-0">Quản lý và phản hồi các báo cáo</p>
         </div>
     </div>
 
@@ -41,12 +41,12 @@
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>
-                        <th>ID</th>
-                        <th>User</th>
-                        <th>Title</th>
-                        <th>Status</th>
-                        <th>Created</th>
-                        <th>Actions</th>
+                        <th>Mã</th>
+                        <th>Người dùng</th>
+                        <th>Tiêu đề</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -64,7 +64,7 @@
                             <td>@report.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#respondModal_@report.Id">
-                                    <i class="bi bi-reply"></i> Respond
+                                    <i class="bi bi-reply"></i> Phản hồi
                                 </button>
                             </td>
                         </tr>
@@ -74,17 +74,17 @@
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Respond to Report #@report.Id</h5>
+                                        <h5 class="modal-title">Phản hồi Báo cáo #@report.Id</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
                                         <div class="mb-3">
-                                            <label class="form-label fw-bold">Report Details</label>
+                                            <label class="form-label fw-bold">Chi tiết báo cáo</label>
                                             <div class="bg-light p-3 rounded">
-                                                <p><strong>Title:</strong> @report.Title</p>
-                                                <p><strong>Description:</strong> @report.Description</p>
-                                                <p><strong>User:</strong> @report.User.FullName (@report.User.Email)</p>
-                                                <p><strong>Submitted:</strong> @report.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                                                <p><strong>Tiêu đề:</strong> @report.Title</p>
+                                                <p><strong>Nội dung:</strong> @report.Description</p>
+                                                <p><strong>Người dùng:</strong> @report.User.FullName (@report.User.Email)</p>
+                                                <p><strong>Ngày gửi:</strong> @report.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
                                             </div>
                                         </div>
 
@@ -95,21 +95,21 @@
                                                 <label for="status_@report.Id" class="form-label fw-bold">Trạng thái xử lý</label>
                                                 <select class="form-select" id="status_@report.Id" name="status">
                                                     <!-- ĐÃ FIX: Tự động bôi đậm (selected) trạng thái thực tế của Report -->
-                                                    <option value="Open" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.Open ? "selected" : null)">Open (Mới)</option>
-                                                    <option value="InProgress" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? "selected" : null)">In Progress (Đang xử lý)</option>
-                                                    <option value="Resolved" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "selected" : null)">Resolved (Đã giải quyết)</option>
-                                                    <option value="Closed" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.Closed ? "selected" : null)">Closed (Đóng)</option>
+                                                    <option value="Open" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.Open ? "selected" : null)">Mới</option>
+                                                    <option value="InProgress" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? "selected" : null)">Đang xử lý</option>
+                                                    <option value="Resolved" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "selected" : null)">Đã giải quyết</option>
+                                                    <option value="Closed" selected="@(report.Status == SaigonRide.Models.entities.ReportStatus.Closed ? "selected" : null)">Đóng</option>
                                                 </select>
                                             </div>
 
                                             <div class="mb-3">
-                                                <label for="response_@report.Id" class="form-label fw-bold">Admin Response</label>
-                                                <textarea class="form-control" id="response_@report.Id" name="adminResponse" rows="4" placeholder="Enter your response here..." required>@report.AdminResponse</textarea>
+                                                <label for="response_@report.Id" class="form-label fw-bold">Phản hồi từ Admin</label>
+                                                <textarea class="form-control" id="response_@report.Id" name="adminResponse" rows="4" placeholder="Nhập phản hồi của bạn..." required>@report.AdminResponse</textarea>
                                             </div>
 
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                <button type="submit" class="btn btn-primary">Send Response</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                <button type="submit" class="btn btn-primary">Gửi Phản hồi</button>
                                             </div>
                                         </form>
                                     </div>
@@ -125,7 +125,7 @@
         {
             <div class="text-center py-5">
                 <i class="bi bi-inbox" style="font-size: 3rem; color: #999;"></i>
-                <p class="text-muted mt-3">No reports yet</p>
+                <p class="text-muted mt-3">Chưa có báo cáo nào</p>
             </div>
         }
     </div>
