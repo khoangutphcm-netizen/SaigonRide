@@ -11,8 +11,7 @@ namespace SaigonRide.Models.entities
         public int UserId { get; set; }
         public User User { get; set; }
 
-        [Required]
-        public int RentalTransactionId { get; set; }
+        public int? RentalTransactionId { get; set; }
         public RentalTransaction RentalTransaction { get; set; }
 
         [Required]
