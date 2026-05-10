@@ -20,7 +20,7 @@ namespace SaigonRide.Controllers
             _context = context;
         }
 
-        // Khách hàng gửi báo cáo
+        // Khách hàng gửi báo cáo (hỗ trợ hoặc liên quan chuyến đi)
         [HttpPost]
         public async Task<IActionResult> CreateReport(int rentalTransactionId, string title, string description)
         {
@@ -28,14 +28,22 @@ namespace SaigonRide.Controllers
             if (string.IsNullOrEmpty(userIdString)) return Unauthorized();
 
             int userId = int.Parse(userIdString);
-            var transaction = await _context.RentalTransactions.FindAsync(rentalTransactionId);
 
-            if (transaction == null) return NotFound("Rental transaction not found");
+            // Nếu rentalTransactionId không phải 0, kiểm tra xem chuyến đi có tồn tại không
+            if (rentalTransactionId != 0)
+            {
+                var transaction = await _context.RentalTransactions.FindAsync(rentalTransactionId);
+                if (transaction == null)
+                {
+                    TempData["ErrorMessage"] = "Chuyến đi không tồn tại!";
+                    return RedirectToAction("Index", "Home");
+                }
+            }
 
             var report = new Report
             {
                 UserId = userId,
-                RentalTransactionId = rentalTransactionId,
+                RentalTransactionId = rentalTransactionId == 0 ? null : rentalTransactionId,
                 Title = title,
                 Description = description,
                 Status = ReportStatus.Open,
@@ -90,7 +98,7 @@ namespace SaigonRide.Controllers
             return View(await reports.OrderByDescending(r => r.CreatedAt).ToListAsync());
         }
 
-        // Admin trả lời báo cáo 
+        // Admin trả lời báo cáo (ĐÃ XÓA SẠCH [Authorize(Roles="Admin")])
         [HttpPost]
         public async Task<IActionResult> RespondToReport(int reportId, string adminResponse, string status)
         {

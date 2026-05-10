@@ -16,6 +16,10 @@ namespace SaigonRide.Controllers
         // Trang chủ Intro (Mặc định)
         public IActionResult Index()
         {
+            // Nếu user đã đăng nhập, chuyển hướng về Home
+            if (User.Identity.IsAuthenticated)
+                return RedirectToAction("Index", "Home");
+
             // Kéo 3 thông báo mới nhất đang Active để đưa ra trang Intro
             var recentAnnouncements = _context.Announcements
                                               .Where(a => a.IsActive)
