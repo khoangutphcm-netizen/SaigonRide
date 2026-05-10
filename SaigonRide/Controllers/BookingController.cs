@@ -25,19 +25,20 @@ namespace SaigonRide.Controllers
                                    .Where(s => s.IsAvailable)
                                    .ToList();
 
-            // 2. Đóng gói dữ liệu gửi xuống Javascript
+            // 2. Đóng gói dữ liệu gửi xuống Javascript 
             var stationsData = stations.Select(s => new {
                 id = s.Id,
                 name = s.LocationName,
                 lat = s.Latitude,
                 lng = s.Longitude,
-                inventory = s.CurrentInventory,
+ 
+                // Tự động đếm chính xác số lượng xe đang ở trạng thái Available thực tế
+                inventory = s.Vehicles.Count(v => v.Status == SaigonRide.Models.Enums.VehicleStatus.Available),
+                
                 capacity = s.MaxCapacity,
 
-                // ĐÂY LÀ DÒNG CHỐT HẠ: Phải có dòng này thì JS mới thấy được 4 chiếc xe!
-                // Tớ thêm luôn tính năng chỉ lọc ra những xe có trạng thái "Available" (Sẵn sàng)
                 vehicles = s.Vehicles.Where(v => v.Status == SaigonRide.Models.Enums.VehicleStatus.Available)
-                                     .Select(v => new { id = v.Id, name = v.Category, price = v.PricePerMinute }).ToList()
+                                    .Select(v => new { id = v.Id, name = v.Category, price = v.PricePerMinute }).ToList()
             }).ToList();
 
             ViewBag.StationsJson = JsonSerializer.Serialize(stationsData);

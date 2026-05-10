@@ -84,20 +84,11 @@
                 </div>
             </div>
 
-            <!-- Promo Card -->
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative flex-grow-1" style="background: linear-gradient(135deg, #114728 0%, #0a2e19 100%); color: white; min-height: 150px;">
-                <div class="card-body p-4 position-relative z-1 d-flex flex-column justify-content-center">
-                    <h5 class="fw-bold mb-2">Explore Saigon<br>The Green Way</h5>
-                    <p class="small mb-4" style="color: rgba(255,255,255,0.7);">Comfortable rides, anywhere you go.</p>
-                </div>
-                <i class="bi bi-scooter position-absolute opacity-25" style="font-size: 8rem; right: -20px; bottom: -20px;"></i>
-            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // 1. Khởi tạo bản đồ (Mặc định tâm ở HCM)
     var map = L.map('mainMap').setView([10.785, 106.705], 14);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
@@ -105,7 +96,6 @@
     var bounds = [];
     var currentStation = null;
 
-    // 2. Hàm tính khoảng cách Haversine (km)
     function calculateDistance(lat1, lon1, lat2, lon2) {
         var R = 6371;
         var dLat = (lat2 - lat1) * Math.PI / 180;
@@ -117,22 +107,25 @@
         return R * c;
     }
 
-    // 3. Vẽ các Marker trạm lên bản đồ
+    // Vẽ các Marker trạm lên bản đồ
     stationData.forEach(function (st) {
         if(st.lat && st.lng) {
             bounds.push([st.lat, st.lng]);
-            var isFull = (st.capacity - st.inventory) <= 0;
-            var markerColor = isFull ? 'filter: grayscale(100%);' : 'filter: hue-rotate(120deg);';
+            var isEmpty = st.inventory <= 0; 
+            var isPromo = st.inventory <= (st.capacity * 0.2) && !isEmpty; // Trạm Khuyến mãi (còn <= 20% xe)
+            var markerColor = isEmpty ? 'filter: grayscale(100%);' : 'filter: hue-rotate(120deg);';
+            var iconClass = isEmpty ? 'text-secondary' : 'text-success';
             
             var customIcon = L.divIcon({
                 className: 'custom-div-icon',
-                html: `<div style="text-align:center; ${markerColor}"><i class="bi bi-geo-alt-fill fs-2 ${isFull ? 'text-secondary' : 'text-success'}" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i></div>`,
+                html: `<div style="text-align:center; ${markerColor}"><i class="bi bi-geo-alt-fill fs-2 ${iconClass}" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i></div>`,
                 iconSize: [30, 42],
                 iconAnchor: [15, 42]
             });
 
             var marker = L.marker([st.lat, st.lng], { icon: customIcon }).addTo(map);
             marker.bindTooltip(`<b>${st.name}</b>`, { direction: 'top', offset: [0, -20] });
+            
             marker.on('click', function () {
                 currentStation = st; 
                 renderStationDetailAndVehicles(st);
@@ -142,14 +135,24 @@
 
     if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
 
-    // 4. XỬ LÝ VỊ TRÍ THỰC TẾ (Dynamic Location)
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
             var userLat = position.coords.latitude;
             var userLng = position.coords.longitude;
+            var userIcon = L.divIcon({ 
+                className: 'custom-div-icon', 
+                html: `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 25px; height: 25px; border: 3px solid white;"><i class="bi bi-person-fill small"></i></div>`, 
+                iconSize: [25, 25], 
+                iconAnchor: [12, 12] 
+            });
+            L.marker([userLat, userLng], { icon: userIcon })
+             .addTo(map)
+             .bindTooltip("Vị trí của bạn", { direction: 'top', offset: [0, -10] });
+            map.setView([userLat, userLng], 14);
 
             let closest = null;
             let minDistance = Infinity;
+
 
             stationData.forEach(st => {
                 let dist = calculateDistance(userLat, userLng, st.lat, st.lng);
@@ -162,9 +165,9 @@
             if (closest) {
                 document.getElementById('nearestStationName').innerText = closest.name;
                 let distText = minDistance < 1 ? (minDistance * 1000).toFixed(0) + " m" : minDistance.toFixed(1) + " km";
-                document.getElementById('nearestDistance').innerText = distText + " từ vị trí hiện tại";
+                document.getElementById('nearestDistance').innerText = distText + " @Localizer["FromCurrent"]";
                 let walkMinutes = Math.max(1, Math.round(minDistance * 12));
-                document.getElementById('nearestWalkTime').innerText = walkMinutes + " min walk";
+                document.getElementById('nearestWalkTime').innerText = walkMinutes + " @Localizer["MinWalk"]";
 
                 let btn = document.getElementById('btnViewNearest');
                 btn.classList.remove('d-none');
@@ -174,26 +177,28 @@
                 };
             }
         }, function() {
-            document.getElementById('nearestStationName').innerText = "Không thể lấy vị trí";
-            document.getElementById('nearestDistance').innerText = "Vui lòng bật GPS";
+            document.getElementById('nearestStationName').innerText = "@Localizer["NoLocation"]";
+            document.getElementById('nearestDistance').innerText = "@Localizer["EnableGPS"]";
         });
     }
 
     function renderStationDetailAndVehicles(st) {
         document.getElementById('stationInfoPanel').innerHTML = `
             <div class="d-flex justify-content-between align-items-start mb-2">
-                <h6 class="fw-bold text-dark mb-0">${st.name}</h6>
-                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">Open</span>
+                <div>
+                    <h6 class="fw-bold text-dark mb-0 d-inline-block">${st.name}</h6>
+                </div>
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">@Localizer["Open"]</span>
             </div>
             <p class="text-muted small mb-4"><i class="bi bi-geo-alt"></i> Ho Chi Minh City</p>
             <div class="row text-center mb-4 border-top pt-3">
                 <div class="col-6 border-end">
                     <h5 class="fw-bold text-dark mb-0">${st.capacity}</h5>
-                    <small class="text-muted" style="font-size: 0.7rem;">Sức chứa</small>
+                    <small class="text-muted" style="font-size: 0.7rem;">@Localizer["Capacity"]</small>
                 </div>
                 <div class="col-6">
                     <h5 class="fw-bold text-success mb-0">${st.inventory}</h5>
-                    <small class="text-muted" style="font-size: 0.7rem;">Có sẵn</small>
+                    <small class="text-muted" style="font-size: 0.7rem;">@Localizer["Available"]</small>
                 </div>
             </div>
             <button class="btn btn-outline-success w-100 rounded-pill btn-sm fw-bold">@Localizer["GetDirections"]</button>
@@ -213,8 +218,8 @@
                     <div class="vehicle-row">
                         <div class="vehicle-img me-4 flex-shrink-0"><i class="bi ${isScooter ? 'bi-scooter' : 'bi-bicycle'}"></i></div>
                         <div style="width: 150px;"><small class="text-muted d-block" style="font-size: 0.7rem;">ID</small><h6 class="fw-bold text-dark mb-0">SR-${v.id}</h6></div>
-                        <div class="flex-grow-1"><small class="text-muted d-block" style="font-size: 0.7rem;">Loại</small><span class="text-dark fw-bold">${v.name}</span></div>
-                        <div style="width: 120px;" class="d-none d-md-block"><small class="text-muted d-block" style="font-size: 0.7rem;">Giá</small><span class="text-dark fw-bold">${v.price.toLocaleString('vi-VN')} đ/m</span></div>
+                        <div class="flex-grow-1"><small class="text-muted d-block" style="font-size: 0.7rem;">@Localizer["Type"]</small><span class="text-dark fw-bold">${v.name}</span></div>
+                        <div style="width: 120px;" class="d-none d-md-block"><small class="text-muted d-block" style="font-size: 0.7rem;">@Localizer["Price"]</small><span class="text-dark fw-bold">${v.price.toLocaleString('vi-VN')} đ/min</span></div>
                         <div class="ms-auto"><a href="/Checkout/Rent?vehicleId=${v.id}" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">@Localizer["BtnSelect"]</a></div>
                     </div>`;
             });
@@ -228,28 +233,4 @@
         var filtered = currentStation.vehicles.filter(v => v.name.toLowerCase().includes(keyword));
         renderVehiclesList(filtered);
     };
-<<<<<<< Updated upstream
 </script>
-@section Scripts {
-    <script>
-        // Khởi tạo bản đồ tại TP.HCM
-        var map = L.map('mainMap').setView([10.762622, 106.660172], 13);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Đổ dữ liệu trạm từ Model vào bản đồ
-        @foreach (var station in Model)
-        {
-            <text>
-            L.marker([@station.Latitude, @station.Longitude])
-                .addTo(map)
-                .bindPopup('<b>@station.LocationName</b><br>Xe trống: @station.CurrentInventory');
-            </text>
-        }
-    </script>
-}
-=======
-</script>
->>>>>>> Stashed changes

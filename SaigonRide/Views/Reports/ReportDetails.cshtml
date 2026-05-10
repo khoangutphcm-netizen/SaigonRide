@@ -1,6 +1,6 @@
 @model SaigonRide.Models.entities.Report
 @{
-    ViewData["Title"] = "Report Details";
+    ViewData["Title"] = "Chi tiết Báo cáo";
 }
 
 <div class="container py-4">
@@ -9,7 +9,7 @@
             <i class="bi bi-arrow-left text-dark"></i>
         </a>
         <div>
-            <h3 class="fw-bold text-dark mb-0">Report #@Model.Id</h3>
+            <h3 class="fw-bold text-dark mb-0">Báo cáo #@Model.Id</h3>
             <p class="text-muted mb-0">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
         </div>
     </div>
@@ -18,27 +18,27 @@
         <!-- User Report Section -->
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                <h5 class="fw-bold text-dark mb-3">Your Report</h5>
+                <h5 class="fw-bold text-dark mb-3">Báo cáo của bạn</h5>
                 <div class="mb-3">
-                    <label class="text-muted small fw-bold mb-2">Status</label>
+                    <label class="text-muted small fw-bold mb-2">Trạng thái</label>
                     <span class="badge bg-@(Model.Status == SaigonRide.Models.entities.ReportStatus.Open ? "warning" : (Model.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "success" : (Model.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? "info" : "secondary")))" style="font-size: 0.9rem; padding: 8px 12px;">
-                        @Model.Status
+                        @(Model.Status == SaigonRide.Models.entities.ReportStatus.Open ? "Mới" : (Model.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? "Đang xử lý" : (Model.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "Đã giải quyết" : "Đóng")))
                     </span>
                 </div>
                 <div class="mb-3">
-                    <label class="text-muted small fw-bold mb-2">Title</label>
+                    <label class="text-muted small fw-bold mb-2">Tiêu đề</label>
                     <p class="mb-0">@Model.Title</p>
                 </div>
                 <div class="mb-3">
-                    <label class="text-muted small fw-bold mb-2">Description</label>
+                    <label class="text-muted small fw-bold mb-2">Nội dung</label>
                     <p class="mb-0">@Model.Description</p>
                 </div>
                 <div class="mb-3">
-                    <label class="text-muted small fw-bold mb-2">Related Rental ID</label>
+                    <label class="text-muted small fw-bold mb-2">Mã chuyến đi liên quan</label>
                     <p class="mb-0">#@Model.RentalTransactionId</p>
                 </div>
                 <div class="mb-3">
-                    <label class="text-muted small fw-bold mb-2">Submitted</label>
+                    <label class="text-muted small fw-bold mb-2">Ngày gửi</label>
                     <p class="mb-0">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
                 </div>
             </div>
@@ -49,14 +49,14 @@
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
                 <h5 class="fw-bold text-dark mb-3">
                     <i class="bi bi-chat-left-dots text-success me-2"></i>
-                    Admin Response
+                    Phản hồi từ Admin
                 </h5>
 
                 @if (string.IsNullOrEmpty(Model.AdminResponse))
                 {
                     <div class="alert alert-info" role="alert">
                         <i class="bi bi-info-circle me-2"></i>
-                        No response yet. We'll get back to you soon!
+                        Chưa có phản hồi. Chúng tôi sẽ sớm liên hệ với bạn!
                     </div>
                 }
                 else
@@ -65,9 +65,9 @@
                         <p class="mb-0">@Model.AdminResponse</p>
                     </div>
                     <div class="mb-3">
-                        <label class="text-muted small fw-bold mb-2">Response Status</label>
+                        <label class="text-muted small fw-bold mb-2">Trạng thái phản hồi</label>
                         <p class="mb-0">
-                            <strong>@Model.Status</strong> - 
+                            <strong>@(Model.Status == SaigonRide.Models.entities.ReportStatus.Open ? "Mới" : (Model.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? "Đang xử lý" : (Model.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "Đã giải quyết" : "Đóng")))</strong> - 
                             @if (Model.RespondedAt.HasValue)
                             {
                                 <span class="text-muted">@Model.RespondedAt.Value.ToString("dd/MM/yyyy HH:mm:ss")</span>

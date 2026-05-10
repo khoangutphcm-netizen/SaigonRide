@@ -59,6 +59,12 @@ namespace SaigonRide.Controllers
                                             .OrderByDescending(a => a.CreatedAt)
                                             .Take(3)
                                             .ToList();
+            // Lấy danh sách tọa độ các trạm để truyền ra Dashboard (Nhớ using System.Text.Json;)
+            var stationsData = _context.Stations
+                                    .Where(s => s.IsAvailable)
+                                    .Select(s => new { name = s.LocationName, lat = s.Latitude, lng = s.Longitude })
+                                    .ToList();
+            ViewBag.StationsJson = JsonSerializer.Serialize(stationsData);
 
             return View(recentRides);
         }

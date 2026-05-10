@@ -42,22 +42,41 @@ namespace SaigonRide.Controllers
 
             return View(vehicle);
         }
-
         [HttpGet]
         public IActionResult Receipt(int vehicleId, int returnStationId, int duration)
         {
-            decimal finalPrice = _rentalService.CalculateEstimatedFare(vehicleId, returnStationId, duration);
+            // 1. TÌM XE ĐỂ LẤY GIÁ TIỀN & TÊN XE (Sửa lỗi CS0103)
             var vehicle = _context.Vehicles.FirstOrDefault(v => v.Id == vehicleId);
-            var station = _context.Stations.FirstOrDefault(s => s.Id == returnStationId);
+            if (vehicle == null) return NotFound("Không tìm thấy xe.");
 
+            // 2. TÌM TRẠM TRẢ ĐỂ LẤY TÊN TRẠM VÀ TÍNH KHUYẾN MÃI
+            var returnStation = _context.Stations.Include(s => s.Vehicles).FirstOrDefault(s => s.Id == returnStationId);
+            if (returnStation == null) return NotFound("Không tìm thấy trạm trả.");
+
+            // 3. TÍNH TOÁN GIÁ CẢ
+            decimal basePrice = duration * vehicle.PricePerMinute;
+            decimal finalPrice = basePrice;
+            bool isDiscountApplied = false;
+
+            // LOGIC CÂN BẰNG TỒN KHO: Khuyến mãi 15% nếu trả xe ở trạm đang thiếu xe (<= 20% sức chứa)
+            int actualInventory = returnStation.Vehicles.Count(v => v.Status == SaigonRide.Models.Enums.VehicleStatus.Available);
+            if (actualInventory <= (returnStation.MaxCapacity * 0.2)) 
+            {
+                finalPrice = basePrice * 0.85m; // Áp dụng giảm 15%
+                isDiscountApplied = true;
+            }
+
+            // 4. TRUYỀN TOÀN BỘ DỮ LIỆU XUỐNG VIEW ĐỂ IN HÓA ĐƠN VÀ ĐẨY LÊN FORM (Sửa lỗi mất data)
             ViewBag.VehicleId = vehicleId;
             ViewBag.ReturnStationId = returnStationId;
-            ViewBag.VehicleName = vehicle?.Category;
-            ViewBag.StationName = station?.LocationName;
             ViewBag.Duration = duration;
-            ViewBag.BasePrice = duration * (vehicle?.PricePerMinute ?? 0);
+            
+            ViewBag.VehicleName = vehicle.Category;
+            ViewBag.StationName = returnStation.LocationName;
+            
+            ViewBag.BasePrice = basePrice;
             ViewBag.FinalPrice = finalPrice;
-            ViewBag.IsDiscounted = finalPrice < ViewBag.BasePrice;
+            ViewBag.IsDiscountApplied = isDiscountApplied;
 
             return View();
         }
@@ -175,7 +194,6 @@ namespace SaigonRide.Controllers
             return RedirectToAction("Timer", new { vehicleId }); // Chuyển hướng cho chuẩn MVC
         }
 
-        // 2. HÀM HIỂN THỊ GIAO DIỆN TIMER (Hàm bị thiếu gây lỗi 404)
         [HttpGet]
         public IActionResult Timer(int vehicleId)
         {
@@ -194,14 +212,25 @@ namespace SaigonRide.Controllers
                 ViewBag.VehicleId = vehicleId;
                 ViewBag.VehicleCategory = vehicle?.Category;
                 ViewBag.StationName = station?.LocationName;
+                ViewBag.ReturnStationId = returnStationId; // Thêm dòng này để JS biết đích đến hiện tại
                 ViewBag.PricePerMinute = vehicle?.PricePerMinute ?? 0;
 
-                // Trị lỗi NaN: Ép thời gian thành số nguyên Unix (Miliseconds)
                 DateTime st = DateTime.Parse(root.GetProperty("StartTime").GetString());
                 ViewBag.StartTimeUnix = ((DateTimeOffset)st).ToUnixTimeMilliseconds();
 
                 ViewBag.AdditionalMinutes = root.GetProperty("AdditionalMinutes").GetInt32();
             }
+
+            // [THÊM MỚI]: Kéo data toàn bộ trạm xuống để vẽ bản đồ
+            var stationsData = _context.Stations.Select(s => new {
+                id = s.Id,
+                name = s.LocationName,
+                lat = s.Latitude,
+                lng = s.Longitude,
+                inventory = s.CurrentInventory,
+                capacity = s.MaxCapacity
+            }).ToList();
+            ViewBag.StationsJson = JsonSerializer.Serialize(stationsData);
 
             return View();
         }
@@ -260,6 +289,32 @@ namespace SaigonRide.Controllers
 
             // ĐÁ KHÁCH SANG TRANG RECEIPT ĐỂ CHỌN 6 PHƯƠNG THỨC THANH TOÁN
             return RedirectToAction("Receipt", new { vehicleId = vehicleId, returnStationId = returnStationId, duration = actualMinutes });
+        }
+        // 5. API ĐỔI TRẠM ĐÍCH GIỮA CHỪNG (KHÔNG CẦN LOAD LẠI TRANG)
+        [HttpPost]
+        public IActionResult ChangeReturnStation([FromBody] JsonElement data)
+        {
+            if (!data.TryGetProperty("newStationId", out var newStationIdProp)) return BadRequest();
+            int newStationId = newStationIdProp.GetInt32();
+
+            var sessionKey = HttpContext.Session.GetString("current_rental_session");
+            if (string.IsNullOrEmpty(sessionKey)) return BadRequest();
+
+            var sessionData = HttpContext.Session.GetString(sessionKey);
+            using (JsonDocument doc = JsonDocument.Parse(sessionData))
+            {
+                var root = doc.RootElement;
+                var updatedSession = new
+                {
+                    VehicleId = root.GetProperty("VehicleId").GetInt32(),
+                    ReturnStationId = newStationId, // Cập nhật trạm đích mới vào Session
+                    StartTime = root.GetProperty("StartTime").GetString(),
+                    AdditionalMinutes = root.GetProperty("AdditionalMinutes").GetInt32()
+                };
+                HttpContext.Session.SetString(sessionKey, JsonSerializer.Serialize(updatedSession));
+            }
+
+            return Ok(new { success = true });
         }
     }
 }

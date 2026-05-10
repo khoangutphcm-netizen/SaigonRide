@@ -26,11 +26,8 @@
     </div>
     <p class="text-muted mb-4">@Localizer["PageSubtitle"]</p>
 
-    <div class="row g-4">
-        <!-- CỘT TRÁI (Lịch sử & Thống kê) -->
-        <div class="col-lg-8 col-xl-9">
-            
-            <!-- 4 Thẻ Thống Kê (tính toán dựa trên StartTime và EndTime) -->
+    <div class="row g-4"> 
+        <div class="col-12"> 
             @{
                 var totalRides = Model?.Count() ?? 0;
                 var totalMinutes = Model?.Sum(x => (x.EndTime.HasValue ? (x.EndTime.Value - x.StartTime).TotalMinutes : (DateTime.Now - x.StartTime).TotalMinutes)) ?? 0;
@@ -81,10 +78,8 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Danh sách chuyến đi -->
-            <div class="card border-0 shadow-sm rounded-4 bg-white">
-                <!-- CARD HEADER MỚI (đã thay thế) -->
+ 
+            <div class="card border-0 shadow-sm rounded-4 bg-white"> 
                 <div class="card-header bg-transparent border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center p-4 gap-3">
                     <div class="d-flex gap-4">
                         <a asp-action="Index" asp-route-type="all" asp-route-period="@ViewBag.ActivePeriod" 
@@ -116,8 +111,7 @@
                     @if (Model != null && Model.Any())
                     {
                         foreach (var item in Model)
-                        {
-                            // TỰ ĐỘNG TÍNH SỐ PHÚT TỪ START TIME VÀ END TIME
+                        { 
                             var durationMins = (int)((item.EndTime - item.StartTime)?.TotalMinutes ?? 0);
 
                             <a asp-controller="History" asp-action="Details" asp-route-id="@item.Id" class="history-row flex-column flex-md-row gap-3 text-decoration-none text-dark">
@@ -172,31 +166,6 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI (Widgets) -->
-        <div class="col-lg-4 col-xl-3 d-flex flex-column gap-4">
-            <!-- Announcements Widget -->
-            <div class="card bg-white border-0 shadow-sm rounded-4">
-                <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 pb-2 px-4">
-                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-megaphone-fill text-success me-2"></i> @Localizer["Announcements"]</h6>
-                    <a href="#" class="text-success text-decoration-none small fw-bold">@Localizer["ViewAll"]</a>
-                </div>
-                <div class="card-body px-4 pt-0">
-                    <div class="py-3 border-bottom border-light">
-                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill mb-2" style="font-size: 0.6rem;">@Localizer["New"]</span>
-                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.85rem;">Weekend Promotion!</h6>
-                        <p class="text-muted mb-1" style="font-size: 0.75rem;">Get 15% off on all rides this weekend.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Promo Card -->
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative flex-grow-1" style="background: linear-gradient(135deg, #114728 0%, #0a2e19 100%); color: white;">
-                <div class="card-body p-4 position-relative z-1 d-flex flex-column justify-content-center">
-                    <h5 class="fw-bold mb-2">Explore Saigon<br>With Every Ride</h5>
-                    <p class="small mb-4" style="color: rgba(255,255,255,0.7);">Affordable, convenient and eco-friendly rides for everyone.</p>
-                </div>
-                <i class="bi bi-scooter position-absolute opacity-25" style="font-size: 8rem; right: -20px; bottom: -20px;"></i>
-            </div>
-        </div>
+         
     </div>
 </div>
