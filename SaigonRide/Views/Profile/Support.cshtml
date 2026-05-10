@@ -33,21 +33,23 @@
 
         <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
             <h6 class="fw-bold text-dark mb-4"><i class="bi bi-chat-left-text-fill text-success me-2"></i> @Localizer["SendFeedback"]</h6>
-            
-            <form action="#" method="get" onsubmit="event.preventDefault(); alert('@Localizer["MsgSentAlert"]');">
+
+            <form action="/Reports/CreateReport" method="post">
                 <div class="mb-3">
-                    <label class="form-label text-muted small fw-bold">@Localizer["LabelTopic"]</label>
-                    <select class="form-select border-light shadow-none bg-light fw-bold text-dark">
-                        <option>@Localizer["Topic_AppIssue"]</option>
-                        <option>@Localizer["Topic_VehicleIssue"]</option>
-                        <option>@Localizer["Topic_Payment"]</option>
-                        <option>@Localizer["Topic_Other"]</option>
+                    <label for="topic" class="form-label text-muted small fw-bold">@Localizer["LabelTopic"]</label>
+                    <select id="topic" name="title" class="form-select border-light shadow-none bg-light fw-bold text-dark" required>
+                        <option value="">-- @Localizer["LabelTopic"] --</option>
+                        <option value="Sự cố ứng dụng">@Localizer["Topic_AppIssue"]</option>
+                        <option value="Vấn đề phương tiện">@Localizer["Topic_VehicleIssue"]</option>
+                        <option value="Vấn đề thanh toán">@Localizer["Topic_Payment"]</option>
+                        <option value="Khác">@Localizer["Topic_Other"]</option>
                     </select>
                 </div>
                 <div class="mb-4">
-                    <label class="form-label text-muted small fw-bold">@Localizer["LabelMessage"]</label>
-                    <textarea class="form-control border-light shadow-none bg-light" rows="4" placeholder="@Localizer["MsgPlaceholder"]" required></textarea>
+                    <label for="description" class="form-label text-muted small fw-bold">@Localizer["LabelMessage"]</label>
+                    <textarea id="description" name="description" class="form-control border-light shadow-none bg-light" rows="4" placeholder="@Localizer["MsgPlaceholder"]" required></textarea>
                 </div>
+                <input type="hidden" name="rentalTransactionId" value="0" />
                 <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm">@Localizer["BtnSubmit"] <i class="bi bi-send-fill ms-2"></i></button>
             </form>
         </div>
