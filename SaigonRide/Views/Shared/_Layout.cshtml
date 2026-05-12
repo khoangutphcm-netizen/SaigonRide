@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
+         @@keyframes smoothFadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        body { animation: smoothFadeIn 0.35s ease-out forwards; }
         :root {
             --sidebar-bg-start: #0a3b22;
             --sidebar-bg-end: #1b6e3c;
@@ -30,40 +36,40 @@
             --text-main: #e0e0e0;
             --text-muted: #aaaaaa;
         }
-
-        body { background-color: var(--main-bg); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
-
-        /* Bố cục chính */
-        #wrapper { display: flex; min-height: 100vh; }
+ 
+        body { background-color: var(--main-bg); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; height: 100vh; margin: 0; }
+ 
+        #wrapper { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+         
+        #sidebar { width: 230px; background: linear-gradient(135deg, var(--sidebar-bg-start) 0%, var(--sidebar-bg-end) 100%); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 1000; height: 100vh; overflow-y: auto; overflow-x: hidden; margin-left: -230px; position: relative; -ms-overflow-style: none; scrollbar-width: none; }
+        #sidebar::-webkit-scrollbar { display: none; }
         
-        /* SIDEBAR WITH GRADIENT */
-        #sidebar { 
-            width: 260px; 
-            background: linear-gradient(135deg, var(--sidebar-bg-start) 0%, var(--sidebar-bg-end) 100%);
-            color: white; 
-            display: flex; 
-            flex-direction: column; 
-            flex-shrink: 0; 
-            transition: all 0.3s; 
-            z-index: 1000; 
-        }
+        #sidebar::before { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); border-radius: 50%; pointer-events: none; z-index: 0; }
+        #sidebar::after { content: ''; position: absolute; bottom: 20%; left: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%); border-radius: 50%; pointer-events: none; z-index: 0; }
+        
+        .user-deco-icon { position: absolute; color: rgba(255,255,255,0.1); pointer-events: none; z-index: 0; animation: userFloat 6s infinite ease-in-out; }
+        .user-deco-1 { top: 10%; right: 20px; font-size: 1.8rem; animation-delay: 0s; }
+        .user-deco-2 { top: 45%; left: 15px; font-size: 1.2rem; animation-delay: 2s; }
+        .user-deco-3 { top: 75%; right: 30px; font-size: 2rem; animation-delay: 1s; }
+        
+        .user-deco-wave { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; opacity: 0.1; pointer-events: none; z-index: 0; transform: scaleY(0.7); transform-origin: bottom; }
+        
+        @@keyframes userFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-15px) rotate(10deg); } }
+
+        .sidebar-brand, .sidebar-nav, .user-panel { position: relative; z-index: 1; }
+
+        #sidebar.sidebar-open { margin-left: 0; }
+        .sidebar-transition { transition: margin-left 0.3s ease-in-out; }
         .sidebar-brand { padding: 1.5rem; display: flex; align-items: center; gap: 10px; text-decoration: none; color: white; }
         .sidebar-nav .nav-link { color: rgba(255,255,255,0.8); padding: 0.8rem 1.5rem; display: flex; align-items: center; gap: 12px; font-weight: 500; border-radius: 0 25px 25px 0; margin-right: 1.5rem; transition: all 0.2s; }
-        .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { 
-            background-color: var(--sidebar-hover); 
-            color: white; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
+        .sidebar-nav .nav-link:hover, .sidebar-nav .nav-link.active { background-color: var(--sidebar-hover); color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
         
-        /* Cột bên phải */
-        #page-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        #page-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; height: 100vh; overflow: hidden; background: transparent; }
         
-        /* TOPBAR */
-        .topbar { background-color: transparent; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .topbar { background: transparent !important; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; border: none !important; box-shadow: none !important; }
         .search-bar { background: var(--card-bg); border: 1px solid #e0e0e0; border-radius: 20px; padding: 0.4rem 1rem; display: flex; align-items: center; width: 300px; }
         .search-bar input { border: none; background: transparent; outline: none; margin-left: 8px; width: 100%; color: var(--text-main); }
         
-        /* Ghi đè nền Dark Mode (Đã fix lỗi chữ chìm) */
         body.dark-mode .bg-white, body.dark-mode .card { background-color: var(--card-bg) !important; border-color: #333 !important; color: var(--text-main) !important; }
         body.dark-mode .search-bar { border-color: #333; }
         body.dark-mode .text-dark { color: #e0e0e0 !important; } 
@@ -78,8 +84,14 @@
 </head>
 <body>
     <div id="wrapper">
-        <!-- SIDEBAR -->
         <aside id="sidebar">
+            <i class="bi bi-cloud-fill user-deco-icon user-deco-1"></i>
+            <i class="bi bi-geo-alt-fill user-deco-icon user-deco-2"></i>
+            <i class="bi bi-bicycle user-deco-icon user-deco-3"></i>
+            <svg class="user-deco-wave" viewBox="0 0 1440 320" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#ffffff" fill-opacity="1" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,165.3C672,171,768,213,864,213.3C960,213,1056,171,1152,149.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+
             <a href="/" class="sidebar-brand mb-4 mt-2">
                 <i class="bi bi-scooter fs-2 text-white"></i>
                 <div>
@@ -111,10 +123,9 @@
                 </a>
             </nav>
 
-            <!-- Khối Account Góc Dưới -->
             @if (User.Identity.IsAuthenticated)
             {
-                <div class="px-3 pb-4">
+                <div class="user-panel px-3 pb-4">
                     <h6 class="text-uppercase mb-3" style="font-size: 0.75rem; color: rgba(255,255,255,0.6); padding-left: 1rem;">@Localizer["AccountLabel"]</h6>
                     <div class="d-flex align-items-center mb-4 px-3">
                         <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px; font-weight: bold;">
@@ -138,43 +149,36 @@
                             </small>
                         </div>
                     </div>
-                    <!-- NÚT BÍ MẬT CHỈ DÀNH CHO ADMIN -->
+
                     @if (User.FindFirst("UserType")?.Value == "Admin")
                     {
-                        <li class="nav-item mt-4">
-                            <a class="nav-link text-danger fw-bold" style="background-color: #ffcccc; border-radius: 8px; padding: 10px;" href="/AdminDashBoard/Index">
-                                <i class="bi bi-shield-lock-fill"></i> Vào Admin Dashboard
+                        <div class="mt-4 mb-3">
+                            <a class="btn w-100 fw-bold d-flex align-items-center justify-content-center gap-2" style="background-color: #ffcccc; color: #dc3545; border-radius: 12px; padding: 10px 5px; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" href="/AdminDashBoard/Index">
+                                <i class="bi bi-shield-lock-fill fs-5"></i> Admin Dashboard
                             </a>
-                        </li>
+                        </div>
                     }
-                    <!-- Khối Promo nhỏ xíu ở sidebar -->
-                    <div class="rounded-4 p-3 position-relative overflow-hidden" style="background: linear-gradient(135deg, #1b5e38 0%, #0f4225 100%); border: 1px solid rgba(255,255,255,0.15);">
-                        <h6 class="fw-bold mb-1 fs-6">@Html.Raw(Localizer["SidebarPromoTitle"].Value)</h6>
-                        <small class="d-block mb-3" style="color: rgba(255,255,255,0.8); font-size: 0.75rem;">@Localizer["SidebarPromoDesc"]</small>
-                        <a asp-controller="Booking" asp-action="Index" class="btn btn-sm btn-success rounded-pill px-3 fw-bold" style="font-size: 0.75rem; background-color: #20994a; border: none;">@Localizer["BtnLearnMore"] <i class="bi bi-arrow-right"></i></a>
-                        <i class="bi bi-buildings position-absolute opacity-25" style="font-size: 4rem; right: -10px; bottom: -15px;"></i>
-                    </div>
+
+                    <a href="javascript:void(0);" onclick="localStorage.removeItem('theme'); document.body.classList.remove('dark-mode'); window.location.href='/Account/Logout';" 
+                       class="btn w-100 fw-bold rounded-3 py-2 mt-2 d-flex align-items-center justify-content-center gap-2" 
+                       style="background-color: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.2s;" 
+                       onmouseover="this.style.backgroundColor='rgba(220, 53, 69, 0.9)'; this.style.borderColor='rgba(220, 53, 69, 1)';" 
+                       onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.1)'; this.style.borderColor='rgba(255, 255, 255, 0.2)';">
+                        <i class="bi bi-box-arrow-left fs-5"></i> @Localizer["BtnLogout"]
+                    </a>
                 </div>
             }
         </aside>
 
-        <!-- NỘI DUNG CHÍNH BÊN PHẢI -->
         <div id="page-content">
-            <!-- TOPBAR -->
             <header class="topbar">
-                <button class="btn btn-light rounded-circle shadow-sm border d-md-none"><i class="bi bi-list"></i></button>
-                <div class="d-none d-md-block"></div> <!-- Spacer -->
-
-                <div class="d-flex align-items-center gap-3">
-                    <form action="/Booking/Index" method="get" class="search-bar shadow-sm mb-0 p-0 ps-3">
-                        <i class="bi bi-search text-muted"></i>
-                        <input type="text" name="keyword" placeholder="@Localizer["SearchPlaceholder"]" value="@Context.Request.Query["keyword"]" style="border: none; background: transparent; outline: none; margin-left: 8px; width: 100%; color: var(--text-main); padding: 0.4rem 1rem 0.4rem 0;">
-                        <button type="submit" class="d-none"></button>
-                    </form>
-
-                    <!-- Nút đổi ngôn ngữ -->
+                <button id="sidebarToggle" class="btn fs-4 text-dark p-0" style="background: transparent; border: none; box-shadow: none;">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <div class="d-flex align-items-center gap-3 ms-auto">
                     <div class="dropdown">
-                        <button class="btn btn-white bg-white border shadow-sm rounded-pill px-3 fw-bold d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+                        <button class="btn fw-bold d-flex align-items-center gap-2 text-dark" style="background: transparent; border: none; box-shadow: none;" data-bs-toggle="dropdown">
                             <i class="bi bi-globe2 text-success"></i> 
                             @(System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("en") ? "EN" : "VI") 
                             <i class="bi bi-chevron-down ms-1" style="font-size: 0.7rem;"></i>
@@ -199,39 +203,38 @@
 
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <!-- Notifications Bell Icon -->
                         <div class="dropdown">
-                            <button class="btn btn-white bg-white border shadow-sm rounded-circle d-flex align-items-center justify-content-center position-relative" style="width: 40px; height: 40px;" data-bs-toggle="dropdown">
-                                <i class="bi bi-bell fs-5 text-success"></i>
+                            <button class="btn d-flex align-items-center justify-content-center position-relative text-dark p-2" style="background: transparent; border: none; box-shadow: none;" data-bs-toggle="dropdown">
+                                <i class="bi bi-bell fs-5"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge" style="font-size: 0.6rem; display: none;">
                                     <span id="notificationCount">0</span>
                                 </span>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2\" style=\"min-width: 350px;\">
-                                <li class=\"dropdown-header fw-bold text-dark\">Thông báo</li>
-                                <li><hr class=\"dropdown-divider\"></li>
-                                <li id=\"notificationList\">
-                                    <a class=\"dropdown-item text-muted text-center py-3\"><small>Không có thông báo</small></a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" style="min-width: 350px;">
+                                <li class="dropdown-header fw-bold text-dark">@Localizer["NotifTitle"]</li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li id="notificationList">
+                                    <a class="dropdown-item text-muted text-center py-3"><small>@Localizer["NotifEmpty"]</small></a>
                                 </li>
-                                <li><hr class=\"dropdown-divider\"></li>
-                                <li><a class=\"dropdown-item text-center fw-bold text-success\" href=\"/Reports/MyReports\">Xem Báo cáo của tôi</a></li>
-                            </ul>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center fw-bold text-success" href="/Reports/MyReports">@Localizer["ViewMyReports"]</a></li>
+                             </ul>
                         </div>
 
                         <div class="dropdown">
-                            <button class="btn btn-white bg-white border shadow-sm rounded-pill d-flex align-items-center gap-2 p-1 pe-3" data-bs-toggle="dropdown">
-                                <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 30px; height: 30px;">
+                            <button class="btn d-flex align-items-center gap-2 p-1 pe-2" style="background: transparent; border: none; box-shadow: none;" data-bs-toggle="dropdown">
+                                <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 30px; height: 30px;">
                                     @{
                                         var avatarUrl = User.FindFirst("AvatarUrl")?.Value;
                                         var currentName = User.Identity.Name ?? "User";
                                     }
                                     @if (!string.IsNullOrEmpty(avatarUrl))
                                     {
-                                        <img src="@avatarUrl" alt="Avatar" class="rounded-circle shadow-sm" style="width: 35px; height: 35px; object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=@currentName&background=0a3b22&color=fff'" />
+                                        <img src="@avatarUrl" alt="Avatar" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=@currentName&background=0a3b22&color=fff'" />
                                     }
                                     else
                                     {
-                                        <img src="https://ui-avatars.com/api/?name=@currentName&background=0a3b22&color=fff" alt="Avatar" class="rounded-circle shadow-sm" style="width: 35px; height: 35px; object-fit: cover;" />
+                                        <img src="https://ui-avatars.com/api/?name=@currentName&background=0a3b22&color=fff" alt="Avatar" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;" />
                                     }
                                 </div>
                                 <div class="text-start" style="line-height: 1;">
@@ -250,8 +253,7 @@
                 </div>
             </header>
 
-            <!-- MAIN VIEW -->
-            <main class="p-4" style="overflow-y: auto;">
+            <main class="p-4" style="flex: 1; overflow-y: auto;">
                 @RenderBody()
             </main>
         </div>
@@ -261,18 +263,17 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         if(localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark-mode'); }
+        
         function submitLanguageForm(formId) {
             var langForm = document.getElementById(formId);
             var cultureValue = langForm.querySelector('input[name="culture"]').value;
             
             var paymentForm = document.getElementById('paymentForm') || document.getElementById('rentForm');
-            
             if (paymentForm) {
                 var returnUrlInput = document.createElement('input');
                 returnUrlInput.type = 'hidden';
                 returnUrlInput.name = 'returnUrl';
                 returnUrlInput.value = window.location.pathname + window.location.search;
-
                 var cultureInput = document.createElement('input');
                 cultureInput.type = 'hidden';
                 cultureInput.name = 'culture';
@@ -291,12 +292,11 @@
             }
         }
 
-        // Load notifications on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadNotifications();
-            setInterval(loadNotifications, 30000); // Refresh every 30 seconds
+            setInterval(loadNotifications, 30000); 
         });
-
+        
         async function loadNotifications() {
             try {
                 const response = await fetch('/api/notifications/count');
@@ -306,11 +306,11 @@
                     document.getElementById('notificationBadge').style.display = 'inline-block';
                     document.getElementById('notificationCount').textContent = data.count;
 
-                    // Load notification list
                     const listResponse = await fetch('/api/notifications/list');
                     const notifications = await listResponse.json();
-
                     let listHTML = '';
+                    const statusVi = { 'Open': 'Mới', 'InProgress': 'Đang xử lý', 'Resolved': 'Đã giải quyết', 'Closed': 'Đóng' };
+                    const statusEn = { 'Open': 'Open', 'InProgress': 'In Progress', 'Resolved': 'Resolved', 'Closed': 'Closed' };
                     notifications.forEach(notif => {
                         listHTML += `<a class="dropdown-item py-2" href="/Reports/ReportDetails/${notif.reportId}">
                             <div class="d-flex gap-2">
@@ -330,7 +330,36 @@
             } catch (error) {
                 console.error('Error loading notifications:', error);
             }
-        }
+        } 
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidebarToggle = document.getElementById('sidebarToggle');
+            var sidebar = document.getElementById('sidebar');
+
+            if (sidebarToggle && sidebar) {  
+                var savedState = localStorage.getItem('sidebarState');
+                if (savedState === 'open') {
+                    sidebar.classList.add('sidebar-open');
+                } else if (savedState === 'closed') {
+                    sidebar.classList.remove('sidebar-open');
+                } 
+                 
+                setTimeout(function() {
+                    sidebar.classList.add('sidebar-transition');
+                }, 50);
+                 
+                sidebarToggle.addEventListener('click', function(e) {
+                    sidebar.classList.toggle('sidebar-open'); 
+                     
+                    if (sidebar.classList.contains('sidebar-open')) {
+                        localStorage.setItem('sidebarState', 'open');
+                    } else {
+                        localStorage.setItem('sidebarState', 'closed');
+                    }
+                    e.stopPropagation(); 
+                });
+            }
+        });
     </script>
 </body>
 </html>

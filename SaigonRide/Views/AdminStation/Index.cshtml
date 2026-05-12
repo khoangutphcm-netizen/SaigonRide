@@ -4,23 +4,37 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    .station-row { display: flex; align-items: center; padding: 1.5rem; background: #fff; border: 1px solid #f0f0f0; border-radius: 1rem; margin-bottom: 1rem; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+    .station-row:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #198754; }
+    .station-icon-wrapper { width: 65px; height: 65px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; }
+    .bg-grad-success { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); color: #198754; }
+    .bg-grad-danger { background: linear-gradient(135deg, #ffebee 0%, #f8bbd0 100%); color: #dc3545; }
+    .station-actions { opacity: 0.3; transition: opacity 0.2s; }
+    .station-row:hover .station-actions { opacity: 1; }
+    #modalMap { height: 500px; border-radius: 0 0 1rem 1rem; width: 100%; z-index: 1; }
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-geo-alt-fill text-success me-2"></i>Danh sách Trạm</h5>
-    <a href="/AdminStation/Create" class="btn btn-success fw-bold rounded-pill shadow-sm">
-        <i class="bi bi-plus-circle me-1"></i> Thêm Trạm mới
+    <h4 class="fw-bold text-dark mb-0"><i class="bi bi-geo-alt-fill text-success me-2"></i>Danh sách Trạm</h4>
+    <a href="/AdminStation/Create" class="btn btn-success fw-bold rounded-pill shadow-sm px-4">
+        <i class="bi bi-plus-circle me-2"></i> Thêm Trạm mới
     </a>
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-6">
+    <div class="col-md-6 col-lg-5">
         <form asp-action="Index" method="get">
-            <div class="input-group shadow-sm rounded-pill overflow-hidden border bg-white">
-                <span class="input-group-text bg-white border-0 text-muted ps-4"><i class="bi bi-search"></i></span>
-                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control border-0 shadow-none px-2" placeholder="Tìm kiếm theo Tên khu vực trạm...">
-                <button class="btn btn-success fw-bold px-4" type="submit">Tìm kiếm</button>
+            <div class="input-group shadow-sm rounded-pill overflow-hidden border bg-white p-1">
+                <span class="input-group-text bg-white border-0 text-muted ps-3"><i class="bi bi-search"></i></span>
+                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control border-0 shadow-none px-2" placeholder="Tìm kiếm khu vực trạm...">
+                <button class="btn btn-success fw-bold rounded-pill px-4" type="submit">Tìm</button>
                 @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch))
                 {
-                    <a href="/AdminStation/Index" class="btn btn-light border-start px-3" title="Xóa tìm kiếm"><i class="bi bi-x-lg"></i></a>
+                    <a href="/AdminStation/Index" class="btn btn-light rounded-pill ms-1 text-danger"><i class="bi bi-x-lg"></i></a>
                 }
             </div>
         </form>
@@ -29,92 +43,157 @@
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4">
-        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <div class="alert alert-success rounded-4 border-0 shadow-sm mb-4"><i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]</div>
 }
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <div class="alert alert-danger rounded-4 border-0 shadow-sm mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]</div>
 }
 
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light text-muted" style="border-bottom: 2px solid #dee2e6;">
-                <tr>
-                    <th class="ps-4">ID</th>
-                    <th>Tên Trạm (Khu vực)</th>
-                    <th class="text-center">Trạng thái</th>
-                    <th class="text-center">Sức chứa / Đang đỗ</th>
-                    <th class="text-end pe-4">Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var station in Model)
-                    {
-                        <tr>
-                            <td class="ps-4 fw-bold text-muted">#@station.Id</td>
-                            <td>
-                                <div class="fw-bold text-dark">@station.LocationName</div>
-                                <div class="text-muted small">@station.Latitude, @station.Longitude</div>
-                            </td>
-                            <td class="text-center">
-                                @if (station.IsAvailable)
-                                {
-                                    <span class="badge bg-success rounded-pill">Hoạt động</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger rounded-pill">Tạm ngưng</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-secondary rounded-pill me-1" title="Sức chứa tối đa">@station.MaxCapacity</span> /
-                                @if (station.CurrentInventory == 0)
-                                {
-                                    <span class="badge bg-danger rounded-pill ms-1" title="Đang đỗ">0</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-success rounded-pill ms-1" title="Đang đỗ">@station.CurrentInventory</span>
-                                }
-                            </td>
-                            <td class="text-end pe-4">
-                                <!-- Nút Bật/Tắt Trạm -->
-                                <form asp-action="ToggleStatus" asp-route-id="@station.Id" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm @(station.IsAvailable ? "btn-outline-danger" : "btn-outline-success") me-1" title="Đổi trạng thái trạm">
-                                        <i class="bi bi-power"></i>
-                                    </button>
-                                </form>
-                                <a href="/AdminStation/Edit/@station.Id" class="btn btn-sm btn-light text-primary me-1" title="Chỉnh sửa">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <form asp-action="Delete" asp-route-id="@station.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trạm @station.LocationName không?');">
-                                    <button type="submit" class="btn btn-sm btn-light text-danger" title="Xóa">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
+<div class="station-list">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var station in Model)
+        {
+            <div class="station-row" onclick="openStationMap(@station.Id, @station.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture), @station.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture), '@station.LocationName')">
+                <div class="station-icon-wrapper @(station.IsAvailable ? "bg-grad-success" : "bg-grad-danger") me-4">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+                
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-light text-muted border">ID: #@station.Id</span>
+                        @if (station.IsAvailable)
+                        {
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-check-circle-fill me-1"></i> Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25"><i class="bi bi-x-circle-fill me-1"></i> Tạm ngưng</span>
+                        }
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">@station.LocationName</h5>
+                    <small class="text-muted"><i class="bi bi-compass"></i> @station.Latitude, @station.Longitude</small>
+                </div>
+
+                <div class="d-none d-md-flex align-items-center gap-4 px-4 border-start border-end mx-4">
+                    <div class="text-center">
+                        <h4 class="fw-bold text-dark mb-0">@station.MaxCapacity</h4>
+                        <small class="text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">SỨC CHỨA</small>
+                    </div>
+                    @{ 
+                        var availableCount = station.Vehicles != null ? station.Vehicles.Count(v => v.Status == SaigonRide.Models.Enums.VehicleStatus.Available) : 0; 
                     }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="5" class="text-center text-muted py-5">
-                            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-                            Không tìm thấy trạm nào.
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                    <div class="text-center">
+                        <h4 class="fw-bold @(availableCount == 0 ? "text-danger" : "text-success") mb-0" id="inv-count-@station.Id">@availableCount</h4>
+                        <small class="text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">ĐANG ĐỖ</small>
+                    </div>
+                </div>
+
+                <div class="station-actions text-end" onclick="event.stopPropagation();">
+                    <form asp-action="ToggleStatus" asp-route-id="@station.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-light rounded-circle shadow-sm me-2 text-primary" style="width: 45px; height: 45px;"><i class="bi bi-power"></i></button>
+                    </form>
+                    <a href="/AdminStation/Edit/@station.Id" class="btn btn-light rounded-circle shadow-sm me-2 text-warning" style="width: 45px; height: 45px; display: inline-flex; align-items: center; justify-content: center;"><i class="bi bi-pencil-fill"></i></a>
+                    <form asp-action="Delete" asp-route-id="@station.Id" method="post" class="d-inline" onsubmit="return confirm('Xóa trạm @station.LocationName?');">
+                        <button type="submit" class="btn btn-light rounded-circle shadow-sm text-danger" style="width: 45px; height: 45px;"><i class="bi bi-trash-fill"></i></button>
+                    </form>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-geo-alt fs-1 text-muted opacity-25 mb-3 d-block"></i>
+            <h5 class="fw-bold text-muted">Chưa có dữ liệu trạm</h5>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-light p-4 pb-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="modal-title fw-bold text-dark mb-1" id="mapModalTitle">Bản đồ Trạm</h4>
+                    <span class="badge bg-danger text-white rounded-pill pulse-badge"><i class="bi bi-broadcast me-1"></i> Live Tracking</span>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 position-relative">
+                <div id="modalMap"></div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    var map;
+    var markersLayer;
+    var targetLat = 0;
+    var targetLng = 0;
+    var targetId = 0;
+    var pollInterval;
+
+    var stationIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-white rounded-circle shadow-lg border border-3 border-success d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;"><i class="bi bi-geo-alt-fill text-success fs-4"></i></div>`, iconSize: [45, 45], iconAnchor: [22, 45] });
+    var focusIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-white rounded-circle shadow-lg border border-4 border-danger d-flex align-items-center justify-content-center" style="width: 65px; height: 65px;"><i class="bi bi-geo-alt-fill text-danger fs-1"></i></div>`, iconSize: [65, 65], iconAnchor: [32, 65] });
+
+    function initMap() {
+        if (!map) {
+            map = L.map('modalMap', { zoomControl: false }).setView([10.785, 106.705], 15);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+            markersLayer = L.layerGroup().addTo(map);
+        }
+    }
+
+    function loadLiveStations() {
+        fetch('/AdminStation/GetLiveStations').then(r => r.json()).then(data => {
+            if(markersLayer) markersLayer.clearLayers();
+            data.forEach(st => {
+                let invEl = document.getElementById('inv-count-' + st.id);
+                if (invEl) {
+                    invEl.innerText = st.inventory;
+                    if (st.inventory == 0) {
+                        invEl.classList.remove('text-success');
+                        invEl.classList.add('text-danger');
+                    } else {
+                        invEl.classList.remove('text-danger');
+                        invEl.classList.add('text-success');
+                    }
+                }
+
+                if(st.lat && st.lng && markersLayer) {
+                    let isTarget = (st.id === targetId);
+                    L.marker([st.lat, st.lng], { icon: isTarget ? focusIcon : stationIcon }).addTo(markersLayer)
+                     .bindTooltip(`<b>${st.name}</b><br/>Đang đỗ: <span class="${st.inventory==0?'text-danger':'text-success'} fw-bold">${st.inventory}</span> / ${st.capacity}`, { direction: 'top', offset: [0, isTarget ? -65 : -45], permanent: isTarget });
+                }
+            });
+        });
+    }
+
+    function openStationMap(id, lat, lng, name) {
+        targetId = id;
+        targetLat = lat;
+        targetLng = lng;
+        document.getElementById('mapModalTitle').innerText = name;
+        var myModal = new bootstrap.Modal(document.getElementById('mapModal'));
+        myModal.show();
+    }
+
+    document.getElementById('mapModal').addEventListener('shown.bs.modal', function () {
+        initMap();
+        map.invalidateSize();
+        map.setView([targetLat, targetLng], 17);
+        loadLiveStations();
+        pollInterval = setInterval(loadLiveStations, 5000);
+    });
+
+    document.getElementById('mapModal').addEventListener('hidden.bs.modal', function () {
+        clearInterval(pollInterval);
+    });
+    
+    setInterval(loadLiveStations, 5000);
+    loadLiveStations();
+</script>

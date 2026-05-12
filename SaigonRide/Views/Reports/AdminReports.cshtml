@@ -61,7 +61,7 @@
                                     @report.Status
                                 </span>
                             </td>
-                            <td>@report.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@report.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm")</td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#respondModal_@report.Id">
                                     <i class="bi bi-reply"></i> Phản hồi
@@ -84,7 +84,7 @@
                                                 <p><strong>Tiêu đề:</strong> @report.Title</p>
                                                 <p><strong>Nội dung:</strong> @report.Description</p>
                                                 <p><strong>Người dùng:</strong> @report.User.FullName (@report.User.Email)</p>
-                                                <p><strong>Ngày gửi:</strong> @report.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                                                <p><strong>Ngày gửi:</strong> @report.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm:ss")</p>
                                             </div>
                                         </div>
 

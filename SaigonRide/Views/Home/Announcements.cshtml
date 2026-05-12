@@ -15,26 +15,36 @@
             <p class="text-muted mb-0">Cập nhật những tin tức và khuyến mãi mới nhất</p>
         </div>
     </div>
-
     <div class="row g-4 mb-5">
         @if(Model != null && Model.Any()) {
             foreach(var item in Model) {
                 <div class="col-md-6 col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-4 h-100 p-2 bg-white transition-hover">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 bg-white transition-hover overflow-hidden">
+                        
+                        @if (!string.IsNullOrEmpty(item.ImageUrl)) {
+                            <div style="height: 200px; overflow: hidden; position: relative;">
+                                <img src="@item.ImageUrl" class="w-100 h-100" style="object-fit: cover; transition: transform 0.4s ease;" onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'" />
                                 @if ((DateTime.Now - item.CreatedAt).TotalDays <= 3)
+                                {
+                                    <span class="position-absolute top-0 end-0 badge bg-danger m-3 px-3 py-2 rounded-pill shadow">Mới</span>
+                                }
+                            </div>
+                        }
+
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                @if (string.IsNullOrEmpty(item.ImageUrl) && (DateTime.Now - item.CreatedAt).TotalDays <= 3)
                                 {
                                     <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Mới</span>
                                 }
-                                else
+                                else if (string.IsNullOrEmpty(item.ImageUrl))
                                 {
                                     <span class="badge bg-light text-muted rounded-pill px-3 py-2">Tin tức</span>
                                 }
-                                <small class="text-muted"><i class="bi bi-clock me-1"></i> @item.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i> @item.CreatedAt.ToString("dd/MM/yyyy")</small>
                             </div>
                             <h5 class="fw-bold text-dark mb-3">@item.Title</h5>
-                            <p class="text-muted mb-0" style="font-size: 0.9rem;">@item.Content</p>
+                            <p class="text-muted mb-0" style="font-size: 0.9rem; line-height: 1.6;">@item.Content</p>
                         </div>
                     </div>
                 </div>
