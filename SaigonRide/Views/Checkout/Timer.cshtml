@@ -1,126 +1,180 @@
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
     ViewData["Title"] = Localizer["ActiveRental"];
-    Layout = "~/Views/Shared/_Layout.cshtml"; // Giữ layout chuẩn, không phá nền
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <!-- Khung rộng rãi cho màn hình PC -->
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                
-                <!-- HEADER CHUYẾN ĐI -->
-                <div class="card-header bg-success text-white p-4 text-center border-0">
-                    <span class="badge bg-white text-success rounded-pill mb-3 px-3 py-2 shadow-sm">
-                        <i class="bi bi-circle-fill text-success border border-2 border-white rounded-circle me-2" style="font-size: 0.6rem; vertical-align: middle;"></i>
-                        @Localizer["ActiveRental"]
-                    </span>
-                    <h3 class="mb-0 fw-bold">@ViewBag.VehicleCategory</h3>
-                    <p class="mb-0 mt-2 text-white-50"><i class="bi bi-geo-alt-fill me-1"></i>Trạm đích: @ViewBag.StationName</p>
-                </div>
-                
-                <div class="card-body p-5">
-                    <div class="row align-items-center g-5">
-                        
-                        <!-- CỘT TRÁI: ĐỒNG HỒ ĐẾM THỜI GIAN -->
-                        <div class="col-md-6 text-center border-end pe-md-4">
-                            <p class="text-muted text-uppercase fw-bold mb-2">@Localizer["ElapsedTime"]</p>
-                            
-                            <!-- Font monospace hiển thị số to, không bị nhảy giật -->
-                            <div class="display-2 fw-bold text-success mb-4" id="timerDisplay" style="font-family: 'Courier New', monospace; letter-spacing: 2px;">
-                                00:00:00
-                            </div>
-                            
-                            <!-- Nút cộng giờ -->
-                            <div class="d-flex justify-content-center gap-2 mb-4 mb-md-0">
-                                <form method="post" asp-action="AddMinutes" class="d-inline">
-                                    <input type="hidden" name="vehicleId" value="@ViewBag.VehicleId" />
-                                    <input type="hidden" name="minutes" value="30" />
-                                    <button type="submit" class="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm">
-                                        +30 min
-                                    </button>
-                                </form>
-                                <form method="post" asp-action="AddMinutes" class="d-inline">
-                                    <input type="hidden" name="vehicleId" value="@ViewBag.VehicleId" />
-                                    <input type="hidden" name="minutes" value="60" />
-                                    <button type="submit" class="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm">
-                                        +60 min
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                        
-                        <!-- CỘT PHẢI: CHI PHÍ TẠM TÍNH -->
-                        <div class="col-md-6 ps-md-4">
-                            <div class="bg-light p-4 rounded-4 shadow-sm border border-light">
-                                <h5 class="fw-bold mb-4 text-dark border-bottom pb-3">Chi tiết chi phí</h5>
-                                
-                                <div class="d-flex justify-content-between mb-3">
-                                    <span class="text-muted fw-bold">@Localizer["Rate"]</span>
-                                    <span class="fw-bold text-dark fs-5">@ViewBag.PricePerMinute.ToString("N0") ₫/min</span>
-                                </div>
-                                
-                                <div class="d-flex justify-content-between mb-3">
-                                    <span class="text-muted fw-bold">@Localizer["CurrentCost"]</span>
-                                    <span class="fw-bold text-dark fs-5" id="currentCost">0 ₫</span>
-                                </div>
-                                
-                                <div class="d-flex justify-content-between mt-4 pt-3 border-top border-2 border-white">
-                                    <span class="text-muted fw-bold text-uppercase mt-1">@Localizer["EstimatedTotal"]</span>
-                                    <span class="fs-3 fw-bold text-danger" id="estimatedTotal">0 ₫</span>
-                                </div>
-                            </div>
-                            
-                            <!-- NÚT KẾT THÚC CHUYẾN ĐI -->
-                            <div class="mt-4">
-                                <form method="post" asp-action="EndRental">
-                                    <input type="hidden" name="vehicleId" value="@ViewBag.VehicleId" />
-                                    <button type="submit" class="btn btn-danger btn-lg w-100 rounded-pill fw-bold py-3 shadow" onclick="return confirm('@Localizer["ConfirmEnd"]');">
-                                        <i class="bi bi-stop-circle-fill me-2 fs-5"></i>@Localizer["EndRental"]
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                        
-                    </div>
-                </div>
-            </div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<style>
+    #trackingMap { position: absolute; top: 60px; bottom: 0; left: 0; right: 0; z-index: 1; }
+    .glass-timer { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 400px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+    .glass-action { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 400px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); border-radius: 20px; box-shadow: 0 -10px 30px rgba(0,0,0,0.15); }
+    .leaflet-routing-container { display: none !important; }
+</style>
+
+<div id="trackingMap"></div>
+<div class="p-3 border border-warning shadow-lg" style="position: absolute; top: 80px; right: 20px; z-index: 1000; background: rgba(255,255,255,0.9); backdrop-filter: blur(15px); border-radius: 15px; width: 110px;">
+    <span class="badge bg-warning text-dark mb-2 w-100 fw-bold" style="letter-spacing: 1px;">DEMO</span>
+    <form method="post" asp-action="AddMinutes" class="d-flex flex-column gap-2">
+        <input type="hidden" name="vehicleId" value="@ViewBag.VehicleId" />
+        <button type="submit" name="minutes" value="5" class="btn btn-outline-dark btn-sm fw-bold">+ 5m</button>
+        <button type="submit" name="minutes" value="10" class="btn btn-outline-dark btn-sm fw-bold">+ 10m</button>
+        <button type="submit" name="minutes" value="15" class="btn btn-outline-dark btn-sm fw-bold">+ 15m</button>
+        <button type="submit" name="minutes" value="30" class="btn btn-outline-dark btn-sm fw-bold">+ 30m</button>
+        <button type="submit" name="minutes" value="60" class="btn btn-outline-dark btn-sm fw-bold">+ 60m</button>
+    </form>
+</div>
+<div class="glass-timer p-3 border border-white">
+    <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+        <span class="badge bg-success bg-opacity-25 text-success rounded-pill px-3 py-1"><i class="bi bi-circle-fill small me-1"></i> @Localizer["ActiveRental"]</span>
+        <h6 class="fw-bold text-dark mb-0">@ViewBag.VehicleCategory</h6>
+    </div>
+    <div class="text-center py-2">
+        <div class="display-4 fw-bold text-success mb-1" id="timerDisplay" style="font-family: 'Courier New', monospace; letter-spacing: -2px;">00:00:00</div>
+        <div class="d-flex justify-content-between align-items-center px-2 mt-3">
+            <span class="text-muted fw-bold small">@Localizer["CurrentCost"]</span>
+            <span class="fw-bold text-dark fs-5" id="currentCost">0 ₫</span>
         </div>
     </div>
 </div>
 
+<div class="glass-action p-4 border border-white">
+    <small class="text-muted d-block fw-bold mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> @Localizer["CurrentDestination"]:</small>
+    <div class="bg-light rounded-4 p-3 mb-3 border">
+        <h6 class="fw-bold text-dark mb-0 text-center" id="ui-station-name">
+             @(ViewBag.StationName ?? Localizer["PleaseSelectStation"].Value)
+        </h6>
+        <div id="live-dist" class="text-center fw-bold text-primary mt-1" style="font-size: 0.85rem; display: none;"></div>
+    </div>
+
+    <form method="post" asp-action="EndRental">
+        <input type="hidden" name="vehicleId" value="@ViewBag.VehicleId" />
+        <input type="hidden" name="returnStationId" id="final-station-id" value="@ViewBag.ReturnStationId" />
+        <button type="submit" id="btn-end-rental" class="btn btn-danger btn-lg w-100 rounded-pill fw-bold py-3 shadow-lg"
+                @(ViewBag.ReturnStationId == null ? "disabled" : "")
+                onclick="return confirm('@Localizer["ConfirmEnd"]');">
+            <i class="bi bi-stop-circle-fill me-2"></i>@Localizer["EndRental"]
+        </button>
+    </form>
+</div>
+
 <script>
-    // JS nhận thẳng số Unix Miliseconds từ C#, miễn nhiễm hoàn toàn với lỗi NaN
     let startTime = @(ViewBag.StartTimeUnix ?? "Date.now()");
     let additionalMinutes = @(ViewBag.AdditionalMinutes ?? 0);
     let pricePerMinute = @(ViewBag.PricePerMinute ?? 0);
 
     function formatTime(ms) {
-        let totalSeconds = Math.floor(ms / 1000) + (additionalMinutes * 60);
-        if (totalSeconds < 0) totalSeconds = 0;
-        let hours = Math.floor(totalSeconds / 3600);
-        let minutes = Math.floor((totalSeconds % 3600) / 60);
-        let seconds = totalSeconds % 60;
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        let totalSecs = Math.max(0, Math.floor(ms / 1000) + (additionalMinutes * 60));
+        let h = Math.floor(totalSecs / 3600), m = Math.floor((totalSecs % 3600) / 60), s = totalSecs % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
-    function updateTimer() {
+    setInterval(() => {
         let elapsed = Date.now() - startTime;
         document.getElementById('timerDisplay').textContent = formatTime(elapsed);
+        let mins = Math.max(0, Math.ceil((Math.floor(elapsed / 1000) + (additionalMinutes * 60)) / 60));
+        document.getElementById('currentCost').textContent = (mins * pricePerMinute).toLocaleString('vi-VN') + ' ₫';
+    }, 1000);
 
-        let totalSeconds = Math.floor(elapsed / 1000) + (additionalMinutes * 60);
-        let minutes = Math.ceil(totalSeconds / 60);
-        if (minutes < 0) minutes = 0;
+    var map = L.map('trackingMap', { zoomControl: false }).setView([10.785, 106.705], 15);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    var stations = @Html.Raw(ViewBag.StationsJson ?? "[]");
+    var currentDestId = @(ViewBag.ReturnStationId ?? 0);
+    var userMarker = null, userLatLng = null, routingControl = null;
+    var stationMarkers = {};
+
+    // BỘ ICON "SIÊU TO KHỔNG LỒ" ĐỒNG BỘ
+    var userIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-primary text-white rounded-circle shadow-lg border border-4 border-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-person-fill fs-5"></i></div>`, iconSize: [40, 40], iconAnchor: [20, 20] });
+    
+    var destIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-white rounded-circle shadow-lg border border-4 border-danger d-flex align-items-center justify-content-center" style="width: 55px; height: 55px;"><i class="bi bi-geo-alt-fill text-danger fs-2"></i></div>`, iconSize: [55, 55], iconAnchor: [27, 55] });
+    var normalIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-white rounded-circle shadow-lg border border-3 border-success d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;"><i class="bi bi-geo-alt-fill text-success fs-4"></i></div>`, iconSize: [45, 45], iconAnchor: [22, 45] });
+    var promoIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-white rounded-circle shadow-lg border border-3 border-warning d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;"><i class="bi bi-geo-alt-fill text-warning fs-4"></i></div>`, iconSize: [45, 45], iconAnchor: [22, 45] });
+    var fullIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-white rounded-circle shadow-lg border border-3 border-secondary opacity-75 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;"><i class="bi bi-geo-alt-fill text-secondary fs-4"></i></div>`, iconSize: [45, 45], iconAnchor: [22, 45] });
+    function updateRoute(destLat, destLng) {
+        if (!userLatLng) return;
+        if (routingControl) map.removeControl(routingControl);
+        var destLatLng = L.latLng(destLat, destLng);
+        routingControl = L.Routing.control({
+            waypoints: [userLatLng, destLatLng],
+            routeWhileDragging: false, addWaypoints: false, show: false,
+            createMarker: function() { return null; },
+            lineOptions: { styles: [{color: '#dc3545', opacity: 0.8, weight: 6, dashArray: '10, 10'}] }
+        }).addTo(map);
+        var bounds = L.latLngBounds([userLatLng, destLatLng]);
+        map.fitBounds(bounds, { padding: [80, 200] }); 
         
-        let cost = minutes * pricePerMinute;
-        let formattedCost = cost.toLocaleString('vi-VN') + ' ₫';
+        var R = 6371; var dLat = (destLat - userLatLng.lat) * Math.PI / 180; var dLon = (destLng - userLatLng.lng) * Math.PI / 180;
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(userLatLng.lat * Math.PI / 180) * Math.cos(destLat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        var distKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var distText = distKm < 1 ? (distKm * 1000).toFixed(0) + " m" : distKm.toFixed(1) + " km";
         
-        document.getElementById('currentCost').textContent = formattedCost;
-        document.getElementById('estimatedTotal').textContent = formattedCost;
+        let distEl = document.getElementById('live-dist');
+        distEl.innerHTML = `<i class="bi bi-cursor-fill me-1"></i>` + distText;
+        distEl.style.display = 'block';
     }
+    stations.forEach(function (st) {
+        if(st.lat && st.lng) {
+            let isFull = (st.capacity - st.inventory) <= 0;
+            let isPromo = st.inventory <= (st.capacity * 0.2) && !isFull;
+            let isDest = (st.id === currentDestId);
 
-    // Chạy ngay 1 lần lúc load trang, rồi set interval mỗi 1 giây
-    updateTimer();
-    setInterval(updateTimer, 1000);
+            let baseIcon = isFull ? fullIcon : (isPromo ? promoIcon : normalIcon);
+            let marker = L.marker([st.lat, st.lng], { icon: isDest ? destIcon : baseIcon }).addTo(map);
+            
+            marker.baseIcon = baseIcon;
+            marker.isFull = isFull;
+            marker.bindTooltip(`<b>${st.name}</b>`, { direction: 'top', offset: [0, -45] });
+            stationMarkers[st.id] = marker;
+
+            // NẾU LÀ TRẠM ĐÍCH LÚC MỚI LOAD TRANG: Hiển thị ngay huy hiệu nếu có
+            if(isDest) {
+                updateRoute(st.lat, st.lng);
+                let promoHtml = isPromo ? `<br><small class="text-warning fw-bold d-block mt-2"><i class="bi bi-tags-fill me-1"></i>@Localizer["TooltipDiscount"]</small>` : "";
+                document.getElementById('ui-station-name').innerHTML = st.name + promoHtml;
+            }
+             
+            // XỬ LÝ KHI CLICK ĐỔI TRẠM TRÊN BẢN ĐỒ
+            marker.on('click', function () {
+                if (st.id === currentDestId) return; 
+                if (marker.isFull) { alert('@Localizer["AlertFull"]'); return; }
+                
+                if (currentDestId !== 0 && stationMarkers[currentDestId]) {
+                    stationMarkers[currentDestId].setIcon(stationMarkers[currentDestId].baseIcon);
+                }
+                
+                currentDestId = st.id;
+                stationMarkers[currentDestId].setIcon(destIcon);
+                updateRoute(st.lat, st.lng); 
+                
+                // NÂNG CẤP: Chèn thêm badge giảm giá 15% ngay dưới tên trạm
+                let promoHtml = isPromo ? `<br><small class="text-warning fw-bold d-block mt-2"><i class="bi bi-tags-fill me-1"></i>@Localizer["TooltipDiscount"]</small>` : "";
+                document.getElementById('ui-station-name').innerHTML = st.name + promoHtml;
+
+                document.getElementById('final-station-id').value = st.id;
+                document.getElementById('btn-end-rental').removeAttribute('disabled');
+            });
+        }
+    });
+     
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(function (position) {
+            userLatLng = L.latLng(position.coords.latitude, position.coords.longitude);
+            if (!userMarker) {
+                userMarker = L.marker(userLatLng, { icon: userIcon }).addTo(map).bindTooltip("@Localizer["YourLocation"]", { direction: 'top', offset: [0, -20] });
+                map.setView(userLatLng, 15);
+                
+                if(currentDestId !== 0 && stationMarkers[currentDestId]) {
+                    let st = stations.find(s => s.id === currentDestId);
+                    if(st) updateRoute(st.lat, st.lng);
+                }
+            } else {
+                userMarker.setLatLng(userLatLng); 
+            }
+        }, null, { enableHighAccuracy: true });
+    }
 </script>

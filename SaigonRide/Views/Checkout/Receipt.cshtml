@@ -37,15 +37,18 @@
                             <span class="text-muted">@Localizer["EstimatedTime"]</span>
                             <span class="fw-bold text-dark">@ViewBag.Duration @Localizer["Minutes"]</span>
                         </li>
+                      
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-light">
                             <span class="text-muted">@Localizer["BaseFare"]</span>
-                            <span class="fw-bold text-dark">@ViewBag.BasePrice.ToString("N0") đ</span>
+                            <span class="fw-bold text-dark">@(((decimal)ViewBag.BasePrice).ToString("N0")) đ</span>
                         </li>
-                        
-                        @if (ViewBag.IsDiscountApplied != null && (bool)ViewBag.IsDiscountApplied)
+                       
+                        @if (ViewBag.BasePrice != null && ViewBag.FinalPrice != null && (decimal)ViewBag.FinalPrice < (decimal)ViewBag.BasePrice)
                         {
-                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-light bg-success bg-opacity-10 rounded mt-2 px-3">
-                                <span class="text-success fw-bold"><i class="bi bi-tag-fill me-2"></i>@Localizer["StationBalancePromo"]</span>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3 border-light bg-success bg-opacity-10 rounded mt-2 px-3 border border-success">
+                                <span class="text-success fw-bold">
+                                    <i class="bi bi-tag-fill me-2"></i>@Localizer["StationBalancePromo"] (-15%)
+                                </span>
                                 <span class="text-success fw-bold">-@(((decimal)ViewBag.BasePrice - (decimal)ViewBag.FinalPrice).ToString("N0")) đ</span>
                             </li>
                         }
@@ -53,7 +56,7 @@
 
                     <div class="d-flex justify-content-between align-items-center bg-primary bg-opacity-10 p-4 rounded-4 mb-5">
                         <span class="fs-5 fw-bold text-primary">@Localizer["Total"]</span>
-                        <span class="fs-2 fw-bold text-primary">@ViewBag.FinalPrice.ToString("N0") đ</span>
+                        <span class="fs-2 fw-bold text-primary">@(((decimal)ViewBag.FinalPrice).ToString("N0")) đ</span>
                     </div>
 
                     <!-- KHU VỰC CHỌN PHƯƠNG THỨC THANH TOÁN -->
