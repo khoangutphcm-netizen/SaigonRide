@@ -3,141 +3,298 @@
 @inject IViewLocalizer Localizer
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@(System.Globalization.CultureInfo.CurrentUICulture.Name)">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@Localizer["RegisterPageTitle"] - SaigonRide</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        body { margin: 0; font-family: 'Poppins', sans-serif; }
+        
+        .hcmc-page-wrapper {
+            background-image: url('/images/hcmc_skyline.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            position: relative;
             min-height: 100vh;
-            margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?q=80&w=2074&auto=format&fit=crop');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            padding: 2rem 0; 
+            padding: 2rem 0;
         }
-
-        .lang-switcher { position: fixed; top: 20px; right: 30px; z-index: 1050; }
         
-        .register-card {
-            max-width: 1300px; 
-            min-height: 750px;
-            width: 95%;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        .hcmc-page-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(10, 59, 34, 0.85) 0%, rgba(27, 110, 60, 0.75) 100%);
+            z-index: 1;
+        }
+
+        .auth-card {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            display: flex;
-            margin: auto;
-        }
-
-        .left-panel { background-color: #f8fcf9; padding: 4rem 5rem; width: 45%; display: flex; flex-direction: column; align-items: center; text-align: center; border-right: 1px solid #e9ecef; justify-content: center;}
-        .right-panel { padding: 4rem 5rem; width: 55%; display: flex; flex-direction: column; justify-content: center;}
-
-        .form-control, .form-select { border-radius: 10px; padding: 1.1rem; border: 2px solid #e9ecef; font-size: 1.1rem; }
-        .form-control:focus, .form-select:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.2); }
-        .form-label { font-size: 1.1rem; }
-
-        .btn-custom-dark { background-color: #212529; color: white; border: none; padding: 1.2rem; font-size: 1.3rem; transition: all 0.3s; }
-        .btn-custom-dark:hover { background-color: #343a40; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(33,37,41,0.3); }
-
-        .premium-image {
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            overflow: hidden;
+            z-index: 2;
             width: 100%;
-            height: 400px;
-            object-fit: cover;
-            border-radius: 16px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-            margin-top: 2rem;
-            border: 5px solid white;
+            max-width: 600px;
+            position: relative;
+            transform: translateY(0);
+            transition: all 0.4s ease;
         }
+        
+        .auth-card:hover { box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+        .auth-header { background: #fff; padding: 2rem 2rem 1rem 2rem; text-align: center; }
+        .auth-body { padding: 1.5rem 3rem 2.5rem 3rem; }
+
+        .form-control-custom, .form-select-custom {
+            background-color: #f4f7f6;
+            border: 2px solid transparent;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-size: 0.95rem;
+        }
+        
+        .input-group-text.form-control-custom {
+            background-color: #f4f7f6 !important;
+            border: 2px solid transparent !important;
+            border-left: none !important;
+            padding: 0.8rem 1.2rem;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        
+        .form-control-custom:focus, .form-select-custom:focus {
+            background-color: #fff;
+            border-color: #20994a;
+            box-shadow: 0 8px 16px rgba(32, 153, 74, 0.08);
+            transform: translateY(-1px);
+        }
+        
+        .input-group:focus-within .form-control-custom,
+        .input-group:focus-within .input-group-text.form-control-custom {
+            background-color: #fff !important;
+            border-color: #20994a !important;
+            box-shadow: 0 8px 16px rgba(32, 153, 74, 0.08);
+        }
+        .input-group:focus-within .form-control.form-control-custom { border-right: none !important; }
+        
+        .btn-custom {
+            border-radius: 12px;
+            background-color: #20994a;
+            color: #fff;
+            border: none;
+            padding: 0.8rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-custom:hover {
+            background-color: #16803b;
+            box-shadow: 0 8px 25px rgba(27, 122, 58, 0.3);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+
+        .user-type-switch {
+            background-color: #f4f7f6;
+            border-radius: 50rem;
+            padding: 5px;
+            display: flex;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .user-type-switch:hover { border-color: rgba(32, 153, 74, 0.2); }
+        .user-type-switch .btn {
+            border-radius: 50rem;
+            color: #6c757d;
+            border: none;
+            padding: 0.6rem 1rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .user-type-switch .btn-check:checked + .btn {
+            background-color: #20994a;
+            color: white;
+            box-shadow: 0 4px 12px rgba(32, 153, 74, 0.25);
+        }
+
+        .language-switcher { position: absolute; top: 20px; right: 20px; z-index: 10; }
     </style>
 </head>
 <body>
-    <div class="dropdown position-absolute top-0 end-0 m-4 z-3">
-        <button class="btn btn-white bg-white border shadow-sm rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 fs-5" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-globe2 text-success"></i> @(Context.Request.Cookies[Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName]?.Contains("en") == true ? "EN" : "VI") <i class="bi bi-chevron-down ms-1" style="font-size: 0.8rem;"></i>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 p-2">
-            <li>
-                <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0">
-                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-                    <input type="hidden" name="culture" value="vi" />
-                    <button type="submit" class="dropdown-item rounded fw-bold text-success fs-5 py-2">🇻🇳 Tiếng Việt</button>
-                </form>
-            </li>
-            <li>
-                <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 mt-1">
-                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-                    <input type="hidden" name="culture" value="en" />
-                    <button type="submit" class="dropdown-item rounded text-muted fs-5 py-2">🇬🇧 English</button>
-                </form>
-            </li>
-        </ul>
-    </div>
-
-    <div class="register-card flex-wrap flex-md-nowrap">
-        <div class="left-panel col-12 col-md-5">
-            <h2 class="fw-bold text-dark mb-3" style="font-size: 2.5rem;">@Html.Raw(Localizer["JoinMovementTitle"].Value)</h2>
-            <p class="text-muted fs-5 mb-4" style="line-height: 1.6;">@Localizer["JoinMovementDesc"]</p>
-            
-            <img src="https://images.unsplash.com/photo-1572044162444-ad60f128bdea?q=80&w=800&auto=format&fit=crop" alt="Eco Ride" class="premium-image">
+    <div class="hcmc-page-wrapper">
+        
+        <div class="language-switcher dropdown">
+            <button class="btn btn-light btn-sm dropdown-toggle shadow-sm fw-bold rounded-pill px-3 py-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-globe text-success me-1"></i> 
+                <span>@(System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("en") ? "EN" : "VI")</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-1">
+                <li>
+                    <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0">
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <input type="hidden" name="culture" value="vi" />
+                        <button type="submit" class="dropdown-item fw-bold text-dark rounded-2 py-2">🇻🇳 Tiếng Việt</button>
+                    </form>
+                </li>
+                <li>
+                    <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 mt-1">
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <input type="hidden" name="culture" value="en" />
+                        <button type="submit" class="dropdown-item fw-bold text-dark rounded-2 py-2">🇬🇧 English</button>
+                    </form>
+                </li>
+            </ul>
         </div>
 
-        <div class="right-panel col-12 col-md-7">
-            <div class="text-center py-3 rounded-3 mb-5 fw-bold fs-4" style="background-color: #198754; color: white; box-shadow: 0 8px 20px rgba(25,135,84,0.2);">
-                @Localizer["RegisterHeader"]
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-person-plus-fill fs-1"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-1">@Localizer["CreateAccount"]</h3>
+                <p class="text-muted small">@Localizer["JoinSaigonRide"]</p>
             </div>
+            
+            <div class="auth-body">
+                @if (ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div class="alert alert-danger rounded-3 shadow-sm py-2 px-3 small border-0 mb-4">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div class="d-flex align-items-center mb-1"><i class="fa fa-exclamation-circle me-2"></i> @error.ErrorMessage</div>
+                        }
+                    </div>
+                }
 
-            <form asp-controller="Account" asp-action="Register" method="post">
-                <div class="row g-4 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">@Localizer["FullNameLabel"]</label>
-                        <input type="text" name="FullName" class="form-control" required placeholder="@Localizer["FullNamePlaceholder"]" />
+                <form asp-controller="Account" asp-action="Register" method="post">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">@Localizer["FullName"]</label>
+                            <input type="text" name="FullName" class="form-control form-control-custom shadow-none" placeholder="Nguyen Van A" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold">@Localizer["Phone"]</label>
+                            <input type="text" name="Phone" class="form-control form-control-custom shadow-none" placeholder="090..." required />
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-success">@Localizer["EmailLabel"]</label>
-                        <input type="email" name="Email" class="form-control border-success" required placeholder="@Localizer["EmailPlaceholder"]" />
-                    </div>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="form-label fw-bold">@Localizer["PasswordLabel"]</label>
-                    <input type="password" name="Password" class="form-control" required placeholder="••••••••" />
-                </div>
 
-                <div class="row g-4 mb-5">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">@Localizer["UserTypeLabel"]</label>
-                        <select name="UserType" class="form-select" required>
-                            <option value="Local">@Localizer["LocalResidentOption"]</option>
-                            <option value="Tourist">@Localizer["ForeignTouristOption"]</option>
-                        </select>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">@Localizer["EmailAddress"]</label>
+                        <input type="email" name="Email" class="form-control form-control-custom shadow-none" placeholder="name@example.com" required />
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-success">@Localizer["DocumentIdLabel"]</label>
-                        <input type="text" name="DocumentId" class="form-control border-success" required placeholder="@Localizer["DocumentIdPlaceholder"]" />
-                    </div>
-                </div>
 
-                <button type="submit" class="btn btn-custom-dark w-100 fw-bold rounded-3 shadow mt-2 mb-4">@Localizer["RegisterButton"]</button>
-                
-                <div class="text-center fs-5 mt-4 border-top pt-4">
-                    <span class="text-muted">@Localizer["AlreadyHaveAccount"]</span>
-                    <a href="/Account/Login" class="text-success fw-bold text-decoration-none ms-2">@Localizer["SignInHere"]</a>
-                </div>
-            </form>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">@Localizer["UserTypeLabel"]</label>
+                        <div class="user-type-switch">
+                            <input type="radio" class="btn-check" name="UserType" id="typeLocal" value="Local" checked>
+                            <label class="btn flex-grow-1 fw-bold small m-0" for="typeLocal">
+                                <i class="bi bi-person-vcard me-1"></i>@Localizer["LocalResidentOption"]
+                            </label>
+
+                            <input type="radio" class="btn-check" name="UserType" id="typeTourist" value="Tourist">
+                            <label class="btn flex-grow-1 fw-bold small m-0" for="typeTourist">
+                                <i class="bi bi-passport me-1"></i>@Localizer["ForeignTouristOption"]
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label id="docIdLabel" class="form-label text-success small fw-bold"><i class="bi bi-person-vcard me-1"></i> @Localizer["DocIdLabel_Local"]</label>
+                        <input type="text" name="DocumentId" id="docIdInput" class="form-control form-control-custom border-success shadow-none" placeholder="@Localizer["DocIdPlaceholder_Local"]" required />
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold">@Localizer["Password"]</label>
+                        <div class="input-group">
+                            <input type="password" name="Password" id="password" class="form-control form-control-custom shadow-none border-end-0" placeholder="••••••••" required minlength="6" />
+                            <span class="input-group-text form-control-custom border-start-0" onclick="togglePassword('password', 'eyeIcon')" style="cursor: pointer;">
+                                <i class="fa fa-eye text-muted" id="eyeIcon"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-custom w-100 mb-4 shadow-sm d-flex justify-content-center align-items-center gap-2">
+                        @Localizer["BtnRegister"] <i class="bi bi-person-plus-fill"></i>
+                    </button>
+                    
+                    <p class="text-center text-muted small mb-0">
+                        @Localizer["AlreadyHaveAccount"] <a href="/Account/Login" class="text-success fw-bold text-decoration-none ms-1">@Localizer["LoginNow"]</a>
+                    </p>
+                </form>
+            </div>
+            
+            <div class="text-center pb-3">
+                <p class="text-muted small opacity-75 mb-0">&copy; 2026 - SaigonRide System - F8 Project</p>
+            </div>
         </div>
     </div>
-     
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const typeLocal = document.getElementById('typeLocal');
+            const typeTourist = document.getElementById('typeTourist');
+            const docInput = document.getElementById('docIdInput');
+            const docLabel = document.getElementById('docIdLabel');
+
+            if (typeLocal && typeTourist && docInput && docLabel) {
+                function updateDocumentValidation() {
+                    if (typeLocal.checked) {
+                        docLabel.innerHTML = '<i class="bi bi-person-vcard me-1"></i> @Localizer["DocIdLabel_Local"]';
+                        docInput.setAttribute('pattern', '\\d{12}');
+                        docInput.setAttribute('maxlength', '12');
+                        docInput.setAttribute('minlength', '12');
+                        docInput.setAttribute('title', '@Localizer["DocIdTitle_Local"]');
+                        docInput.placeholder = '@Localizer["DocIdPlaceholder_Local"]';
+                    } else {
+                        docLabel.innerHTML = '<i class="bi bi-book me-1"></i> @Localizer["DocIdLabel_Tourist"]';
+                        docInput.setAttribute('pattern', '[A-Za-z0-9]{6,15}');
+                        docInput.setAttribute('maxlength', '15');
+                        docInput.setAttribute('minlength', '6');
+                        docInput.setAttribute('title', '@Localizer["DocIdTitle_Tourist"]');
+                        docInput.placeholder = '@Localizer["DocIdPlaceholder_Tourist"]';
+                    }
+                }
+
+                typeLocal.addEventListener('change', updateDocumentValidation);
+                typeTourist.addEventListener('change', updateDocumentValidation);
+                updateDocumentValidation(); // Chạy lần đầu thiết lập
+
+                // Chặn nhập chữ nếu là CCCD
+                docInput.addEventListener('input', function(e) {
+                    if (typeLocal.checked) {
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

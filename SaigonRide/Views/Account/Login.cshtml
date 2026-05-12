@@ -3,130 +3,206 @@
 @inject IViewLocalizer Localizer
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@(System.Globalization.CultureInfo.CurrentUICulture.Name)">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@Localizer["PageTitle"] - SaigonRide</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            min-height: 100vh; 
-            margin: 0;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1471506480208-91b3a4cc78be?q=80&w=2074&auto=format&fit=crop');
+        @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        body { margin: 0; font-family: 'Poppins', sans-serif; }
+        
+        .hcmc-page-wrapper {
+            background-image: url('/images/hcmc_skyline.jpg');
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             background-attachment: fixed;
-        }
-
-        .login-container { 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px);
-            border-radius: 20px; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.4); 
-            overflow: hidden; 
-            max-width: 1200px; 
-            min-height: 700px; 
-            width: 95%; 
-            margin: 2rem; 
-        }
-
-        .image-side { background-color: #f8fcf9; padding: 4rem 5rem; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .form-side { padding: 4rem 5rem; display: flex; flex-direction: column; justify-content: center; }
-        
-        .login-header { 
-            background-color: #212529; color: white; text-align: center; 
-            padding: 1.5rem; border-radius: 12px; font-weight: bold; font-size: 1.5rem; margin-bottom: 3rem; 
-            box-shadow: 0 10px 20px rgba(33, 37, 41, 0.2);
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .form-control { border-radius: 10px; padding: 1.2rem; border: 2px solid #e9ecef; font-size: 1.2rem; }
-        .form-control:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); }
-        .form-label { font-size: 1.1rem; }
-        
-        .btn-success { background-color: #198754; border-color: #198754; border-radius: 10px; font-weight: bold; padding: 1.2rem; transition: all 0.3s; }
-        .btn-success:hover { background-color: #157347; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(25,135,84,0.4); }
+        .hcmc-page-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(10, 59, 34, 0.85) 0%, rgba(27, 110, 60, 0.75) 100%);
+            z-index: 1;
+        }
 
-        .premium-image {
+        .auth-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            overflow: hidden;
+            z-index: 2;
             width: 100%;
-            height: 350px;
-            object-fit: cover;
-            border-radius: 16px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-            margin-top: 2rem;
-            border: 5px solid white;
+            max-width: 450px;
+            position: relative;
+            transform: translateY(0);
+            transition: all 0.4s ease;
         }
+        
+        .auth-card:hover { box-shadow: 0 30px 60px rgba(0,0,0,0.4); }
+        .auth-header { background: #fff; padding: 2rem 2rem 1rem 2rem; text-align: center; }
+        .auth-body { padding: 1.5rem 2.5rem 2.5rem 2.5rem; }
+
+        .form-control-custom, .form-select-custom {
+            background-color: #f4f7f6;
+            border: 2px solid transparent;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-size: 0.95rem;
+        }
+        
+        .input-group-text.form-control-custom {
+            background-color: #f4f7f6 !important;
+            border: 2px solid transparent !important;
+            border-left: none !important;
+            padding: 0.8rem 1.2rem;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+        }
+        
+        .form-control-custom:focus, .form-select-custom:focus {
+            background-color: #fff;
+            border-color: #20994a;
+            box-shadow: 0 8px 16px rgba(32, 153, 74, 0.08);
+            transform: translateY(-1px);
+        }
+        
+        .input-group:focus-within .form-control-custom,
+        .input-group:focus-within .input-group-text.form-control-custom {
+            background-color: #fff !important;
+            border-color: #20994a !important;
+            box-shadow: 0 8px 16px rgba(32, 153, 74, 0.08);
+        }
+        .input-group:focus-within .form-control.form-control-custom { border-right: none !important; }
+        
+        .btn-custom {
+            border-radius: 12px;
+            background-color: #20994a;
+            color: #fff;
+            border: none;
+            padding: 0.8rem;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-custom:hover {
+            background-color: #16803b;
+            box-shadow: 0 8px 25px rgba(27, 122, 58, 0.3);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+
+        .language-switcher { position: absolute; top: 20px; right: 20px; z-index: 10; }
     </style>
 </head>
 <body>
-    <div class="dropdown position-absolute top-0 end-0 m-4 z-3">
-        <button class="btn btn-white bg-white border shadow-sm rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 fs-5" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-globe2 text-success"></i> @(Context.Request.Cookies[Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName]?.Contains("en") == true ? "EN" : "VI") <i class="bi bi-chevron-down ms-1" style="font-size: 0.8rem;"></i>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 p-2">
-            <li>
-                <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0">
-                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-                    <input type="hidden" name="culture" value="vi" />
-                    <button type="submit" class="dropdown-item rounded fw-bold text-success fs-5 py-2">🇻🇳 Tiếng Việt</button>
-                </form>
-            </li>
-            <li>
-                <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 mt-1">
-                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
-                    <input type="hidden" name="culture" value="en" />
-                    <button type="submit" class="dropdown-item rounded text-muted fs-5 py-2">🇬🇧 English</button>
-                </form>
-            </li>
-        </ul>
-    </div>
-
-    <div class="login-container d-flex flex-wrap flex-md-nowrap">
-        <div class="image-side col-12 col-md-6 border-end border-light">
-            <h2 class="fw-bold text-dark mb-3" style="font-size: 2.2rem;">@Localizer["WelcomeTitle"]</h2>
-            <p class="text-muted fs-5 mb-0 px-4">@Localizer["WelcomeSubtitle"]</p>
-             
-            <!-- ĐÃ FIX: CHỈ CÒN MỘT THẺ IMG DUY NHẤT -->
-            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=800&auto=format&fit=crop" alt="Eco City Ride" class="premium-image">
-        </div>
+    <div class="hcmc-page-wrapper">
         
-        <div class="form-side col-12 col-md-6">
-            <div class="login-header">
-                @Localizer["LoginHeader"]
+        <div class="language-switcher dropdown">
+            <button class="btn btn-light btn-sm dropdown-toggle shadow-sm fw-bold rounded-pill px-3 py-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-globe text-success me-1"></i> 
+                <span>@(System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("en") ? "EN" : "VI")</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-1">
+                <li>
+                    <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0">
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <input type="hidden" name="culture" value="vi" />
+                        <button type="submit" class="dropdown-item fw-bold text-dark rounded-2 py-2">🇻🇳 Tiếng Việt</button>
+                    </form>
+                </li>
+                <li>
+                    <form asp-controller="Language" asp-action="SetLanguage" method="post" class="m-0 mt-1">
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <input type="hidden" name="culture" value="en" />
+                        <button type="submit" class="dropdown-item fw-bold text-dark rounded-2 py-2">🇬🇧 English</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-bicycle fs-1"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-1">@Localizer["WelcomeBack"]</h3>
+                <p class="text-muted small">@Localizer["LoginToContinue"]</p>
             </div>
-
-            <form asp-controller="Account" asp-action="Login" method="post">
-                <div class="mb-4">
-                    <label class="form-label text-dark fw-bold mb-2">@Localizer["EmailLabel"]</label>
-                    <input type="email" name="Email" class="form-control" placeholder="example@email.com" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label text-dark fw-bold mb-2">@Localizer["PasswordLabel"]</label>
-                    <input type="password" name="Password" class="form-control" placeholder="••••••••" required>
-                </div>
-                
-                <div class="text-end mb-5">
-                    <a href="#" class="text-success text-decoration-none fw-bold fs-6">@Localizer["ForgotPassword"]</a>
-                </div>
-
-                <button type="submit" class="btn btn-success w-100 fs-4 mb-4">
-                    @Localizer["LoginButton"]
-                </button>
-            </form>
             
-            <div class="text-center mt-3 text-muted fs-5">
-                @Localizer["NoAccount"] <a asp-controller="Account" asp-action="Register" class="text-success fw-bold text-decoration-none ms-1">@Localizer["RegisterNow"]</a>
+            <div class="auth-body">
+                @if (ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div class="alert alert-danger rounded-3 shadow-sm py-2 px-3 small border-0 mb-4">
+                        <i class="fa fa-exclamation-circle me-1"></i> @Localizer["InvalidCredentials"]
+                    </div>
+                }
+
+                <form asp-controller="Account" asp-action="Login" method="post">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">@Localizer["EmailAddress"]</label>
+                        <input type="email" name="Email" class="form-control form-control-custom shadow-none" placeholder="name@example.com" required />
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label text-muted small fw-bold mb-0">@Localizer["Password"]</label>
+                            <a href="#" class="text-success small text-decoration-none fw-medium">@Localizer["ForgotPassword"]</a>
+                        </div>
+                        <div class="input-group">
+                            <input type="password" name="Password" id="password" class="form-control form-control-custom shadow-none border-end-0" placeholder="••••••••" required />
+                            <span class="input-group-text form-control-custom border-start-0" onclick="togglePassword('password', 'eyeIcon')" style="cursor: pointer;">
+                                <i class="fa fa-eye text-muted" id="eyeIcon"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-custom w-100 mb-4 shadow-sm d-flex justify-content-center align-items-center gap-2">
+                        @Localizer["BtnLogin"] <i class="bi bi-box-arrow-in-right"></i>
+                    </button>
+                    
+                    <p class="text-center text-muted small mb-0">
+                        @Localizer["NoAccount"] <a href="/Account/Register" class="text-success fw-bold text-decoration-none ms-1">@Localizer["RegisterNow"]</a>
+                    </p>
+                </form>
+            </div>
+            
+            <div class="text-center pb-3">
+                <p class="text-muted small opacity-75 mb-0">&copy; 2026 - SaigonRide System - F8 Project</p>
             </div>
         </div>
     </div>
 
-    <!-- ĐÃ FIX: CHÈN THƯ VIỆN BOOTSTRAP ĐỂ DROPDOWN HOẠT ĐỘNG -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>
