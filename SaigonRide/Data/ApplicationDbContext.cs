@@ -50,8 +50,7 @@ namespace SaigonRide.Data
             // Seed Data cho Vehicle
             modelBuilder.Entity<Vehicle>().HasData(
                 new Vehicle { Id = 1, Category = "Standard Bike", PricePerMinute = 500, StationId = 1, Status = VehicleStatus.Available },
-                new Vehicle { Id = 2, Category = "E-Scooter", PricePerMinute = 1500, StationId = 1, Status = VehicleStatus.Available },
-                new Vehicle { Id = 3, Category = "Premium E-Bike", PricePerMinute = 2000, StationId = 3, Status = VehicleStatus.UnderMaintenance }
+                new Vehicle { Id = 2, Category = "E-Scooter", PricePerMinute = 1500, StationId = 1, Status = VehicleStatus.Available }
             );
 
             // Seed 1 tài khoản Admin
