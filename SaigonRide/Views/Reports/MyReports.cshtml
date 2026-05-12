@@ -9,21 +9,27 @@
             <i class="bi bi-arrow-left text-dark"></i>
         </a>
         <div>
-            <h3 class="fw-bold text-dark mb-0">Báo cáo của tôi</h3>
-            <p class="text-muted mb-0">Xem trạng thái các báo cáo đã gửi</p>
+            <h3 class="fw-bold text-dark mb-0">@Localizer["MyReportsTitle"]</h3>
+            <p class="text-muted mb-0">@Localizer["MyReportsDesc"]</p>
         </div>
     </div>
-
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
         <div class="table-responsive">
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>
-                        <th>Tiêu đề</th>
-                        <th>Trạng thái</th>
-                        <th>Ngày gửi</th>
-                        <th>Ngày phản hồi</th>
-                        <th>Hành động</th>
+                        <th>@Localizer["ReportColTitle"]</th>
+                        <th>@Localizer["ReportColStatus"]</th>
+                        <th>@Localizer["ReportColDateSent"]</th>
+                        <th>@Localizer["ReportColDateReply"]</th>
+                        <th>@Localizer["ReportColAction"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,7 +39,7 @@
                             <td class="fw-bold">@report.Title</td>
                             <td>
                                 <span class="badge bg-@(report.Status == SaigonRide.Models.entities.ReportStatus.Open ? "warning" : (report.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "success" : (report.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? "info" : "secondary")))">
-                                    @(report.Status == SaigonRide.Models.entities.ReportStatus.Open ? "Mới" : (report.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? "Đang xử lý" : (report.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? "Đã giải quyết" : "Đóng")))
+                                    @(report.Status == SaigonRide.Models.entities.ReportStatus.Open ? Localizer["StatusOpen"] : (report.Status == SaigonRide.Models.entities.ReportStatus.InProgress ? Localizer["StatusInProgress"] : (report.Status == SaigonRide.Models.entities.ReportStatus.Resolved ? Localizer["StatusResolved"] : Localizer["StatusClosed"])))
                                 </span>
                             </td>
                             <td>@report.CreatedAt.ToString("dd/MM/yyyy")</td>
@@ -44,12 +50,12 @@
                                 }
                                 else
                                 {
-                                    <span class="text-muted">Chưa phản hồi</span>
+                                    <span class="text-muted">@Localizer["ReportPending"]</span>
                                 }
                             </td>
                             <td>
                                 <a href="/Reports/ReportDetails/@report.Id" class="btn btn-sm btn-info">
-                                    <i class="bi bi-eye"></i> Xem
+                                    <i class="bi bi-eye"></i> @Localizer["ReportViewBtn"]
                                 </a>
                             </td>
                         </tr>
@@ -62,7 +68,7 @@
         {
             <div class="text-center py-5">
                 <i class="bi bi-inbox" style="font-size: 3rem; color: #999;"></i>
-                <p class="text-muted mt-3">Chưa có báo cáo nào</p>
+                <p class="text-muted mt-3">@Localizer["ReportEmpty"]</p>
             </div>
         }
     </div>
