@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SaigonRide.Data;
 
@@ -11,13 +12,15 @@ using SaigonRide.Data;
 namespace SaigonRide.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260507090441_InitialDeploy")]
+    partial class InitialDeploy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.14")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -85,7 +88,7 @@ namespace SaigonRide.Migrations
                     b.Property<bool>("IsDiscountApplied")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<int?>("ReturnStationId")
+                    b.Property<int>("ReturnStationId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartTime")
@@ -132,7 +135,7 @@ namespace SaigonRide.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("varchar(2000)");
 
-                    b.Property<int?>("RentalTransactionId")
+                    b.Property<int>("RentalTransactionId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("RespondedAt")
@@ -317,7 +320,8 @@ namespace SaigonRide.Migrations
                     b.HasOne("SaigonRide.Models.entities.Station", "ReturnStation")
                         .WithMany()
                         .HasForeignKey("ReturnStationId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("SaigonRide.Models.entities.User", "User")
                         .WithMany()
@@ -343,7 +347,8 @@ namespace SaigonRide.Migrations
                     b.HasOne("SaigonRide.Models.entities.RentalTransaction", "RentalTransaction")
                         .WithMany()
                         .HasForeignKey("RentalTransactionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("SaigonRide.Models.entities.User", "User")
                         .WithMany()
