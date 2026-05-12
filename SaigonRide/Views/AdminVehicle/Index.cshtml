@@ -1,101 +1,232 @@
-﻿@model IEnumerable<SaigonRide.Models.entities.Vehicle>
-@{
+﻿@{
     ViewData["Title"] = "Quản lý Phương tiện";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    var stations = ViewBag.Stations as Dictionary<int, string>;
 }
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    .vehicle-row { display: flex; align-items: center; padding: 1.2rem; background: #fff; border: 1px solid #f0f0f0; border-radius: 1rem; margin-bottom: 1rem; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+    .vehicle-row:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); border-color: #ffc107; }
+    .vehicle-icon-wrapper { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; }
+    .bg-grad-success { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); color: #198754; }
+    .bg-grad-danger { background: linear-gradient(135deg, #ffebee 0%, #f8bbd0 100%); color: #dc3545; }
+    .bg-grad-warning { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); color: #fd7e14; }
+    .vehicle-actions { opacity: 0.3; transition: opacity 0.2s; }
+    .vehicle-row:hover .vehicle-actions { opacity: 1; }
+    .badge-pulse { animation: pulse 2s infinite; }
+    @@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    #liveMap { height: calc(100vh - 150px); border-radius: 1rem; width: 100%; z-index: 1; position: sticky; top: 20px; }
+    .filter-pill { cursor: pointer; border: 1px solid #dee2e6; color: #6c757d; background: #fff; font-weight: 600; padding: 0.5rem 1.2rem; border-radius: 50rem; transition: all 0.2s; font-size: 0.9rem; }
+    .filter-pill.active { background: #ffc107; color: #000; border-color: #ffc107; box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3); }
+</style>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-bicycle text-warning me-2"></i>Danh sách Xe</h5>
-    <a href="/AdminVehicle/Create" class="btn btn-warning text-dark fw-bold rounded-pill shadow-sm">
-        <i class="bi bi-plus-circle me-1"></i> Nhập Xe mới
-    </a>
-</div>
-
-<!-- THANH TÌM KIẾM XE -->
-<div class="row mb-4">
-    <div class="col-md-6">
-        <form asp-action="Index" method="get">
-            <div class="input-group shadow-sm rounded-pill overflow-hidden border bg-white">
-                <span class="input-group-text bg-white border-0 text-muted ps-4"><i class="bi bi-search"></i></span>
-                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control border-0 shadow-none px-2" placeholder="Tìm theo loại xe (VD: E-Scooter)...">
-                <button class="btn btn-warning fw-bold px-4 text-dark" type="submit">Tìm kiếm</button>
-                @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch))
-                {
-                    <a href="/AdminVehicle/Index" class="btn btn-light border-start px-3" title="Xóa tìm kiếm"><i class="bi bi-x-lg"></i></a>
-                }
-            </div>
-        </form>
+    <h4 class="fw-bold text-dark mb-0"><i class="bi bi-bicycle text-warning me-2"></i>Quản lý Phương tiện (Live)</h4>
+    <div class="d-flex gap-2">
+        <button id="toggleMapBtn" class="btn btn-outline-dark fw-bold rounded-pill shadow-sm px-4">
+            <i class="bi bi-map me-1"></i> Ẩn/Hiện Bản đồ
+        </button>
+        <a href="/AdminVehicle/Create" class="btn btn-warning fw-bold rounded-pill shadow-sm px-4 text-dark">
+            <i class="bi bi-plus-circle me-2"></i> Nhập Xe mới
+        </a>
     </div>
 </div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4">
-        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+<div class="row g-4">
+    <div id="listCol" class="col-xl-5 col-lg-6 transition-all">
+        <div class="d-flex flex-wrap gap-2 mb-4" id="filterContainer">
+            <div class="filter-pill active" data-filter="all">Tất cả <span class="badge bg-dark ms-1" id="count-all">0</span></div>
+            <div class="filter-pill" data-filter="InUse">Đang thuê <span class="badge bg-danger ms-1" id="count-inuse">0</span></div>
+            <div class="filter-pill" data-filter="Available">Sẵn sàng <span class="badge bg-success ms-1" id="count-avail">0</span></div>
+            <div class="filter-pill" data-filter="UnderMaintenance">Bảo trì <span class="badge bg-warning text-dark ms-1" id="count-maint">0</span></div>
+            <div class="filter-pill" data-filter="Bike"><i class="bi bi-bicycle"></i> Đạp</div>
+            <div class="filter-pill" data-filter="Scooter"><i class="bi bi-scooter"></i> Điện</div>
+        </div>
 
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light text-muted" style="border-bottom: 2px solid #dee2e6;">
-                <tr>
-                    <th class="ps-4">Mã Xe</th>
-                    <th>Loại Xe</th>
-                    <th>Đang đỗ tại</th>
-                    <th class="text-center">Đơn giá / phút</th>
-                    <th class="text-center">Trạng thái</th>
-                    <th class="text-end pe-4">Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
-                {
-                    foreach (var vehicle in Model)
-                    {
-                        <tr>
-                            <td class="ps-4 fw-bold text-muted">V-@vehicle.Id.ToString("D3")</td>
-                            <td class="fw-bold text-dark">@vehicle.Category</td>
-                            <td>
-                                <i class="bi bi-geo-alt text-success"></i>
-                                @(stations != null && stations.ContainsKey(vehicle.StationId) ? stations[vehicle.StationId] : "Trạm không rõ")
-                            </td>
-                            <td class="text-center fw-bold text-danger">@vehicle.PricePerMinute đ</td>
-                            <td class="text-center">
-                                @if (vehicle.Status == SaigonRide.Models.Enums.VehicleStatus.Available)
-                                {
-                                    <span class="badge bg-success rounded-pill">Sẵn sàng</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark rounded-pill">Đang bảo trì</span>
-                                }
-                            </td>
-                            <td class="text-end pe-4">
-                                <form asp-action="ToggleStatus" asp-route-id="@vehicle.Id" method="post" class="d-inline">
-                                    <button type="submit" class="btn btn-sm @(vehicle.Status == SaigonRide.Models.Enums.VehicleStatus.Available ? "btn-outline-warning" : "btn-outline-success") me-1" title="Đổi trạng thái">
-                                        <i class="bi bi-tools"></i>
-                                    </button>
-                                </form>
-                                <a href="/AdminVehicle/Edit/@vehicle.Id" class="btn btn-sm btn-light text-primary me-1" title="Chỉnh sửa">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <form asp-action="Delete" asp-route-id="@vehicle.Id" method="post" class="d-inline" onsubmit="return confirm('Xóa chiếc xe này vĩnh viễn?');">
-                                    <button type="submit" class="btn btn-sm btn-light text-danger" title="Xóa">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr><td colspan="6" class="text-center text-muted py-5"><i class="bi bi-bicycle fs-1 d-block mb-3"></i>Không tìm thấy xe nào.</td></tr>
-                }
-            </tbody>
-        </table>
+        <div id="vehicleListContainer" style="height: calc(100vh - 220px); overflow-y: auto; padding-right: 10px;">
+        </div>
+    </div>
+
+    <div id="mapCol" class="col-xl-7 col-lg-6 transition-all">
+        <div class="card border-0 shadow-sm rounded-4 p-1 position-relative">
+            <div id="liveMap"></div>
+        </div>
     </div>
 </div>
+
+<script>
+    var map = L.map('liveMap', { zoomControl: false }).setView([10.785, 106.705], 14);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    var markersLayer = L.layerGroup().addTo(map);
+
+    var availIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-success text-white rounded-circle shadow-lg border border-3 border-white d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;"><i class="bi bi-check-lg"></i></div>`, iconSize: [35, 35], iconAnchor: [17, 35] });
+    var inUseIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-danger text-white rounded-circle shadow-lg border border-3 border-white d-flex align-items-center justify-content-center badge-pulse" style="width: 45px; height: 45px;"><i class="bi bi-person-bounding-box fs-5"></i></div>`, iconSize: [45, 45], iconAnchor: [22, 45] });
+    var maintIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-warning text-dark rounded-circle shadow-lg border border-3 border-white d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;"><i class="bi bi-tools"></i></div>`, iconSize: [35, 35], iconAnchor: [17, 35] });
+
+    var allVehiclesData = [];
+    var activeRentalsDict = {};
+    var currentFilter = 'all';
+    var currentFocusedVehicleId = null;
+
+    document.getElementById('toggleMapBtn').addEventListener('click', function() {
+        let mapCol = document.getElementById('mapCol');
+        let listCol = document.getElementById('listCol');
+        if(mapCol.style.display === 'none') {
+            mapCol.style.display = 'block';
+            listCol.className = 'col-xl-5 col-lg-6';
+            setTimeout(() => { map.invalidateSize(); }, 300);
+        } else {
+            mapCol.style.display = 'none';
+            listCol.className = 'col-12';
+        }
+    });
+
+    document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.getAttribute('data-filter');
+            renderUI();
+        });
+    });
+
+    function formatTime(ms) {
+        let t = Math.max(0, Math.floor(ms / 1000));
+        let h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function fetchLiveVehicles() {
+        fetch('/AdminVehicle/GetLiveVehicles').then(r => r.json()).then(data => {
+            allVehiclesData = data.vehicles;
+            activeRentalsDict = {};
+            data.activeRentals.forEach(r => { activeRentalsDict[r.vehicleId] = r; });
+            
+            document.getElementById('count-all').innerText = allVehiclesData.length;
+            document.getElementById('count-avail').innerText = allVehiclesData.filter(v => v.status === 'Available').length;
+            document.getElementById('count-inuse').innerText = allVehiclesData.filter(v => v.status === 'InUse').length;
+            document.getElementById('count-maint').innerText = allVehiclesData.filter(v => v.status === 'UnderMaintenance').length;
+
+            renderUI();
+        });
+    }
+
+    function focusVehicle(e, id, lat, lng) {
+        e.stopPropagation();
+        currentFocusedVehicleId = id;
+        
+        let mapCol = document.getElementById('mapCol');
+        if(mapCol.style.display === 'none') {
+            document.getElementById('toggleMapBtn').click();
+        }
+        
+        setTimeout(() => {
+            map.setView([lat, lng], 17);
+            renderUI();
+        }, 350);
+    }
+
+    function renderUI() {
+        markersLayer.clearLayers();
+        let html = "";
+
+        let filtered = allVehiclesData.filter(v => {
+            if (currentFilter === 'all') return true;
+            if (currentFilter === 'Bike' || currentFilter === 'Scooter') return v.category.includes(currentFilter);
+            return v.status === currentFilter;
+        });
+
+        filtered.forEach(v => {
+            let isScooter = v.category.includes('Scooter');
+            let iconClass = isScooter ? 'bi-scooter' : 'bi-bicycle';
+            let bgClass = 'bg-grad-success';
+            let statusBadge = '<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Sẵn sàng</span>';
+            let timerHtml = `<small class="text-muted"><i class="bi bi-geo-alt-fill text-success"></i> ${v.stationName}</small>`;
+            let markerIcon = availIcon;
+            let tooltipContent = `<b>V-${v.id}</b><br/>${v.category}`;
+
+            let displayLat = v.lat;
+            let displayLng = v.lng;
+
+            if (v.status === 'UnderMaintenance') {
+                bgClass = 'bg-grad-warning';
+                statusBadge = '<span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Bảo trì</span>';
+                markerIcon = maintIcon;
+            } 
+            else if (v.status === 'InUse') {
+                bgClass = 'bg-grad-danger';
+                statusBadge = '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">Đang chạy</span>';
+                markerIcon = inUseIcon;
+
+                let rentalInfo = activeRentalsDict[v.id];
+                if (rentalInfo) {
+                    // Lấy thời gian hiện tại của thiết bị trừ ngược đi số giây server trả về
+                    let startTimeMs = Date.now() - (rentalInfo.elapsedSeconds * 1000);
+                    
+                    markerIcon = L.divIcon({ 
+                        className: 'custom-div-icon', 
+                        html: `<div class="bg-danger text-white rounded-pill shadow-lg border border-3 border-white d-flex flex-column align-items-center justify-content-center badge-pulse" style="padding: 5px 12px; min-width: 130px; transform: translateY(-10px);">
+                                  <div class="d-flex align-items-center gap-1" style="font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;">
+                                      <i class="bi bi-person-fill"></i> ${rentalInfo.userName}
+                                  </div>
+                                  <div class="fw-bold text-warning live-timer" data-start="${startTimeMs}" style="font-family: monospace; font-size: 1rem; letter-spacing: 1px;">00:00:00</div>
+                               </div>`, 
+                        iconSize: [130, 55], 
+                        iconAnchor: [65, 55] 
+                    });
+                    timerHtml = `<div class="bg-danger text-white px-2 py-1 rounded shadow-sm d-inline-block mt-1"><i class="bi bi-stopwatch"></i> <span class="fw-bold live-timer" data-start="${startTimeMs}" style="font-family: monospace;">00:00:00</span></div>`;
+                    statusBadge = `<span class="badge bg-danger text-white border border-danger">${rentalInfo.userName}</span>`;
+                }
+            }
+
+            if (displayLat && displayLng && (v.status === 'InUse' || v.id === currentFocusedVehicleId)) {
+                let m = L.marker([displayLat, displayLng], { icon: markerIcon }).addTo(markersLayer).bindTooltip(tooltipContent);
+                if (v.id === currentFocusedVehicleId && v.status !== 'InUse') {
+                    m.openTooltip();
+                }
+            }
+
+            html += `
+            <div class="vehicle-row" onclick="focusVehicle(event, ${v.id}, ${displayLat || 10.785}, ${displayLng || 106.705});">
+                <div class="vehicle-icon-wrapper ${bgClass} me-3"><i class="bi ${iconClass}"></i></div>
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-light text-muted border">V-${v.id.toString().padStart(3, '0')}</span>
+                        ${statusBadge}
+                    </div>
+                    <h6 class="fw-bold text-dark mb-1">${v.category}</h6>
+                    ${timerHtml}
+                </div>
+                <div class="vehicle-actions text-end" onclick="event.stopPropagation();">
+                    <form action="/AdminVehicle/ToggleStatus/${v.id}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-light rounded-circle shadow-sm me-1 text-primary" style="width: 35px; height: 35px;"><i class="bi bi-power"></i></button>
+                    </form>
+                    <a href="/AdminVehicle/Edit/${v.id}" class="btn btn-light rounded-circle shadow-sm me-1 text-warning" style="width: 35px; height: 35px; display: inline-flex; align-items: center; justify-content: center;"><i class="bi bi-pencil-fill"></i></a>
+                </div>
+            </div>`;
+        });
+
+        if(filtered.length === 0) {
+            html = `<div class="text-center py-5"><i class="bi bi-bicycle fs-1 text-muted opacity-25 mb-3 d-block"></i><h6 class="fw-bold text-muted">Không tìm thấy xe phù hợp</h6></div>`;
+        }
+        document.getElementById('vehicleListContainer').innerHTML = html;
+        updateAllTimers();
+    }
+
+    function updateAllTimers() {
+        let n = Date.now();
+        document.querySelectorAll('.live-timer').forEach(el => {
+            let start = parseInt(el.getAttribute('data-start'));
+            if (!isNaN(start)) {
+                el.innerText = formatTime(n - start);
+            }
+        });
+    }
+
+    fetchLiveVehicles();
+    setInterval(fetchLiveVehicles, 5000);
+    setInterval(updateAllTimers, 1000);
+</script>

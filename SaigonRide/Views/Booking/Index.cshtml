@@ -3,206 +3,144 @@
 @inject IViewLocalizer Localizer
 @{ ViewData["Title"] = Localizer["PageTitle"].Value; }
 
-<!-- Nhúng Leaflet CSS & JS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 
 <style>
-    .map-container { height: 400px; width: 100%; border-radius: 1rem; z-index: 1; border: 1px solid #e9ecef; }
-    .vehicle-row { display: flex; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
-    .vehicle-row:last-child { border-bottom: none; }
-    .vehicle-img { width: 70px; height: 70px; background: #f4f6f8; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #555; }
-    .station-detail-card { background: var(--card-bg); border-radius: 1rem; padding: 1.5rem; border: 1px solid #e9ecef; }
-    
-    body.dark-mode .map-container { border-color: #333; }
-    body.dark-mode .vehicle-row { border-color: #333; }
-    body.dark-mode .vehicle-img { background: #2a2d30; color: #aaa; }
-    body.dark-mode .station-detail-card { border-color: #333; }
+    .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: none; border-radius: 1.5rem; }
+    .vehicle-row { transition: all 0.2s; border-radius: 1rem; cursor: pointer; }
+    .vehicle-row:hover { background: #f8f9fa; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .vehicle-img { width: 60px; height: 60px; background: #e9ecef; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #198754; }
+    #mainMap { height: calc(100vh - 80px); border-radius: 1.5rem; } 
+    .leaflet-routing-container { display: none !important; }
 </style>
 
-<div class="container-fluid px-0">
-    <div class="mb-4 d-flex align-items-center gap-2">
-        <h3 class="fw-bold text-dark mb-0">@Localizer["PageTitle"]</h3>
-        <i class="bi bi-bicycle text-success fs-4"></i>
-    </div>
-    <p class="text-muted mb-4">@Localizer["PageSubtitle"]</p>
-
-    <div class="row g-4">
-        <!-- CỘT TRÁI (Bản đồ & Danh sách xe) -->
-        <div class="col-lg-8 col-xl-9 d-flex flex-column gap-4">
-            
-            <!-- VÙNG BẢN ĐỒ -->
-            <div class="card border-0 shadow-sm rounded-4 bg-white p-2">
-                <div id="mainMap" class="map-container"></div>
+<div class="container-fluid py-3">
+    <div class="row g-3">
+        <div class="col-lg-5 col-xl-4 d-flex flex-column gap-3 h-100">
+            <div class="glass-card shadow-sm p-4">
+                <h3 class="fw-bold text-dark mb-1">@Localizer["PageTitle"] <i class="bi bi-geo-alt-fill text-success"></i></h3>
+                <p class="text-muted small mb-4">@Localizer["PageSubtitle"]</p>
+                
+                <div class="position-relative mb-3">
+                    <i class="bi bi-search position-absolute text-muted" style="top: 50%; transform: translateY(-50%); left: 15px;"></i>
+                    <input type="text" id="vehicleSearch" class="form-control form-control-lg rounded-pill ps-5 bg-light border-0 shadow-none" placeholder="@Localizer["SearchPlaceholder"]" onkeyup="filterVehicles()">
+                </div>
             </div>
 
-            <!-- VÙNG DANH SÁCH XE -->
-            <div class="card border-0 shadow-sm rounded-4 bg-white">
-                <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center p-4">
-                    <div class="position-relative" style="width: 250px;">
-                        <i class="bi bi-search position-absolute text-muted" style="top: 50%; transform: translateY(-50%); left: 15px;"></i>
-                        <input type="text" id="vehicleSearch" class="form-control form-control-sm rounded-pill ps-5 bg-light border-0 shadow-none" placeholder="@Localizer["SearchPlaceholder"]" onkeyup="filterVehicles()">
-                    </div>
-                </div>
-                <div class="card-body p-4" id="vehicleListContainer">
+            <div class="glass-card shadow-sm p-4 flex-grow-1 overflow-auto" style="max-height: calc(100vh - 280px);">
+                <div id="stationInfoPanel" class="mb-3">
                     <div class="text-center py-5 text-muted">
-                        <i class="bi bi-geo-alt-fill fs-1 d-block mb-3 opacity-25 text-success"></i>
+                        <i class="bi bi-map fs-1 d-block mb-3 opacity-25 text-success"></i>
                         <p>@Localizer["SelectStationPrompt"]</p>
                     </div>
                 </div>
+                <div id="vehicleListContainer" class="d-flex flex-column gap-2"></div>
             </div>
         </div>
 
-        <!-- CỘT PHẢI (Chi tiết trạm & Trạm gần nhất) -->
-        <div class="col-lg-4 col-xl-3 d-flex flex-column gap-4">
-            
-            <!-- TRẠM GẦN NHẤT (Đã xóa Placeholder Nguyễn Huệ) -->
-            <div class="station-detail-card shadow-sm text-white" style="background: linear-gradient(135deg, #20994a 0%, #157347 100%);">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <small class="fw-bold">@Localizer["ClosestStation"]</small>
-                    <span id="nearestWalkTime" class="badge bg-white bg-opacity-25 rounded-pill">-- min walk</span>
-                </div>
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="bg-white text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                        <i class="bi bi-geo-alt-fill"></i>
-                    </div>
-                    <div>
-                        <h6 id="nearestStationName" class="fw-bold mb-0">@Localizer["FindingStation"]...</h6>
-                        <small id="nearestDistance" class="text-white-50" style="font-size: 0.75rem;">@Localizer["LocatingYourPosition"]</small>
-                    </div>
-                </div>
-                <button id="btnViewNearest" class="btn btn-light text-success w-100 rounded-pill fw-bold btn-sm d-none">
-                    @Localizer["ViewStation"] <i class="bi bi-arrow-right"></i>
-                </button>
+        <div class="col-lg-7 col-xl-8">
+            <div class="card border-0 shadow-sm rounded-4 bg-white p-1">
+                <div id="mainMap" class="w-100"></div>
             </div>
-
-            <!-- Panel Chi tiết trạm khi Click -->
-            <div class="station-detail-card shadow-sm">
-                <h6 class="fw-bold text-dark mb-4">@Localizer["StationDetails"]</h6>
-                <div id="stationInfoPanel">
-                    <p class="text-muted small text-center py-3">@Localizer["SelectStationPrompt"]</p>
-                </div>
-            </div>
-
         </div>
     </div>
 </div>
-
 <script>
-    var map = L.map('mainMap').setView([10.785, 106.705], 14);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    var map = L.map('mainMap', { zoomControl: false }).setView([10.785, 106.705], 14);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     var stationData = JSON.parse('@Html.Raw(ViewBag.StationsJson)');
-    var bounds = [];
     var currentStation = null;
+    var routingControl = null;
+    var userLatLng = null; 
+    var stationMarkers = {};
 
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        var R = 6371;
-        var dLat = (lat2 - lat1) * Math.PI / 180;
-        var dLon = (lon2 - lon1) * Math.PI / 180;
-        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c;
+    var userIcon = L.divIcon({ 
+        className: 'custom-div-icon', 
+        html: `<div class="bg-primary text-white rounded-circle shadow-lg border border-4 border-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-person-fill fs-5"></i></div>`, 
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    });
+
+    function createStationIcon(isEmpty) {
+        var iconHtml = isEmpty ? 
+            `<div class="bg-white rounded-circle shadow-lg border border-3 border-secondary d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;"><i class="bi bi-geo-alt-fill text-secondary fs-4"></i></div>` : 
+            `<div class="bg-white rounded-circle shadow-lg border border-3 border-success d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;"><i class="bi bi-geo-alt-fill text-success fs-4"></i></div>`;
+        return L.divIcon({ className: 'custom-div-icon', html: iconHtml, iconSize: [45, 45], iconAnchor: [22, 45] });
     }
 
-    // Vẽ các Marker trạm lên bản đồ
     stationData.forEach(function (st) {
-        if(st.lat && st.lng) {
-            bounds.push([st.lat, st.lng]);
-            var isEmpty = st.inventory <= 0; 
-            var isPromo = st.inventory <= (st.capacity * 0.2) && !isEmpty; // Trạm Khuyến mãi (còn <= 20% xe)
-            var markerColor = isEmpty ? 'filter: grayscale(100%);' : 'filter: hue-rotate(120deg);';
-            var iconClass = isEmpty ? 'text-secondary' : 'text-success';
-            
-            var customIcon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div style="text-align:center; ${markerColor}"><i class="bi bi-geo-alt-fill fs-2 ${iconClass}" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i></div>`,
-                iconSize: [30, 42],
-                iconAnchor: [15, 42]
-            });
-
-            var marker = L.marker([st.lat, st.lng], { icon: customIcon }).addTo(map);
-            marker.bindTooltip(`<b>${st.name}</b>`, { direction: 'top', offset: [0, -20] });
+        if(st.lat && st.lng) { 
+            var marker = L.marker([st.lat, st.lng], { icon: createStationIcon(st.inventory <= 0) }).addTo(map);
+            marker.bindTooltip(`<b>${st.name}</b><br>${st.inventory} @Localizer["Available"]`, { direction: 'top', offset: [0, -45] });
             
             marker.on('click', function () {
                 currentStation = st; 
                 renderStationDetailAndVehicles(st);
+                drawRouteToStation(st.lat, st.lng);  
             });
+            stationMarkers[st.id] = marker;
         }
-    });
-
-    if(bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
+    }); 
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
-            var userLat = position.coords.latitude;
-            var userLng = position.coords.longitude;
-            var userIcon = L.divIcon({ 
-                className: 'custom-div-icon', 
-                html: `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow" style="width: 25px; height: 25px; border: 3px solid white;"><i class="bi bi-person-fill small"></i></div>`, 
-                iconSize: [25, 25], 
-                iconAnchor: [12, 12] 
-            });
-            L.marker([userLat, userLng], { icon: userIcon })
-             .addTo(map)
-             .bindTooltip("Vị trí của bạn", { direction: 'top', offset: [0, -10] });
-            map.setView([userLat, userLng], 14);
-
-            let closest = null;
-            let minDistance = Infinity;
-
-
-            stationData.forEach(st => {
-                let dist = calculateDistance(userLat, userLng, st.lat, st.lng);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    closest = st;
-                }
-            });
-
-            if (closest) {
-                document.getElementById('nearestStationName').innerText = closest.name;
-                let distText = minDistance < 1 ? (minDistance * 1000).toFixed(0) + " m" : minDistance.toFixed(1) + " km";
-                document.getElementById('nearestDistance').innerText = distText + " @Localizer["FromCurrent"]";
-                let walkMinutes = Math.max(1, Math.round(minDistance * 12));
-                document.getElementById('nearestWalkTime').innerText = walkMinutes + " @Localizer["MinWalk"]";
-
-                let btn = document.getElementById('btnViewNearest');
-                btn.classList.remove('d-none');
-                btn.onclick = function() {
-                    map.setView([closest.lat, closest.lng], 16);
-                    renderStationDetailAndVehicles(closest);
-                };
-            }
-        }, function() {
-            document.getElementById('nearestStationName').innerText = "@Localizer["NoLocation"]";
-            document.getElementById('nearestDistance').innerText = "@Localizer["EnableGPS"]";
+            userLatLng = L.latLng(position.coords.latitude, position.coords.longitude);
+            L.marker(userLatLng, { icon: userIcon }).addTo(map).bindTooltip("@Localizer["YourLocation"]").openTooltip();
+            map.setView(userLatLng, 15);
         });
+    } 
+
+    function drawRouteToStation(destLat, destLng) {
+        if (!userLatLng) return;
+        if (routingControl) map.removeControl(routingControl); 
+        
+        var destLatLng = L.latLng(destLat, destLng);
+
+        routingControl = L.Routing.control({
+            waypoints: [userLatLng, destLatLng],
+            routeWhileDragging: false, addWaypoints: false, show: false,
+            createMarker: function() { return null; },  
+            lineOptions: { styles: [{color: '#0d6efd', opacity: 0.8, weight: 6, dashArray: '10, 10'}] }  
+        }).addTo(map);
+        var bounds = L.latLngBounds([userLatLng, destLatLng]);
+        map.fitBounds(bounds, { padding: [60, 60], maxZoom: 16 });
     }
 
     function renderStationDetailAndVehicles(st) {
+        let distHtml = "";
+        if (userLatLng && st.lat && st.lng) {
+            var R = 6371; 
+            var dLat = (st.lat - userLatLng.lat) * Math.PI / 180; 
+            var dLon = (st.lng - userLatLng.lng) * Math.PI / 180;
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(userLatLng.lat * Math.PI / 180) * Math.cos(st.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            var distKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            var distText = distKm < 1 ? (distKm * 1000).toFixed(0) + " m" : distKm.toFixed(1) + " km";
+            distHtml = `<span class="badge bg-primary bg-opacity-10 text-primary rounded-pill ms-2"><i class="bi bi-cursor-fill me-1"></i>${distText}</span>`;
+        }
+
         document.getElementById('stationInfoPanel').innerHTML = `
-            <div class="d-flex justify-content-between align-items-start mb-2">
-                <div>
-                    <h6 class="fw-bold text-dark mb-0 d-inline-block">${st.name}</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                <div class="d-flex align-items-center">
+                    <h5 class="fw-bold text-dark mb-0">${st.name}</h5>
+                    ${distHtml}
                 </div>
-                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">@Localizer["Open"]</span>
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i>@Localizer["Open"]</span>
             </div>
-            <p class="text-muted small mb-4"><i class="bi bi-geo-alt"></i> Ho Chi Minh City</p>
-            <div class="row text-center mb-4 border-top pt-3">
+            <div class="row text-center mb-3">
                 <div class="col-6 border-end">
-                    <h5 class="fw-bold text-dark mb-0">${st.capacity}</h5>
-                    <small class="text-muted" style="font-size: 0.7rem;">@Localizer["Capacity"]</small>
+                    <h4 class="fw-bold text-dark mb-0">${st.capacity}</h4>
+                    <small class="text-muted">@Localizer["Capacity"]</small>
                 </div>
                 <div class="col-6">
-                    <h5 class="fw-bold text-success mb-0">${st.inventory}</h5>
-                    <small class="text-muted" style="font-size: 0.7rem;">@Localizer["Available"]</small>
+                    <h4 class="fw-bold text-success mb-0">${st.inventory}</h4>
+                    <small class="text-muted">@Localizer["Available"]</small>
                 </div>
-            </div>
-            <button class="btn btn-outline-success w-100 rounded-pill btn-sm fw-bold">@Localizer["GetDirections"]</button>
-        `;
+            </div>`;
         renderVehiclesList(st.vehicles);
     }
 
@@ -210,17 +148,21 @@
         var listContainer = document.getElementById('vehicleListContainer');
         var html = "";
         if (!vehiclesList || vehiclesList.length === 0) {
-            html = `<div class="text-center py-5 text-muted"><i class="bi bi-emoji-frown fs-1 d-block mb-3"></i><p>@Localizer["NoVehicles"]</p></div>`;
+            html = `<div class="text-center py-4 text-muted"><p>@Localizer["NoVehicles"]</p></div>`;
         } else {
             vehiclesList.forEach(function (v) {
                 var isScooter = v.name.toLowerCase().includes("scooter");
                 html += `
-                    <div class="vehicle-row">
-                        <div class="vehicle-img me-4 flex-shrink-0"><i class="bi ${isScooter ? 'bi-scooter' : 'bi-bicycle'}"></i></div>
-                        <div style="width: 150px;"><small class="text-muted d-block" style="font-size: 0.7rem;">ID</small><h6 class="fw-bold text-dark mb-0">SR-${v.id}</h6></div>
-                        <div class="flex-grow-1"><small class="text-muted d-block" style="font-size: 0.7rem;">@Localizer["Type"]</small><span class="text-dark fw-bold">${v.name}</span></div>
-                        <div style="width: 120px;" class="d-none d-md-block"><small class="text-muted d-block" style="font-size: 0.7rem;">@Localizer["Price"]</small><span class="text-dark fw-bold">${v.price.toLocaleString('vi-VN')} đ/min</span></div>
-                        <div class="ms-auto"><a href="/Checkout/Rent?vehicleId=${v.id}" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">@Localizer["BtnSelect"]</a></div>
+                    <div class="vehicle-row border p-2 d-flex align-items-center mb-2" onclick="window.location.href='/Checkout/Rent?vehicleId=${v.id}'">
+                        <div class="vehicle-img me-3"><i class="bi ${isScooter ? 'bi-scooter' : 'bi-bicycle'}"></i></div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold text-dark mb-0">${v.name}</h6>
+                            <small class="text-muted">ID: SR-${v.id}</small>
+                        </div>
+                        <div class="text-end">
+                            <h6 class="text-success fw-bold mb-0">${v.price.toLocaleString('vi-VN')}đ<small>/m</small></h6>
+                            <small class="text-muted"><i class="bi bi-chevron-right"></i></small>
+                        </div>
                     </div>`;
             });
         }
@@ -233,4 +175,24 @@
         var filtered = currentStation.vehicles.filter(v => v.name.toLowerCase().includes(keyword));
         renderVehiclesList(filtered);
     };
+
+    function fetchLiveUserStations() {
+        fetch('/Checkout/GetLiveStationsData').then(r => r.json()).then(data => {
+            stationData = data;
+            data.forEach(st => {
+                let marker = stationMarkers[st.id];
+                if (marker) {
+                    marker.setIcon(createStationIcon(st.inventory <= 0));
+                    marker.setTooltipContent(`<b>${st.name}</b><br>${st.inventory} @Localizer["Available"]`);
+                }
+                
+                if (currentStation && currentStation.id === st.id) {
+                    currentStation = st;
+                    renderStationDetailAndVehicles(st);
+                    filterVehicles(); 
+                }
+            });
+        });
+    }
+    setInterval(fetchLiveUserStations, 5000);
 </script>
