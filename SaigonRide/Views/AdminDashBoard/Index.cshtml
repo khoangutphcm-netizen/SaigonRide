@@ -1,241 +1,199 @@
-﻿@{
-    ViewData["Title"] = "Tổng quan hệ thống";
+﻿@model IEnumerable<SaigonRide.Models.entities.Station>
+@{
+    ViewData["Title"] = "Quản lý Trạm xe";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-
-    decimal totalRev = ViewBag.TotalRevenue ?? 0m;
-    decimal bikeRev = ViewBag.BikeRevenue ?? 0m;
-    decimal scooterRev = ViewBag.ScooterRevenue ?? 0m;
-    string bikePct = totalRev > 0 ? ((bikeRev / totalRev) * 100).ToString("0.0") : "0";
-    string scooterPct = totalRev > 0 ? ((scooterRev / totalRev) * 100).ToString("0.0") : "0";
 }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<style> 
-    .bg-grad-blue { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); }
-    .bg-grad-green { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); }
-    .bg-grad-yellow { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); }
-    .bg-grad-red { background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%); }
-    .bento-card { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; border: none; }
-    .bento-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important; }
-    .bento-icon { position: absolute; font-size: 6.5rem; right: -15px; bottom: -20px; opacity: 0.1; transform: rotate(-15deg); }
+<style>
+    .station-row { display: flex; align-items: center; padding: 1.5rem; background: #fff; border: 1px solid #f0f0f0; border-radius: 1rem; margin-bottom: 1rem; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+    .station-row:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #198754; }
+    .station-icon-wrapper { width: 65px; height: 65px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; }
+    .bg-grad-success { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); color: #198754; }
+    .bg-grad-danger { background: linear-gradient(135deg, #ffebee 0%, #f8bbd0 100%); color: #dc3545; }
+    .station-actions { opacity: 0.3; transition: opacity 0.2s; }
+    .station-row:hover .station-actions { opacity: 1; }
+    #modalMap { height: 500px; border-radius: 0 0 1rem 1rem; width: 100%; z-index: 1; }
 </style>
 
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 position-relative" style="min-height: 180px; background-image: linear-gradient(to right, rgba(8, 76, 97, 0.95) 15%, rgba(23, 126, 137, 0.4) 100%), url('/images/admin_banner.png'); background-size: cover; background-position: center; color: white;">
-    <div class="card-body p-4 position-relative z-1 d-flex flex-column justify-content-center h-100">
-        <div style="max-width: 80%;">
-            <h3 class="fw-bold mb-2">Chào mừng trở lại, System Admin! 👋</h3>
-            <p class="mb-0" style="color: rgba(255,255,255,0.8);">Dưới đây là tóm tắt tình hình kinh doanh của SaigonRide ngày hôm nay.</p>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold text-dark mb-0"><i class="bi bi-geo-alt-fill text-success me-2"></i>Danh sách Trạm</h4>
+    <a href="/AdminStation/Create" class="btn btn-success fw-bold rounded-pill shadow-sm px-4">
+        <i class="bi bi-plus-circle me-2"></i> Thêm Trạm mới
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-5">
+        <form asp-action="Index" method="get">
+            <div class="input-group shadow-sm rounded-pill overflow-hidden border bg-white p-1">
+                <span class="input-group-text bg-white border-0 text-muted ps-3"><i class="bi bi-search"></i></span>
+                <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control border-0 shadow-none px-2" placeholder="Tìm kiếm khu vực trạm...">
+                <button class="btn btn-success fw-bold rounded-pill px-4" type="submit">Tìm</button>
+                @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch))
+                {
+                    <a href="/AdminStation/Index" class="btn btn-light rounded-pill ms-1 text-danger"><i class="bi bi-x-lg"></i></a>
+                }
+            </div>
+        </form>
     </div>
 </div>
 
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
-        <div class="card bento-card shadow-sm rounded-4 h-100 bg-grad-blue overflow-hidden position-relative">
-            <div class="card-body p-4 z-1">
-                <h6 class="text-uppercase fw-bold text-muted mb-1">Người dùng</h6>
-                <h2 class="fw-bold text-dark mb-0">@ViewBag.TotalUsers</h2>
-            </div>
-            <i class="bi bi-people-fill bento-icon text-primary"></i>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bento-card shadow-sm rounded-4 h-100 bg-grad-green overflow-hidden position-relative">
-            <div class="card-body p-4 z-1">
-                <h6 class="text-uppercase fw-bold text-muted mb-1">Trạm xe</h6>
-                <h2 class="fw-bold text-dark mb-0">@ViewBag.TotalStations</h2>
-            </div>
-            <i class="bi bi-geo-alt-fill bento-icon text-success"></i>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bento-card shadow-sm rounded-4 h-100 bg-grad-yellow overflow-hidden position-relative">
-            <div class="card-body p-4 z-1">
-                <h6 class="text-uppercase fw-bold text-muted mb-1">Phương tiện</h6>
-                <h2 class="fw-bold text-dark mb-0">@ViewBag.TotalVehicles</h2>
-            </div>
-            <i class="bi bi-bicycle bento-icon text-warning"></i>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bento-card shadow-sm rounded-4 h-100 bg-grad-red overflow-hidden position-relative">
-            <div class="card-body p-4 z-1">
-                <h6 class="text-uppercase fw-bold text-muted mb-1">Chuyến đi</h6>
-                <h2 class="fw-bold text-dark mb-0">@ViewBag.TotalTransactions</h2>
-            </div>
-            <i class="bi bi-signpost-split-fill bento-icon text-danger"></i>
-        </div>
-    </div>
-</div>
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success rounded-4 border-0 shadow-sm mb-4"><i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger rounded-4 border-0 shadow-sm mb-4"><i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]</div>
+}
 
-<h6 class="fw-bold text-dark mb-3 mt-2 text-uppercase"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Truy cập nhanh</h6>
-<div class="row g-3 mb-5">
-    <div class="col">
-        <a href="/AdminStation" class="card bento-card text-decoration-none h-100 border-0 shadow-sm rounded-4">
-            <div class="card-body p-3 d-flex align-items-center gap-3">
-                <div class="bg-primary bg-opacity-10 p-2 rounded-3 text-primary"><i class="bi bi-geo-alt-fill fs-4"></i></div>
-                <h6 class="fw-bold text-dark mb-0">Trạm xe</h6>
-            </div>
-        </a>
-    </div>
-    <div class="col">
-        <a href="/AdminVehicle" class="card bento-card text-decoration-none h-100 border-0 shadow-sm rounded-4">
-            <div class="card-body p-3 d-flex align-items-center gap-3">
-                <div class="bg-success bg-opacity-10 p-2 rounded-3 text-success"><i class="bi bi-bicycle fs-4"></i></div>
-                <h6 class="fw-bold text-dark mb-0">Phương tiện</h6>
-            </div>
-        </a>
-    </div>
-    <div class="col">
-        <a href="/AdminUser" class="card bento-card text-decoration-none h-100 border-0 shadow-sm rounded-4">
-            <div class="card-body p-3 d-flex align-items-center gap-3">
-                <div class="bg-warning bg-opacity-10 p-2 rounded-3 text-warning"><i class="bi bi-people-fill fs-4"></i></div>
-                <h6 class="fw-bold text-dark mb-0">Người dùng</h6>
-            </div>
-        </a>
-    </div>
-    <div class="col">
-        <a href="/AdminDashBoard/Announcements" class="card bento-card text-decoration-none h-100 border-0 shadow-sm rounded-4">
-            <div class="card-body p-3 d-flex align-items-center gap-3">
-                <div class="bg-info bg-opacity-10 p-2 rounded-3 text-info"><i class="bi bi-megaphone-fill fs-4"></i></div>
-                <h6 class="fw-bold text-dark mb-0">Thông báo</h6>
-            </div>
-        </a>
-    </div>
-</div>
-
-<div class="row g-4 mb-5 align-items-stretch">
-    <div class="col-lg-7">
-        <div class="card bento-card shadow-sm rounded-4 h-100">
-            <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Lưu lượng tồn kho (Live)</h5>
-                    <span class="spinner-grow spinner-grow-sm text-success" role="status" aria-hidden="true"></span>
-                </div>
-                <div style="position: relative; height: 300px; width: 100%;">
-                    <canvas id="inventoryChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-5">
-        <div class="card bento-card shadow-sm rounded-4 h-100">
-            <div class="card-body p-4 d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart-fill text-success me-2"></i>Doanh thu (Live)</h5>
-                    <select id="revenueFilter" class="form-select form-select-sm border-0 bg-light fw-bold text-success shadow-none w-auto">
-                        <option value="day">Hôm nay</option>
-                        <option value="week">Tuần này</option>
-                        <option value="month" selected>Tháng này</option>
-                        <option value="year">Năm nay</option>
-                    </select>
-                </div>
-
-                <div style="position: relative; height: 220px; width: 100%; display: flex; justify-content: center; align-items: center; flex-grow: 1;">
-                    <canvas id="revenueChart"></canvas>
-                    <div style="position: absolute; text-align: center; pointer-events: none;">
-                        <span class="text-muted small fw-bold">TỔNG</span><br>
-                        <span class="fs-5 fw-bold text-dark" id="totalRevText">@totalRev.ToString("N0") đ</span>
-                    </div>
+<div class="station-list">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var station in Model)
+        {
+            <div class="station-row" onclick="openStationMap(@station.Id, @station.Latitude.ToString(System.Globalization.CultureInfo.InvariantCulture), @station.Longitude.ToString(System.Globalization.CultureInfo.InvariantCulture), '@station.LocationName')">
+                <div class="station-icon-wrapper @(station.IsAvailable ? "bg-grad-success" : "bg-grad-danger") me-4">
+                    <i class="bi bi-geo-alt-fill"></i>
                 </div>
                 
-                <div class="mt-4 d-flex justify-content-around bg-light p-3 rounded-4">
-                    <div class="text-center">
-                        <div class="text-muted small fw-bold"><i class="bi bi-circle-fill text-success me-1"></i>Xe đạp</div>
-                        <h6 class="fw-bold mt-2 mb-1" id="bikeRevText">@bikeRev.ToString("N0") đ</h6>
-                        <span class="badge bg-success rounded-pill" id="bikePctText">@bikePct%</span>
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-light text-muted border">ID: #@station.Id</span>
+                        @if (station.IsAvailable)
+                        {
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-check-circle-fill me-1"></i> Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25"><i class="bi bi-x-circle-fill me-1"></i> Tạm ngưng</span>
+                        }
                     </div>
-                    <div class="border-end border-2"></div>
+                    <h5 class="fw-bold text-dark mb-1">@station.LocationName</h5>
+                    <small class="text-muted"><i class="bi bi-compass"></i> @station.Latitude, @station.Longitude</small>
+                </div>
+
+                <div class="d-none d-md-flex align-items-center gap-4 px-4 border-start border-end mx-4">
                     <div class="text-center">
-                        <div class="text-muted small fw-bold"><i class="bi bi-circle-fill text-primary me-1"></i>Xe điện</div>
-                        <h6 class="fw-bold mt-2 mb-1" id="scooterRevText">@scooterRev.ToString("N0") đ</h6>
-                        <span class="badge bg-primary rounded-pill" id="scooterPctText">@scooterPct%</span>
+                        <h4 class="fw-bold text-dark mb-0">@station.MaxCapacity</h4>
+                        <small class="text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">SỨC CHỨA</small>
+                    </div>
+                    @{ 
+                        var availableCount = station.Vehicles != null ? station.Vehicles.Count(v => v.Status == SaigonRide.Models.Enums.VehicleStatus.Available) : 0; 
+                    }
+                    <div class="text-center">
+                        <h4 class="fw-bold @(availableCount == 0 ? "text-danger" : "text-success") mb-0" id="inv-count-@station.Id">@availableCount</h4>
+                        <small class="text-muted fw-bold" style="font-size: 0.7rem; letter-spacing: 1px;">ĐANG ĐỖ</small>
                     </div>
                 </div>
+
+                <div class="station-actions text-end" onclick="event.stopPropagation();">
+                    <form asp-action="ToggleStatus" asp-route-id="@station.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-light rounded-circle shadow-sm me-2 text-primary" style="width: 45px; height: 45px;"><i class="bi bi-power"></i></button>
+                    </form>
+                    <a href="/AdminStation/Edit/@station.Id" class="btn btn-light rounded-circle shadow-sm me-2 text-warning" style="width: 45px; height: 45px; display: inline-flex; align-items: center; justify-content: center;"><i class="bi bi-pencil-fill"></i></a>
+                    <form asp-action="Delete" asp-route-id="@station.Id" method="post" class="d-inline" onsubmit="return confirm('Xóa trạm @station.LocationName?');">
+                        <button type="submit" class="btn btn-light rounded-circle shadow-sm text-danger" style="width: 45px; height: 45px;"><i class="bi bi-trash-fill"></i></button>
+                    </form>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-geo-alt fs-1 text-muted opacity-25 mb-3 d-block"></i>
+            <h5 class="fw-bold text-muted">Chưa có dữ liệu trạm</h5>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-light p-4 pb-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="modal-title fw-bold text-dark mb-1" id="mapModalTitle">Bản đồ Trạm</h4>
+                    <span class="badge bg-danger text-white rounded-pill pulse-badge"><i class="bi bi-broadcast me-1"></i> Live Tracking</span>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 position-relative">
+                <div id="modalMap"></div>
             </div>
         </div>
     </div>
-</div> 
+</div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        Chart.register(ChartDataLabels);
-        
-        var rawInventoryData = '@Html.Raw(ViewBag.InventoryData ?? "[]")';
-        var invCtx = document.getElementById('inventoryChart').getContext('2d');
-        var invChart = new Chart(invCtx, {
-            type: 'bar',
-            data: {
-                labels: @Html.Raw(ViewBag.StationLabels ?? "[]"),
-                datasets: [{
-                    data: JSON.parse(rawInventoryData),
-                    backgroundColor: @Html.Raw(ViewBag.InventoryColors ?? "[]"),
-                    borderRadius: 8,
-                    borderSkipped: false
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false },
-                    datalabels: { anchor: 'end', align: 'top', color: '#333', font: { weight: 'bold', size: 14 } }
-                },
-                scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [5, 5] }, suggestedMax: 10 },
-                    x: { grid: { display: false }, ticks: { font: { weight: 'bold' } } }
+    var map;
+    var markersLayer;
+    var targetLat = 0;
+    var targetLng = 0;
+    var targetId = 0;
+    var pollInterval;
+
+    var stationIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-white rounded-circle shadow-lg border border-3 border-success d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;"><i class="bi bi-geo-alt-fill text-success fs-4"></i></div>`, iconSize: [45, 45], iconAnchor: [22, 45] });
+    var focusIcon = L.divIcon({ className: 'custom-div-icon', html: `<div class="bg-white rounded-circle shadow-lg border border-4 border-danger d-flex align-items-center justify-content-center" style="width: 65px; height: 65px;"><i class="bi bi-geo-alt-fill text-danger fs-1"></i></div>`, iconSize: [65, 65], iconAnchor: [32, 65] });
+
+    function initMap() {
+        if (!map) {
+            map = L.map('modalMap', { zoomControl: false }).setView([10.785, 106.705], 15);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+            markersLayer = L.layerGroup().addTo(map);
+        }
+    }
+
+    function loadLiveStations() {
+        fetch('/AdminStation/GetLiveStations').then(r => r.json()).then(data => {
+            if(markersLayer) markersLayer.clearLayers();
+            data.forEach(st => {
+                let invEl = document.getElementById('inv-count-' + st.id);
+                if (invEl) {
+                    invEl.innerText = st.inventory;
+                    if (st.inventory == 0) {
+                        invEl.classList.remove('text-success');
+                        invEl.classList.add('text-danger');
+                    } else {
+                        invEl.classList.remove('text-danger');
+                        invEl.classList.add('text-success');
+                    }
                 }
-            }
+
+                if(st.lat && st.lng && markersLayer) {
+                    let isTarget = (st.id === targetId);
+                    L.marker([st.lat, st.lng], { icon: isTarget ? focusIcon : stationIcon }).addTo(markersLayer)
+                     .bindTooltip(`<b>${st.name}</b><br/>Đang đỗ: <span class="${st.inventory==0?'text-danger':'text-success'} fw-bold">${st.inventory}</span> / ${st.capacity}`, { direction: 'top', offset: [0, isTarget ? -65 : -45], permanent: isTarget });
+                }
+            });
         });
+    }
 
-        var rawRevenueData = '@Html.Raw(ViewBag.RevenueData ?? "[0,0]")';
-        var revCtx = document.getElementById('revenueChart').getContext('2d');
-        var revChart = new Chart(revCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Xe đạp', 'Xe điện'],
-                datasets: [{
-                    data: JSON.parse(rawRevenueData),
-                    backgroundColor: ['#1cc88a', '#4e73df'],
-                    hoverOffset: 4, cutout: '75%', borderWidth: 0
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } }
-        }); 
+    function openStationMap(id, lat, lng, name) {
+        targetId = id;
+        targetLat = lat;
+        targetLng = lng;
+        document.getElementById('mapModalTitle').innerText = name;
+        var myModal = new bootstrap.Modal(document.getElementById('mapModal'));
+        myModal.show();
+    }
 
-        function updateRevenue() {
-            var filterVal = document.getElementById('revenueFilter').value;
-            fetch('/AdminDashboard/GetRevenueData?filter=' + filterVal)
-                .then(response => response.json())
-                .then(data => { 
-                    revChart.data.datasets[0].data = [data.bike, data.scooter];
-                    revChart.update(); 
-                    document.getElementById('totalRevText').innerText = data.total.toLocaleString('vi-VN') + ' đ';
-                    document.getElementById('bikeRevText').innerText = data.bike.toLocaleString('vi-VN') + ' đ';
-                    document.getElementById('scooterRevText').innerText = data.scooter.toLocaleString('vi-VN') + ' đ';  
-                    let bikeP = data.total > 0 ? ((data.bike / data.total) * 100).toFixed(1) : 0;
-                    let scooterP = data.total > 0 ? ((data.scooter / data.total) * 100).toFixed(1) : 0;
-                    document.getElementById('bikePctText').innerText = bikeP + '%';
-                    document.getElementById('scooterPctText').innerText = scooterP + '%';
-                });
-        }
-
-        function updateInventory() {
-            fetch('/AdminDashboard/GetLiveInventoryData')
-                .then(response => response.json())
-                .then(data => {
-                    invChart.data.labels = data.labels;
-                    invChart.data.datasets[0].data = data.data;
-                    invChart.data.datasets[0].backgroundColor = data.colors;
-                    invChart.update();
-                });
-        }
-
-        document.getElementById('revenueFilter').addEventListener('change', updateRevenue);
-
-        setInterval(updateInventory, 5000);
-        setInterval(updateRevenue, 5000);
+    document.getElementById('mapModal').addEventListener('shown.bs.modal', function () {
+        initMap();
+        map.invalidateSize();
+        map.setView([targetLat, targetLng], 17);
+        loadLiveStations();
+        pollInterval = setInterval(loadLiveStations, 5000);
     });
+
+    document.getElementById('mapModal').addEventListener('hidden.bs.modal', function () {
+        clearInterval(pollInterval);
+    });
+    
+    setInterval(loadLiveStations, 5000);
+    loadLiveStations();
 </script>
